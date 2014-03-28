@@ -2,30 +2,30 @@
 var Put = require('put');
 var util = require('util');
 
-var log = function (msg) {  }
+var log = function (msg) {  };
 
 exports.setLogger = function (logger) {
-  log = logger;
+    log = logger;
 };
 
 exports.ExceptionMessage = {
 
-  0x01 : 'ILLEGAL FUNCTION',
-  0x02 : 'ILLEGAL DATA ADDRESS',
-  0x03 : 'ILLEGAL DATA VALE',
-  0x04 : 'SLAVE DEVICE FAILURE',
-  0x05 : 'ACKNOWLEDGE',
-  0x06 : 'SLAVE DEVICE BUSY',
-  0x08 : 'MEMORY PARITY ERROR',
-  0x0A : 'GATEWAY PATH UNAVAILABLE',
-  0x0B : 'GATEWAY TARGET DEVICE FAILED TO RESPOND'
+    0x01 : 'ILLEGAL FUNCTION',
+    0x02 : 'ILLEGAL DATA ADDRESS',
+    0x03 : 'ILLEGAL DATA VALE',
+    0x04 : 'SLAVE DEVICE FAILURE',
+    0x05 : 'ACKNOWLEDGE',
+    0x06 : 'SLAVE DEVICE BUSY',
+    0x08 : 'MEMORY PARITY ERROR',
+    0x0A : 'GATEWAY PATH UNAVAILABLE',
+    0x0B : 'GATEWAY TARGET DEVICE FAILED TO RESPOND'
 
 };
 
 exports.FC = {
-  readCoils		: 1,
-  readInputRegister	: 4
-}
+    readCoils		: 1,
+    readInputRegister	: 4
+};
 
 exports.Server = { };
 
@@ -36,54 +36,56 @@ exports.Server = { };
  *  the server objects addHandler function.
  */
 exports.Server.ResponseHandler = {
-  // read coils
-  1:  function (register) {
-        var flr = Math.floor(register.length / 8),
-	    len = register.length % 8 > 0 ? flr + 1 : flr,
-	    res = Put().word8(1).word8(len);
+    // read coils
+    1 : function (register) {
+            var flr = Math.floor(register.length / 8),
+                len = register.length % 8 > 0 ? flr + 1 : flr,
+                res = Put().word8(1).word8(len);
 
-        var cntr = 0;
-        for (var i = 0; i < len; i += 1 ) {
-	  var cur = 0;
-   	  for (var j = 0; j < 8; j += 1) {
- 	    var h = 1 << j;
-	    
-	    if (register[cntr]) {
-	      cur += h;
- 	    }
+            var cntr = 0;
+            for (var i = 0; i < len; i += 1 ) {
+                var cur = 0;
+                for (var j = 0; j < 8; j += 1) {
+                    var h = 1 << j;
 
-	    cntr += 1;
- 	  }
-	  res.word8(cur);
-   	}
+                    if (register[cntr]) {
+                        cur += h;
+                    }
+
+                    cntr += 1;
+                
+                }
+            
+            res.word8(cur);
+        }
 
         return res.buffer();
       },
-  // read input register
-  4:  function (register) {
+    // read input register
+    4 : function (register) {
 
-        var res = Put().word8(4).word8(register.length * 2);
+            var res = Put().word8(4).word8(register.length * 2);
 
-	for (var i = 0; i < register.length; i += 1) {
-	  res.word16be(register[i]);
-	}
+            for (var i = 0; i < register.length; i += 1) {
+                res.word16be(register[i]);
+            }
 
-	return res.buffer();
-  },
-  5:  function (outputAddress, outputValue) {
+            return res.buffer();
+    },
+    5 : function (outputAddress, outputValue) {
 
-        var res = Put().word8(5).word16be(outputAddress)
-		.word16be(outputValue?0xFF00:0x0000).buffer();
+            var res = Put().word8(5).word16be(outputAddress)
+                        .word16be(outputValue?0xFF00:0x0000).buffer();
 
-        return res;
-  },
-  6: function (outputAddress, outputValue) {
+            return res;
+        },
+    6 : function (outputAddress, outputValue) {
   
-      var res = Put().word8(5).word16be(outputAddress).word16be(outputValue).buffer();
+            var res = Put().word8(5).word16be(outputAddress).word16be(outputValue).buffer();
 
-      return res;
+            return res;
   
-  }
+        }
 
 };
 
@@ -97,44 +99,44 @@ exports.Server.ResponseHandler = {
 exports.Server.RequestHandler = {
 
     // ReadCoils
-    1:  function (pdu) {
+    1 : function (pdu) {
 
-        var fc = pdu.readUInt8(0), // never used, should just be an example
-            startAddress = pdu.readUInt16BE(1),
-            quantity = pdu.readUInt16BE(3),
-            param = [ startAddress, quantity ];
+            var fc              = pdu.readUInt8(0), // never used, should just be an example
+                startAddress    = pdu.readUInt16BE(1),
+                quantity        = pdu.readUInt16BE(3),
+                param           = [ startAddress, quantity ];
 
-        return param;	
-    },
+            return param;	
+        },
 
     // ReadInputRegister
-    4: function (pdu) {
+    4 : function (pdu) {
 
-        var startAddress = pdu.readUInt16BE(1),
-            quantity = pdu.readUInt16BE(3),
-            param = [ startAddress, quantity ];
+            var startAddress    = pdu.readUInt16BE(1),
+                quantity        = pdu.readUInt16BE(3),
+                param           = [ startAddress, quantity ];
 
-        return param;
+            return param;
     },
-    5: function (pdu) {
+    5 : function (pdu) {
       
-        var outputAddress = pdu.readUInt16BE(1),
-            outputValue = pdu.readUInt16BE(3),
-            boolValue = outputValue===0xFF00?true:outputValue===0x0000?false:undefined,
-        param = [ outputAddress, boolValue ];
+            var outputAddress   = pdu.readUInt16BE(1),
+                outputValue     = pdu.readUInt16BE(3),
+                boolValue       = outputValue===0xFF00?true:outputValue===0x0000?false:undefined,
+                param           = [ outputAddress, boolValue ];
 
-        return param;
-    },
-    6: function (pdu) {
+            return param;
+        },
+    6 : function (pdu) {
      
-        var outputAddress   = pdu.readUInt16BE(1),
-            outputValue     = pdu.readUInt16BE(3),
-            param = [ outputAddress, outputValue ];
+            var outputAddress   = pdu.readUInt16BE(1),
+                outputValue     = pdu.readUInt16BE(3),
+                param           = [ outputAddress, outputValue ];
 
-        return param; 
+            return param; 
      
-     }
-  };
+        }
+};
 
 
 exports.Client = { };
@@ -146,86 +148,87 @@ exports.Client = { };
  */
 exports.Client.ResponseHandler = {
     // ReadCoils
-    1:	function (pdu, cb) {
+    1 :	function (pdu, cb) {
 
-	  log("handeling read coils response.");	  
+            log("handeling read coils response.");
 
-	  var fc = pdu.readUInt8(0),
-	      byteCount = pdu.readUInt8(1),
-	      bitCount = byteCount * 8;
+            var fc          = pdu.readUInt8(0),
+                byteCount   = pdu.readUInt8(1),
+                bitCount    = byteCount * 8;
 
-	  var resp = {
-	    fc: fc,
-	    byteCount: byteCount,
-	    coils: [] 
-	  };
+            var resp = {
+                    fc          : fc,
+                    byteCount   : byteCount,
+                    coils       : [] 
+                };
 
-          var cntr = 0;
-          for (var i = 0; i < byteCount; i+=1) {
-            var h = 1, cur = pdu.readUInt8(2 + i);
-	    for (var j = 0; j < 8; j+=1) {
-	      resp.coils[cntr] = (cur & h) > 0 ;
-	      h = h << 1;
-              cntr += 1;
-	    }	    
+            var cntr = 0;
+            for (var i = 0; i < byteCount; i+=1) {
+                var h = 1, cur = pdu.readUInt8(2 + i);
+                for (var j = 0; j < 8; j+=1) {
+                    resp.coils[cntr] = (cur & h) > 0 ;
+                    h = h << 1;
+                    cntr += 1;
+                } 
+            }
 
-  	  }
-
-	  cb(resp);
-
-	},
+            cb(resp);
+        },
 
     // ReadInputRegister
-    4:  function (pdu, cb) {
-          log("handling read input register response.");
+    4 : function (pdu, cb) {
+          
+            log("handling read input register response.");
 
-	  var fc = pdu.readUInt8(0),
-   	      byteCount = pdu.readUInt8(1);
+            var fc          = pdu.readUInt8(0),
+                byteCount   = pdu.readUInt8(1);
 
-          var resp = {
-            fc: fc,
-            byteCount: byteCount,
-            register: []
-          };
+            var resp = {
+                fc          : fc,
+                byteCount   : byteCount,
+                register    : []
+            };
 
-          var registerCount = byteCount / 2;
+            var registerCount = byteCount / 2;
 
-          for (var i = 0; i < registerCount; i += 1) {
-            resp.register.push(pdu.readUInt16BE(2 + (i * 2)));
-          }
+            for (var i = 0; i < registerCount; i += 1) {
+                resp.register.push(pdu.readUInt16BE(2 + (i * 2)));
+            }
 
-          cb(resp);
+            cb(resp);
         },
-    5:  function (pdu, cb) {
-          log("handling write single coil response.");
+    5 : function (pdu, cb) {
+            
+            log("handling write single coil response.");
 
-	  var fc = pdu.readUInt8(0),
-	      outputAddress = pdu.readUInt16BE(1),
-	      outputValue = pdu.readUInt16BE(3);
+            var fc              = pdu.readUInt8(0),
+                outputAddress   = pdu.readUInt16BE(1),
+                outputValue     = pdu.readUInt16BE(3);
 
-	  var resp = {
-	    fc: fc,
-	    outputAddress: outputAddress,
-	    outputValue: outputValue === 0x0000?false:outputValue===0xFF00?true:undefined
- 	  };
+            var resp = {
+                fc              : fc,
+                outputAddress   : outputAddress,
+                outputValue     : outputValue === 0x0000?false:outputValue===0xFF00?true:undefined
+            };
 
-  	  cb(resp);
-    },
-    6:    function (pdu, cb) {
+            cb(resp);
+        },
+    6 : function (pdu, cb) {
+            
             log("handling write single register response.");
 
-            var fc = pdu.readUInt8(0),
+            var fc              = pdu.readUInt8(0),
 		registerAddress = pdu.readUInt16BE(1),
-		registerValue = pdu.readUInt16BE(3);
+		registerValue   = pdu.readUInt16BE(3);
 
- 	    var resp = {
-	      fc: fc,
-	      registerAddress: registerAddress,
-              registerValue: registerValue
-	    };
+            var resp = {
+                fc              : fc,
+                registerAddress : registerAddress,
+                registerValue   : registerValue
+            };
 
- 	    cb(resp);
-    }
+            cb(resp);
+        }
         
 };
 

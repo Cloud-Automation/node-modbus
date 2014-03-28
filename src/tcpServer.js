@@ -1,12 +1,12 @@
 
-var Util	 = require('util'),
-    Put 	 = require('put'),
-    EventEmitter = require('events').EventEmitter;
+var Util    = require('util'),
+    Put     = require('put'),
+EventEmitter = require('events').EventEmitter;
 
-var log = function (msg) { Util.log(msg); }
+var log = function (msg) { Util.log(msg); };
 
 exports.setLogger = function (logger) {
-  log = logger;
+    log = logger;
 };
 
 /**
@@ -17,47 +17,47 @@ exports.setLogger = function (logger) {
  */
 var ModbusTCPServer = function (socket) {
 
-  if (!(this instanceof ModbusTCPServer)) {
-    return new ModbusTCPServer(socket);
-  }
+    if (!(this instanceof ModbusTCPServer)) {
+        return new ModbusTCPServer(socket);
+    }
 
-  EventEmitter.call(this);
+    EventEmitter.call(this);
 
-  // listen for data and connection
-  this._socket = socket;
-  this._socket.on('data', this._handleData(this));
+    // listen for data and connection
+    this._socket = socket;
+    this._socket.on('data', this._handleData(this));
 
-  // store the requests in this fifo and 
-  // flush them later
-  this.reqFifo = [];
-  this.mbapFifo = [];
+    // store the requests in this fifo and 
+    // flush them later
+    this.reqFifo = [];
+    this.mbapFifo = [];
 
-  // create a modbus tcp packet with mbap and pdu
-  // and attach the packet to the packet pipe.
-  this.write = function (pdu) {
+    // create a modbus tcp packet with mbap and pdu
+    // and attach the packet to the packet pipe.
+    this.write = function (pdu) {
 
-    var mbap = this.mbapFifo.shift();
+        var mbap = this.mbapFifo.shift();
 
-    var pkt = Put()
-	.word16be(mbap.trans_id)     // transaction id
-	.word16be(mbap.protocol_ver) // protocol version
-	.word16be(pdu.length + 1)    // pdu length
-	.word8(mbap.unit_id)         // unit id
-	.put(pdu)                    // the actual pdu
-	.buffer();
+        var pkt = Put()
+        .word16be(mbap.trans_id)     // transaction id
+        .word16be(mbap.protocol_ver) // protocol version
+        .word16be(pdu.length + 1)    // pdu length
+        .word8(mbap.unit_id)         // unit id
+        .put(pdu)                    // the actual pdu
+        .buffer();
 
-    this.reqFifo.push(pkt);          // pipe the packet
-    this._flush();
-  };
+        this.reqFifo.push(pkt);          // pipe the packet
+        this._flush();
+    };
 
-  this.flush = function () {
-    this._flush();
-  };
+    this.flush = function () {
+        this._flush();
+    };
 
-  // end the connection
-  this.end = function () {
-    this._socket.end();
-  };
+    // end the connection
+    this.end = function () {
+        this._socket.end();
+    };
 
 };
 
@@ -70,11 +70,11 @@ var proto = ModbusTCPServer.prototype;
  */
 proto._flush = function () {
 
-  while (this.reqFifo.length > 0) {
-    var pkt = this.reqFifo.shift();
-    this._socket.write(pkt);
-  }
-}
+    while (this.reqFifo.length > 0) {
+        var pkt = this.reqFifo.shift();
+        this._socket.write(pkt);
+    }
+};
 
 /**
  *  Handle the incoming data, cut out the mbap
@@ -82,58 +82,56 @@ proto._flush = function () {
  */
 proto._handleData = function (that) {
 
-  return function (data) {
-   
-    log('received data');
+    return function (data) {
 
-    // TODO: remove
-    console.log(data);
-    var cnt = 0;
+        log('received data');
 
-    while (cnt < data.length) {
+        var cnt = 0;
 
-      // 0. check package
+        while (cnt < data.length) {
 
-      if (data.length < 7) {
-        log('Package is too small, stop processing.');
-        return;
-      }
- 
-      // 1. extract mbap
+            // 0. check package
 
-      var mbap = data.slice(cnt, cnt + 7),
-          len = mbap.readUInt16BE(4);
+            if (data.length < 7) {
+                log('Package is too small, stop processing.');
+                return;
+            }
 
-      that.mbapFifo.push({ 
-	trans_id: mbap.readUInt16BE(0),
-	protocol_ver: mbap.readUInt16BE(2),
-	unit_id: mbap.readUInt8(6) }); 
+            // 1. extract mbap
 
-      cnt += 7;
+            var mbap = data.slice(cnt, cnt + 7),
+            len = mbap.readUInt16BE(4);
 
-      log('MBAP extracted');
+            that.mbapFifo.push({ 
+                trans_id: mbap.readUInt16BE(0),
+                protocol_ver: mbap.readUInt16BE(2),
+                unit_id: mbap.readUInt8(6) }); 
 
-      // 2. extract
+                cnt += 7;
 
-      if (data.length < cnt + len - 1) {
-        log('PDU is too small, stop processing.');
-        return;
-      } 
+                log('MBAP extracted');
 
-      var pdu = data.slice(cnt, cnt + len - 1);
-    
-      cnt += pdu.length;
+                // 2. extract
 
-      log('PDU extracted');
+                if (data.length < cnt + len - 1) {
+                    log('PDU is too small, stop processing.');
+                    return;
+                } 
 
-      // emit data event and let the 
-      // listener handle the pdu
+                var pdu = data.slice(cnt, cnt + len - 1);
 
-      that.emit('data', pdu); 
-  
-    }
+                cnt += pdu.length;
 
-  };
+                log('PDU extracted');
+
+                // emit data event and let the 
+                // listener handle the pdu
+
+                that.emit('data', pdu); 
+
+        }
+
+    };
 
 };
 

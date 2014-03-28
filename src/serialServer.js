@@ -1,135 +1,135 @@
 
 
-var Put = require('put'),
-    util = require('util');
-
-var log = function (msg) { util.log(msg); };
+var Put     = require('put'),
+    util    = require('util'),
+    log     = function (msg) { util.log(msg); };
 
 exports.setLogger = function (logger) {
-  log = logger;
+    log = logger;
 };
 
 var ModbusServer = function (
-	socket, 
-	reqHandler, 
-	resHandler) {
+    socket, 
+    reqHandler, 
+    resHandler) {
 
-  if (!(this instanceof ModbusServer)) {
-    return new ModbusServer(
-		socket, 
-		reqHandler, 
-		resHandler);
-  }
+        if (!(this instanceof ModbusServer)) {
+            return new ModbusServer(
+                socket, 
+                reqHandler, 
+                resHandler);
+        }
 
-  var that = this;
+        var that = this;
 
-  this.reqHandler = reqHandler;
-  this.resHandler = resHandler;
+        this.reqHandler = reqHandler;
+        this.resHandler = resHandler;
 
-  // request handler
-  this.handler = { };
+        // request handler
+        this.handler = { };
 
-  // initiate server
-  that.socket = socket;
+        // initiate server
+        that.socket = socket;
 
-  socket.on('end', that.handleEnd(that));
-  socket.on('data', that.handleData(that));
-  
-  var api = {
+        socket.on('end', that.handleEnd(that));
+        socket.on('data', that.handleData(that));
 
-    addHandler: function (fc, handler) {
-      that.handler[fc] = handler;
-    }
+        var api = {
 
-  };
+            addHandler: function (fc, handler) {
+                that.handler[fc] = handler;
+            }
 
-  return api;
+        };
 
-};
+        return api;
 
-var proto = ModbusServer.prototype;
+    };
 
-proto.handleData = function (that) {
+    var proto = ModbusServer.prototype;
 
-  return function (pdu) {
+    proto.handleData = function (that) {
 
-    log('received data');
+        return function (pdu) {
 
-    // get fc and byteCount in advance
-    var fc = pdu.readUInt8(0);
-    var byteCount = pdu.readUInt8(1);
+            log('received data');
 
-    // get the pdu handler
-    var reqHandler = that.reqHandler[fc];
-    var callback = that.handler[fc];
-    var resHandler = that.resHandler[fc];
-  
-    if (!reqHandler || !callback || !resHandler) {
+            // get fc and byteCount in advance
+            var fc          = pdu.readUInt8(0),
+                byteCount   = pdu.readUInt8(1);
 
-      // write a error/exception pkt to the 
-      // socket with error code fc + 0x80 and
-      // exception code 0x01 (Illegal Function)
-      that.handleException(fc, 0x01);
-      return
-    }
-   
-    var params = reqHandler(pdu);
+            // get the pdu handler
+            var reqHandler  = that.reqHandler[fc],
+                callback    = that.handler[fc],
+                resHandler  = that.resHandler[fc];
 
-    // if params contains a error attribute then
-    // handle the error
-    if (params && 'error' in params) {
-      log('Request handler returned an error.');
-      that.handleException(fc, params.error);
-      return;
-    }
+            if (!reqHandler || !callback || !resHandler) {
 
-    var resObj = callback.apply(null, params);
-    var resPdu = resHandler.apply(that, resObj);
+                // write a error/exception pkt to the 
+                // socket with error code fc + 0x80 and
+                // exception code 0x01 (Illegal Function)
+                that.handleException(fc, 0x01);
+                return;
+            
+            }
 
-    // add mbdaHeader to resPdu and send it
-    // with write
+            var params = reqHandler(pdu);
 
-    that.socket.write(resPdu);
+            // if params contains a error attribute then
+            // handle the error
+            if (params && 'error' in params) {
+                log('Request handler returned an error.');
+                that.handleException(fc, params.error);
+                return;
+            }
 
-  };
+            var resObj = callback.apply(null, params);
+            var resPdu = resHandler.apply(that, resObj);
 
-};
+            // add mbdaHeader to resPdu and send it
+            // with write
 
-proto.handleException = function (fc, exceptionCode) {
+            that.socket.write(resPdu);
 
-  // replace that with an appropriate modbus error
-  var errPkt = Put() 
-	.word8(fc + 0x80)
-	.word8(exceptionCode)
-	.buffer();
+        };
 
-  this.socket.write(errPkt);
+    };
 
-};
+    proto.handleException = function (fc, exceptionCode) {
 
-proto.listen = function (that) {
+        // replace that with an appropriate modbus error
+        var errPkt = Put() 
+        .word8(fc + 0x80)
+        .word8(exceptionCode)
+        .buffer();
 
-  return function () {
-    var o = that.server.address();
-    log('Listening on ' + o.address + ":" + o.port + ".");
-  };
+        this.socket.write(errPkt);
 
-};
+    };
 
-proto.handleConnection = function (that) {
+    proto.listen = function (that) {
 
-  return function () {
-    log("Connection established.");
-  }
+        return function () {
+            var o = that.server.address();
+            log('Listening on ' + o.address + ":" + o.port + ".");
+        };
 
-};
+    };
 
-proto.handleError = function (e) {
-  log('Error occured');
-};
+    proto.handleConnection = function (that) {
 
-proto.handleEnd = function (that) {
-  return function () {}; 
-};
+        return function () {
+            log("Connection established.");
+        };
 
-exports.create = ModbusServer;
+    };
+
+    proto.handleError = function (e) {
+        log('Error occured');
+    };
+
+    proto.handleEnd = function (that) {
+        return function () {}; 
+    };
+
+    exports.create = ModbusServer;

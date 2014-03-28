@@ -1,12 +1,12 @@
 
-var Util	 = require('util'),
-    Put 	 = require('put'),
-    EventEmitter = require('events').EventEmitter;
+var Util    = require('util'),
+    Put     = require('put'),
+EventEmitter = require('events').EventEmitter;
 
-var log = function (msg) { Util.log(msg); }
+var log = function (msg) { Util.log(msg); };
 
 exports.setLogger = function (logger) {
-  log = logger;
+    log = logger;
 };
 
 var PROTOCOL_VERSION = 0,
@@ -20,49 +20,49 @@ var PROTOCOL_VERSION = 0,
  */
 var ModbusTCPClient = function (socket) {
 
-  if (!(this instanceof ModbusTCPClient)) {
-    return new ModbusTCPClient(socket);
-  }
+    if (!(this instanceof ModbusTCPClient)) {
+        return new ModbusTCPClient(socket);
+    }
 
-  EventEmitter.call(this);
+    EventEmitter.call(this);
 
-  // listen for data and connection
-  this._socket = socket;
-  this._socket.on('data', this._handleData(this));
-  this._socket.on('connect', this._handleConnection(this));
-  this._socket.on('end', this._handleEnd(this));
-  this._socket.on('error', this._handleError(this));
-  this._socket.on('close', this._handleClose(this));
+    // listen for data and connection
+    this._socket = socket;
+    this._socket.on('data', this._handleData(this));
+    this._socket.on('connect', this._handleConnection(this));
+    this._socket.on('end', this._handleEnd(this));
+    this._socket.on('error', this._handleError(this));
+    this._socket.on('close', this._handleClose(this));
 
-  // store the requests in this fifo and 
-  // flush them later
-  this.reqFifo = [];
-  this.reqId = 0; 
+    // store the requests in this fifo and 
+    // flush them later
+    this.reqFifo = [];
+    this.reqId = 0; 
 
-  // create a modbus tcp packet with mbap and pdu
-  // and attach the packet to the packet pipe.
-  this.write = function (pdu) {
+    // create a modbus tcp packet with mbap and pdu
+    // and attach the packet to the packet pipe.
+    this.write = function (pdu) {
 
-    var pkt = Put()
-	.word16be(this.reqId++)      // transaction id
-	.word16be(PROTOCOL_VERSION)  // protocol version
-	.word16be(pdu.length + 1)    // pdu length
-	.word8(UNIT_ID)              // unit id
-	.put(pdu)                    // the actual pdu
-	.buffer();
+        var pkt = Put()
+        .word16be(this.reqId++)      // transaction id
+        .word16be(PROTOCOL_VERSION)  // protocol version
+        .word16be(pdu.length + 1)    // pdu length
+        .word8(UNIT_ID)              // unit id
+        .put(pdu)                    // the actual pdu
+        .buffer();
 
-    this.reqFifo.push(pkt);          // pipe the packet
-    this._flush();
-  };
+        this.reqFifo.push(pkt);          // pipe the packet
+        this._flush();
+    };
 
-  this.flush = function () {
-    this._flush();
-  };
+    this.flush = function () {
+        this._flush();
+    };
 
-  // end the connection
-  this.end = function () {
-    this._socket.end();
-  };
+    // end the connection
+    this.end = function () {
+        this._socket.end();
+    };
 
 };
 
@@ -76,48 +76,48 @@ var proto = ModbusTCPClient.prototype;
  *  listener. Finally the piped packets get flushed.
  */
 proto._handleConnection = function (that) {
-  
-  return function () {
-    that.isConnected = true;
-    that.emit('connect');
-    that._flush();
-  }
+
+    return function () {
+        that.isConnected = true;
+        that.emit('connect');
+        that._flush();
+    };
 };
 
 /**
  *  Flush the remainig packets.
  */
 proto._flush = function () {
-  if (!this.isConnected) {
-    return;
-  }
+    if (!this.isConnected) {
+        return;
+    }
 
-  while (this.reqFifo.length > 0) {
-    var pkt = this.reqFifo.shift();
-    this._socket.write(pkt);
-  }
-}
+    while (this.reqFifo.length > 0) {
+        var pkt = this.reqFifo.shift();
+        this._socket.write(pkt);
+    }
+};
 
 proto._handleEnd = function (that) {
 
-  return function () {
-    that.emit("end");
-  }
+    return function () {
+        that.emit("end");
+    };
 
 };
 
 proto._handleError = function (that) {
 
-  return function () {
-//    that.emit("error");
-  }
+    return function () {
+        //    that.emit("error");
+    };
 };
 
 proto._handleClose = function (that) {
 
-  return function () {
-    that.emit('close');
-  }; 
+    return function () {
+        that.emit('close');
+    }; 
 
 };
 
@@ -127,39 +127,39 @@ proto._handleClose = function (that) {
  */
 proto._handleData = function (that) {
 
-  return function (data) {
-   
-    log('received data');
+    return function (data) {
 
-    var cnt = 0;
+        log('received data');
 
-    while (cnt < data.length) {
- 
-      // 1. extract mbap
+        var cnt = 0;
 
-      var mbap = data.slice(cnt, cnt + 7),
-          len = mbap.readUInt16BE(4);
+        while (cnt < data.length) {
 
-      cnt += 7;
+            // 1. extract mbap
 
-      log('MBAP extracted');
+            var mbap = data.slice(cnt, cnt + 7),
+            len = mbap.readUInt16BE(4);
 
-      // 2. extract pdu
+            cnt += 7;
 
-      var pdu =data.slice(cnt, cnt + len - 1);
-    
-      cnt += pdu.length;
+            log('MBAP extracted');
 
-      log('PDU extracted');
+            // 2. extract pdu
 
-      // emit data event and let the 
-      // listener handle the pdu
+            var pdu =data.slice(cnt, cnt + len - 1);
 
-      that.emit('data', pdu); 
-  
-    }
+            cnt += pdu.length;
 
-  };
+            log('PDU extracted');
+
+            // emit data event and let the 
+            // listener handle the pdu
+
+            that.emit('data', pdu); 
+
+        }
+
+    };
 
 };
 

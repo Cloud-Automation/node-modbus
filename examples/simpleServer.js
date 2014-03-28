@@ -1,8 +1,8 @@
 
-var jsModbus = require('../'),
-    util = require('util');
+var modbus  = require('../'),
+    util    = require('util');
 
-jsModbus.setLogger(function (msg) { util.log(msg); });
+modbus.setLogger(function (msg) { util.log(msg); });
 
 var readCoils = function (start, quant) {
 
@@ -16,13 +16,13 @@ var readCoils = function (start, quant) {
 };
 
 var readInputRegHandler = function (start, quant) {
-  
-  var resp = [];
-  for (var i = start; i < start+quant; i += 1) {
-    resp.push(i);
-  }
 
-  return [resp];
+    var resp = [];
+    for (var i = start; i < start+quant; i += 1) {
+        resp.push(i);
+    }
+
+    return [resp];
 
 };
 
@@ -43,7 +43,7 @@ var writeSingleRegister = function (adr, value) {
 };
 
 
-jsModbus.createTCPServer(512, '127.0.0.1', function (err, server) {
+modbus.createTCPServer(512, '127.0.0.1', function (err, server) {
 
     if (err) {
         console.log(err);
