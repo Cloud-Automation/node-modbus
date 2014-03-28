@@ -1,0 +1,37 @@
+{
+  "name": "modbus",
+  "version": "0.2.0",
+  "description": "Implementation for the Serial/TCP Modbus protocol.",
+  "author": "Stefan Poeter <stefan.poeter@cloud-automation.de>",
+  "main": "./src/jsModbus.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Cloud-Automation/modbus"
+  },
+  "dependencies": {
+    "put": "0.0.6"
+  },
+  "devDependencies": {
+    "sinon": "1.5.0"
+  },
+  "scripts": {
+    "test": "mocha test/*"
+  },
+  "engine": {
+    "node": ">=0.6"
+  },
+  "license": "MIT",
+  "keywords": [
+    "client",
+    "server",
+    "serial",
+    "port",
+    "modbus",
+    "tcp"
+  ],
+  "readmeFilename": "README.md",
+  "directories": {
+    "test": "test",
+    "example": "examples"
+  }
+}
