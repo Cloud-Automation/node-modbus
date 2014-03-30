@@ -58,7 +58,15 @@ var ModbusClient = function (socket, resHandler) {
                 defer   = Q.defer(),
                 pdu     = that.pduWithTwoParameter(fc, start, quantity);
 
-            return that.makeRequest(fc, pdu, !cb?dummy:cb, defer);
+            if (!cb) {
+
+                that.makeRequest(fc, pdu, that.promiseCallback(defer));
+                return defer.promise;
+            
+            }
+
+            return that.makeRequest(fc, pdu, cb);
+        
         },
 
         readInputRegister: function (start, quantity, cb) {
@@ -67,7 +75,15 @@ var ModbusClient = function (socket, resHandler) {
                 defer   = Q.defer(),
                 pdu     = that.pduWithTwoParameter(fc, start, quantity);
 
-            return that.makeRequest(fc, pdu, !cb?dummy:cb, defer);
+            if (!cb) {
+
+                that.makeRequest(fc, pdu, that.promiseCallback(defer));
+                return defer.promise;
+            
+            }
+
+
+            return that.makeRequest(fc, pdu, cb);
 
         },
 
@@ -77,7 +93,14 @@ var ModbusClient = function (socket, resHandler) {
                 defer   = Q.defer(),
                 pdu     = that.pduWithTwoParameter(fc, address, value?0xff00:0x0000);
 
-            return that.makeRequest(fc, pdu, !cb?dummy:cb, defer);
+            if (!cb) {
+
+                that.makeRequest(fc, pdu, that.promiseCallback(defer));
+                return defer.promise;
+            
+            }
+
+            return that.makeRequest(fc, pdu, cb);
 
         },
 
@@ -86,15 +109,27 @@ var ModbusClient = function (socket, resHandler) {
                 defer   = Q.defer(),
                 pdu     = that.pduWithTwoParameter(fc, address, value);
 
-            return that.makeRequest(fc, pdu, !cb?dummy:cb, defer);
+            if (!cb) {
+
+                that.makeRequest(fc, pdu, that.promiseCallback(defer));
+                return defer.promise;
+            
+            }
+
+            return that.makeRequest(fc, pdu, cb);
+        
         },
 
         isConnected: function () {
+
             return that.isConnected;
+
         },
 
         on: function (name, cb) {
+
             socket.on(name, cb);
+
         },
 
         flush: function () {
@@ -102,8 +137,11 @@ var ModbusClient = function (socket, resHandler) {
         },
 
         close: function () {
+
             that.socket.end();
+
         }
+
     };
 
     return api;
@@ -112,21 +150,47 @@ var ModbusClient = function (socket, resHandler) {
 
 var proto = ModbusClient.prototype;
 
+
+proto.promiseCallback = function (defer) {
+
+    var that = this;
+
+    return function (resp, err) {
+   
+        console.log(arguments);
+
+        if (err) {
+        
+            defer.reject(err);
+            return;
+
+        }
+
+        defer.resolve(resp);
+    
+    };
+
+};
+
 /**
  * Pack up the pdu and the handler function
  * and pipes both. Calls flush in the end.
  */
-proto.makeRequest = function (fc, pdu, cb, defer) {
+proto.makeRequest = function (fc, pdu, cb) {
 
-    var req = { fc: fc, cb: cb, pdu: pdu, defer: defer };
+    var req = { 
+        fc: fc, 
+        cb: cb, 
+        pdu: pdu 
+    };
 
     this.pipe.push(req);
 
     if (this.state === 'ready') {
-        this.flush();
-    }
 
-    return defer.promise;
+        this.flush();
+
+    }
 
 };
 
@@ -137,7 +201,9 @@ proto.makeRequest = function (fc, pdu, cb, defer) {
 proto.flush = function () {
 
     if (!this.isConnected) {
+
         return;
+
     }
 
     if (this.pipe.length > 0 && !this.current) {
@@ -191,7 +257,7 @@ proto.handleData = function (that) {
         if (!handler) { 
             throw "No handler implemented.";
         }
-        handler(pdu, that.current.cb, that.current.defer);
+        handler(pdu, that.current.cb);
 
         that.current = null;
         that.state = "ready";
@@ -240,10 +306,10 @@ proto.handleErrorPDU = function (pdu, cb) {
 proto.pduWithTwoParameter = function (fc, start, quantity) {
 
     return Put()
-    .word8(fc)
-    .word16be(start)
-    .word16be(quantity)
-    .buffer();
+        .word8(fc)
+        .word16be(start)
+        .word16be(quantity)
+        .buffer();
 
 };
 
@@ -260,7 +326,9 @@ proto.handleClose = function (that) {
 proto.handleEnd = function (that) {
 
     return function () {
+
         that.isConnected = false;
+
     };
 
 };

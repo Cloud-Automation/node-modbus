@@ -147,7 +147,7 @@ exports.Client = { };
  */
 exports.Client.ResponseHandler = {
     // ReadCoils
-    1 :	function (pdu, cb, defer) {
+    1 :	function (pdu, cb) {
 
             log("handeling read coils response.");
 
@@ -172,11 +172,10 @@ exports.Client.ResponseHandler = {
             }
 
             cb(resp);
-            defer.resolve(resp);
         },
 
     // ReadInputRegister
-    4 : function (pdu, cb, defer) {
+    4 : function (pdu, cb) {
           
             log("handling read input register response.");
 
@@ -196,10 +195,9 @@ exports.Client.ResponseHandler = {
             }
 
             cb(resp);
-            defer.resolve(resp);
 
         },
-    5 : function (pdu, cb, defer) {
+    5 : function (pdu, cb) {
             
             log("handling write single coil response.");
 
@@ -214,10 +212,9 @@ exports.Client.ResponseHandler = {
             };
 
             cb(resp);
-            defer.resolve(resp);
 
         },
-    6 : function (pdu, cb, defer) {
+    6 : function (pdu, cb) {
             
             log("handling write single register response.");
 
@@ -232,7 +229,6 @@ exports.Client.ResponseHandler = {
             };
 
             cb(resp);
-            defer.resolve(resp);
 
         }
         
