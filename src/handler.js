@@ -1,8 +1,7 @@
 
-var Put = require('put');
-var util = require('util');
-
-var log = function (msg) {  };
+var Put     = require('put'),
+    util    = require('util'),
+    log     = function (msg) {  };
 
 exports.setLogger = function (logger) {
     log = logger;
@@ -148,7 +147,7 @@ exports.Client = { };
  */
 exports.Client.ResponseHandler = {
     // ReadCoils
-    1 :	function (pdu, cb) {
+    1 :	function (pdu, cb, defer) {
 
             log("handeling read coils response.");
 
@@ -173,10 +172,11 @@ exports.Client.ResponseHandler = {
             }
 
             cb(resp);
+            defer.resolve(resp);
         },
 
     // ReadInputRegister
-    4 : function (pdu, cb) {
+    4 : function (pdu, cb, defer) {
           
             log("handling read input register response.");
 
@@ -196,8 +196,10 @@ exports.Client.ResponseHandler = {
             }
 
             cb(resp);
+            defer.resolve(resp);
+
         },
-    5 : function (pdu, cb) {
+    5 : function (pdu, cb, defer) {
             
             log("handling write single coil response.");
 
@@ -212,8 +214,10 @@ exports.Client.ResponseHandler = {
             };
 
             cb(resp);
+            defer.resolve(resp);
+
         },
-    6 : function (pdu, cb) {
+    6 : function (pdu, cb, defer) {
             
             log("handling write single register response.");
 
@@ -228,6 +232,8 @@ exports.Client.ResponseHandler = {
             };
 
             cb(resp);
+            defer.resolve(resp);
+
         }
         
 };

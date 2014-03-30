@@ -1,5 +1,6 @@
 var util    = require('util'),
-    Put     = require('put');
+    Put     = require('put'),
+    Q       = require('q');
 
 var Handler = require('./handler');
 
@@ -53,35 +54,39 @@ var ModbusClient = function (socket, resHandler) {
     var api = {
 
         readCoils: function (start, quantity, cb) {
-            var fc  = 1,
-                pdu = that.pduWithTwoParameter(fc, start, quantity);
+            var fc      = 1,
+                defer   = Q.defer(),
+                pdu     = that.pduWithTwoParameter(fc, start, quantity);
 
-            that.makeRequest(fc, pdu, !cb?dummy:cb);
+            return that.makeRequest(fc, pdu, !cb?dummy:cb, defer);
         },
 
         readInputRegister: function (start, quantity, cb) {
 
             var fc      = 4, 
+                defer   = Q.defer(),
                 pdu     = that.pduWithTwoParameter(fc, start, quantity);
 
-            that.makeRequest(fc, pdu, !cb?dummy:cb);
+            return that.makeRequest(fc, pdu, !cb?dummy:cb, defer);
 
         },
 
         writeSingleCoil: function (address, value, cb) {
 
-            var fc  = 5,
-                pdu = that.pduWithTwoParameter(fc, address, value?0xff00:0x0000);
+            var fc      = 5,
+                defer   = Q.defer(),
+                pdu     = that.pduWithTwoParameter(fc, address, value?0xff00:0x0000);
 
-            that.makeRequest(fc, pdu, !cb?dummy:cb);
+            return that.makeRequest(fc, pdu, !cb?dummy:cb, defer);
 
         },
 
         writeSingleRegister: function (address, value, cb) {
-            var fc  = 6,
-                pdu = that.pduWithTwoParameter(fc, address, value);
+            var fc      = 6,
+                defer   = Q.defer(),
+                pdu     = that.pduWithTwoParameter(fc, address, value);
 
-            that.makeRequest(fc, pdu, !cb?dummy:cb);
+            return that.makeRequest(fc, pdu, !cb?dummy:cb, defer);
         },
 
         isConnected: function () {
@@ -111,15 +116,17 @@ var proto = ModbusClient.prototype;
  * Pack up the pdu and the handler function
  * and pipes both. Calls flush in the end.
  */
-proto.makeRequest = function (fc, pdu, cb) {
+proto.makeRequest = function (fc, pdu, cb, defer) {
 
-    var req = { fc: fc, cb: cb, pdu: pdu };
+    var req = { fc: fc, cb: cb, pdu: pdu, defer: defer };
 
     this.pipe.push(req);
 
     if (this.state === 'ready') {
         this.flush();
     }
+
+    return defer.promise;
 
 };
 
@@ -184,7 +191,7 @@ proto.handleData = function (that) {
         if (!handler) { 
             throw "No handler implemented.";
         }
-        handler(pdu, that.current.cb);
+        handler(pdu, that.current.cb, that.current.defer);
 
         that.current = null;
         that.state = "ready";
