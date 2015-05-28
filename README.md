@@ -8,7 +8,7 @@ Modbus is a simple Modbus TCP Client (Server implementation is coming, but feel 
 Installation
 ------------
 
-Just type `npm install modbus` and you are ready to go.
+Just type `npm install jsmodbus` and you are ready to go.
 
 Testing
 -------
