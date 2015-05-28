@@ -3,7 +3,7 @@ A simple an easy to use Modbus TCP client/server implementation.
 Modbus
 ========
 
-Modbus is a simple Modbus TCP Client (Server implementation is coming, but feel free to start on your own) with a simple API.
+Modbus is a simple Modbus TCP Client with a simple API.
 
 Installation
 ------------
