@@ -9,19 +9,18 @@ exports.setLogger = function (logger) {
     log = logger;
 };
 
-var PROTOCOL_VERSION = 0,
-    UNIT_ID = 1;
-
+var PROTOCOL_VERSION = 0;
+    
 /**
  *  ModbusTCPClient handles the MBAP that is the
  *  additional header used for modbus tcp protocol.
  *  It get's initialised with a simple socket providing
  *  .on, .emit and .write methods
  */
-var ModbusTCPClient = function (socket) {
+var ModbusTCPClient = function (socket, unit_id) {
 
     if (!(this instanceof ModbusTCPClient)) {
-        return new ModbusTCPClient(socket);
+        return new ModbusTCPClient(socket, unit_id);
     }
 
     EventEmitter.call(this);
@@ -47,7 +46,7 @@ var ModbusTCPClient = function (socket) {
         .word16be(this.reqId++)      // transaction id
         .word16be(PROTOCOL_VERSION)  // protocol version
         .word16be(pdu.length + 1)    // pdu length
-        .word8(UNIT_ID)              // unit id
+        .word8(typeof unit_id === 'number' ? unit_id:true)	// unit id
         .put(pdu)                    // the actual pdu
         .buffer();
 
