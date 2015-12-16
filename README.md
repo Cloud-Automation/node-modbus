@@ -21,67 +21,72 @@ Please feel free to fork and add your own tests.
 
 Client example
 --------------
+```javascript
+var modbus = require('jsmodbus');
 
-	var modbus = require('./modbus');
-	
-	// create a modbus client
-	var client = modbus.createTCPClient(502, '127.0.0.1', function (err) {
-        if (err) {
-            console.log(err);
-            exit(0);
-        }
-    });
-	
-	// make some calls
-	client.readInputRegister(0, 10, function (resp, err) {
-	  // resp will look like { fc: 4, byteCount: 20, register: [ values 0 - 10 ] }
-	});
-	
-	client.readCoils(5, 3, function (resp, err) {
-	  // resp will look like { fc: 1, byteCount: 1, register: [ true, false, true ] }
-	});
-	
-	client.writeSingleCoil(5, true, function (resp, err) {
-	  // resp will look like { fc: 5, byteCount: 4, outputAddress: 5, outputValue: true }
-	});
+// create a modbus client
+var client = modbus.createTCPClient(8888, '127.0.0.1', function (err) {
+	if (err) {
+		console.log(err);
+		process.exit(0);
+	}
+});
 
-  	client.writeSingleRegister(13, 42, function (resp, err) {
-	  // resp will look like { fc: 6, byteCount: 4, registerAddress: 13, registerValue: 42 }
-	});
+// make some calls
+client.readInputRegister(0, 10, function (resp, err) {
+	// resp will look like { fc: 4, byteCount: 20, register: [ values 0 - 10 ] }
+	console.log(err, resp);
+});
+
+client.readCoils(5, 3, function (resp, err) {
+	// resp will look like { fc: 1, byteCount: 1, register: [ true, false, true ] }
+	console.log(err, resp);
+});
+
+client.writeSingleCoil(5, true, function (resp, err) {
+	// resp will look like { fc: 5, byteCount: 4, outputAddress: 5, outputValue: true }
+	console.log(err, resp);
+});
+
+client.writeSingleRegister(13, 42, function (resp, err) {
+	// resp will look like { fc: 6, byteCount: 4, registerAddress: 13, registerValue: 42 }
+	console.log(err, resp);
+});
+```
 
 Server example
 --------------
+```javascript
+var modbus = require('jsmodbus');
 
-	var modbus = require('./modbus');
+// create readInputRegister handler
+var rirHandler = function (start, quantity) {
+  var resp = [];
+  for (var i = start; i < start + quantity; i += 1) {
+    resp.push(i);
+  }
 
-	// create readInputRegister handler
-	var rirHandler = function (start, quantity) {
-	  var resp[];
-	  for (var i = start; i < start + quant; i += 1) {
-	    resp.push(i);
-	  }
+  return [resp];
+};
 
-	  return [resp];
-	};
+var coil = false;
+var writeCoilHandler = function (addr, value) {
 
-        var coil = false;
-        var writeCoilHandler = function (addr, value) {
-	  
- 	  if (addr === 0) {
-	    coil = value;
-	  }
+   if (addr === 0) {
+    coil = value;
+  }
 
-	  return [addr, value];
+  return [addr, value];
 
-	};
+};
 
-
-	// create Modbus TCP Server
-	modbus.createTCPServer(8888, '127.0.0.1', function (err, modbusServer) {
-	  // addHandler
-	  server.addHandler(4, rirHandler);
-	  server.addHandler(5, writeCoilHandler);
-	});
+// create Modbus TCP Server
+modbus.createTCPServer(8888, '127.0.0.1', function (err, modbusServer) {
+  // addHandler
+  modbusServer.addHandler(4, rirHandler);
+  modbusServer.addHandler(5, writeCoilHandler);
+});
+```
 
 Development
 -----------
