@@ -61,7 +61,7 @@ describe('Modbus TCP/IP Client', function () {
 
   });
 
-  describe('Requests/Responses', function () {
+  describe('Requests/Responses Without Unit Identifier', function () {
 
     var client;
 
@@ -76,9 +76,9 @@ describe('Modbus TCP/IP Client', function () {
     var socket;
 
     beforeEach(function (done) {
-      socket = new SocketApi();
+      socket = new SocketApi();      
 
-      client = modbusClient.create(socket);
+      client = modbusClient.create(socket);      
 
       done();
     });
@@ -131,6 +131,88 @@ describe('Modbus TCP/IP Client', function () {
 		.word16be(2)
 		.word16be(12)
 		.buffer();
+
+     socket.emit('connect');
+     client.write(req);
+
+     assert.ok(writeSpy.calledOnce);
+     assert.deepEqual(writeSpy.args[0][0], exReq); 
+
+    });
+
+  });
+
+ describe('Requests/Responses With Unit Identifier', function () {
+
+    var client;
+
+    var SocketApi = function () {
+
+      eventEmitter.call(this);
+      this.write = function () { };
+    };
+
+    util.inherits(SocketApi, eventEmitter);
+
+    var socket;
+
+    beforeEach(function (done) {
+      socket = new SocketApi();
+      unit_id = 100;
+
+      client = modbusClient.create(socket, unit_id);     
+
+      done();
+    });
+
+    it('should read a simple request', function () {
+
+      var onDataSpy = sinon.spy();
+
+      client.on('data', onDataSpy);
+
+      var res = Put()
+    .word16be(0)
+    .word16be(0)
+    .word16be(5)
+    .word8(unit_id)
+    .word8(4)
+    .word8(2)
+    .word16be(42)
+    .buffer();
+
+      var exRes = Put()
+    .word8(4)
+    .word8(2)
+    .word16be(42)
+    .buffer();
+
+      socket.emit('data', res);
+
+      assert.ok(onDataSpy.called);
+      assert.deepEqual(onDataSpy.args[0][0], exRes);
+
+    });
+
+    it('should respond', function () {
+
+     var writeSpy = sinon.spy(socket, 'write');
+
+     var req = Put()
+    .word8(4)
+    .word16be(2)
+    .word16be(12)
+    .buffer();
+
+      var exReq = Put()
+    .word16be(0)
+    .word16be(0)
+    .word16be(6)
+    .word8(unit_id)
+    .word8(4)
+    .word16be(2)
+    .word16be(12)
+    .buffer();
 
      socket.emit('connect');
      client.write(req);

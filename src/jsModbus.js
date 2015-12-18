@@ -8,7 +8,7 @@ exports.setLogger = function (logger) {
     handler.setLogger(logger);
 };
 
-exports.createTCPClient = function (port, host, cb) {
+exports.createTCPClient = function (port, host, unit_id, cb) {
 
     var net             = require('net'),
     tcpClientModule     = require('./tcpClient'),
@@ -16,10 +16,24 @@ exports.createTCPClient = function (port, host, cb) {
 
     tcpClientModule.setLogger(log);
     serialClientModule.setLogger(log);
+    
+    // retrieve arguments as array
+    var args = [];
+    for (var i = 0; i < arguments.length; i++) {
+        args.push(arguments[i]);
+    }
+    // first argument is the port, 2nd argument is the host   
+    port = args.shift();
+    host = args.shift();
+    // last argument is the callback function.    
+    cb = args.pop();
+
+    // if args still holds items, this is the unit_id
+    if (args.length > 0) unit_id = args.shift(); else unit_id = 1;  //default to 1
 
     var socket    = net.connect(port, host),
-        tcpClient = tcpClientModule.create(socket);
-
+        tcpClient = tcpClientModule.create(socket, unit_id);
+    
     socket.on('error', function (e) {
 
         if (!cb) {
