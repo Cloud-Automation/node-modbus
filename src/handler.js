@@ -23,6 +23,8 @@ exports.ExceptionMessage = {
 
 exports.FC = {
     readCoils		: 1,
+    readDiscrete		: 2,
+    readHoldingRegister	: 3,	
     readInputRegister	: 4
 };
 
@@ -60,6 +62,41 @@ exports.Server.ResponseHandler = {
 
         return res.buffer();
       },
+    2 : function (register) {
+            var flr = Math.floor(register.length / 8),
+                len = register.length % 8 > 0 ? flr + 1 : flr,
+                res = Put().word8(1).word8(len);
+
+            var cntr = 0;
+            for (var i = 0; i < len; i += 1 ) {
+                var cur = 0;
+                for (var j = 0; j < 8; j += 1) {
+                    var h = 1 << j;
+
+                    if (register[cntr]) {
+                        cur += h;
+                    }
+
+                    cntr += 1;
+                
+                }
+            
+            res.word8(cur);
+        }
+
+        return res.buffer();
+      },
+    // read Holding register
+    3 : function (register) {
+
+            var res = Put().word8(4).word8(register.length * 2);
+
+            for (var i = 0; i < register.length; i += 1) {
+                res.word16be(register[i]);
+            }
+
+            return res.buffer();
+    },
     // read input register
     4 : function (register) {
 
@@ -107,7 +144,25 @@ exports.Server.RequestHandler = {
 
             return param;	
         },
+    // ReadDiscrete
+    2 : function (pdu) {
 
+            var fc              = pdu.readUInt8(0), // never used, should just be an example
+                startAddress    = pdu.readUInt16BE(1),
+                quantity        = pdu.readUInt16BE(3),
+                param           = [ startAddress, quantity ];
+
+            return param;	
+        },
+    // ReadHoldingRegister
+    3 : function (pdu) {
+
+            var startAddress    = pdu.readUInt16BE(1),
+                quantity        = pdu.readUInt16BE(3),
+                param           = [ startAddress, quantity ];
+
+            return param;
+    },
     // ReadInputRegister
     4 : function (pdu) {
 
@@ -147,7 +202,7 @@ exports.Client = { };
  */
 exports.Client.ResponseHandler = {
     // ReadCoils
-    1 :	function (pdu, cb) {
+    1 :	function (pdu, cb, defer) {
 
             log("handeling read coils response.");
 
@@ -172,10 +227,61 @@ exports.Client.ResponseHandler = {
             }
 
             cb(resp);
+            defer.resolve(resp);
         },
+    2 :	function (pdu, cb, defer) {
 
+            log("handeling read coils response.");
+
+            var fc          = pdu.readUInt8(0),
+                byteCount   = pdu.readUInt8(1),
+                bitCount    = byteCount * 8;
+
+            var resp = {
+                    fc          : fc,
+                    byteCount   : byteCount,
+                    coils       : [] 
+                };
+
+            var cntr = 0;
+            for (var i = 0; i < byteCount; i+=1) {
+                var h = 1, cur = pdu.readUInt8(2 + i);
+                for (var j = 0; j < 8; j+=1) {
+                    resp.coils[cntr] = (cur & h) > 0 ;
+                    h = h << 1;
+                    cntr += 1;
+                } 
+            }
+
+            cb(resp);
+            defer.resolve(resp);
+        },
+    // ReadHoldingRegister
+    3 : function (pdu, cb, defer) {
+          
+            log("handling read Holding register response.");
+
+            var fc          = pdu.readUInt8(0),
+                byteCount   = pdu.readUInt8(1);
+
+            var resp = {
+                fc          : fc,
+                byteCount   : byteCount,
+                register    : []
+            };
+
+            var registerCount = byteCount / 2;
+
+            for (var i = 0; i < registerCount; i += 1) {
+                resp.register.push(pdu.readUInt16BE(2 + (i * 2)));
+            }
+
+            cb(resp);
+            defer.resolve(resp);
+
+        },
     // ReadInputRegister
-    4 : function (pdu, cb) {
+    4 : function (pdu, cb, defer) {
           
             log("handling read input register response.");
 
@@ -195,9 +301,10 @@ exports.Client.ResponseHandler = {
             }
 
             cb(resp);
+            defer.resolve(resp);
 
         },
-    5 : function (pdu, cb) {
+    5 : function (pdu, cb, defer) {
             
             log("handling write single coil response.");
 
@@ -212,9 +319,10 @@ exports.Client.ResponseHandler = {
             };
 
             cb(resp);
+            defer.resolve(resp);
 
         },
-    6 : function (pdu, cb) {
+    6 : function (pdu, cb, defer) {
             
             log("handling write single register response.");
 
@@ -229,6 +337,7 @@ exports.Client.ResponseHandler = {
             };
 
             cb(resp);
+            defer.resolve(resp);
 
         }
         
