@@ -335,7 +335,78 @@ describe("Modbus Serial Client", function () {
        });
 
 
+
+
     });
+
+    /**
+     *  Simply read holding registers with success
+     */
+
+    it("should read holding register just fine", function () {
+
+      var cb = sinon.spy();
+
+      client.readHoldingRegister(0, 1, cb);
+
+      var res = Put()
+		.word8(3)      // function code
+		.word8(2)      // byte count
+		.word16be(42)  // register 0 value
+		.buffer();
+
+      socket.emit('data', res);
+
+      assert.ok(cb.called);
+      assert.deepEqual(cb.args[0][0], { fc: 3, byteCount: 2, register: [42]});
+
+    });
+
+    /**
+     *  Write Multiple Coils with success
+     */
+
+    it("should write multiple coils just fine", function () {
+
+      var cb = sinon.spy();
+
+      client.writeMultipleCoils(123, [1, 0, 1, 0, 1, 0, 1, 1], cb);
+
+      var res = Put()
+		.word8(15)          // function code
+		.word16be(123)      // start address
+		.word16be(8)        // quantity of outputs
+		.buffer();
+
+      socket.emit('data', res);
+
+      assert.ok(cb.called);
+      assert.deepEqual(cb.args[0][0], { fc: 15, startAddress: 123, quantity: 8 });
+
+    });
+
+    /**
+     *  Write Multiple Coils with too many coils
+     */
+
+    it("should not write multiple coils due to too much coils", function () {
+
+      var cb = sinon.spy(),
+            coils = [];
+
+        for (var i = 0; i < 1969; i += 1) {
+            coils.push(1);
+        }
+
+      client.writeMultipleCoils(123, coils,  cb);
+
+      assert.ok(cb.called);
+      assert.ok(cb.args[0][1]);
+
+    });
+
+
+
 
   });
 
