@@ -148,7 +148,7 @@ var ModbusClient = function (socket, resHandler) {
             }
 
             var fc          = 15,
-                byteCount   = Math.ceil(coils.length / 8) + (coils.length % 8 > 0?1:0),
+                byteCount   = Math.ceil(coils.length / 8),
                 curByte     = 0,
                 cntr        = 0, 
                 defer       = Q.defer(),
@@ -170,7 +170,7 @@ var ModbusClient = function (socket, resHandler) {
                 
                 }
 
-                pdu.buffer();
+                pdu = pdu.buffer();
                 
 
             if (!cb) {

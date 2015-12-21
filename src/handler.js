@@ -11,7 +11,7 @@ exports.ExceptionMessage = {
 
     0x01 : 'ILLEGAL FUNCTION',
     0x02 : 'ILLEGAL DATA ADDRESS',
-    0x03 : 'ILLEGAL DATA VALE',
+    0x03 : 'ILLEGAL DATA VALUE',
     0x04 : 'SLAVE DEVICE FAILURE',
     0x05 : 'ACKNOWLEDGE',
     0x06 : 'SLAVE DEVICE BUSY',
