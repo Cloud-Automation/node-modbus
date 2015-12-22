@@ -173,6 +173,32 @@ exports.Client.ResponseHandler = {
 
             cb(resp);
         },
+    // ReadDiscreteInput
+    2 : function (pdu, cb) {
+    
+            log("handle read discrete input register response.");
+
+            var fc          = pdu.readUInt8(0),
+                byteCount   = pdu.readUInt8(1),
+                cntr        = 0,
+                resp        = {
+                    fc          : fc,
+                    byteCount   : byteCount,
+                    coils       : []
+                };
+
+            for (var i = 0; i < byteCount; i+=1) {
+                var h = 1, cur = pdu.readUInt8(2 + i);
+                for (var j = 0; j < 8; j+=1) {
+                    resp.coils[cntr] = (cur & h) > 0 ;
+                    h = h << 1;
+                    cntr += 1;
+                } 
+            }
+
+            cb(resp);
+   
+    },
 
     // ReadInputRegister
     4 : function (pdu, cb) {
