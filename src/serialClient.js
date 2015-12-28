@@ -84,6 +84,37 @@ var ModbusClient = function (socket, resHandler) {
             }
 
             return that.makeRequest(fc, pdu, cb);
+
+        },
+
+        readDiscreteInput: function (start, quantity, cb) {
+
+            var fc      = 2,
+                defer   = Q.defer(),
+                pdu     = that.pduWithTwoParameter(fc, start, quantity);
+
+            if (quantity > 2000) {    
+
+                if (!cb) {
+                    defer.reject();
+                    return defer.promise;
+                } 
+
+                cb(null, {}); 
+         
+                return; 
+                
+
+            }
+
+            if (!cb) {
+            
+                that.makeRequest(fc, pdu, that.promiseCallback(defer));
+                return defer.promise;
+
+            }
+
+            return that.makeRequest(fc, pdu, cb);
         
         },
 

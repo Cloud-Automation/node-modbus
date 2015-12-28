@@ -406,6 +406,62 @@ describe("Modbus Serial Client", function () {
     });
 
 
+    // Read Discrete Input
+
+    it('should handle a read discrete input request', function () {
+
+        var cb = sinon.spy();
+
+        client.readDiscreteInput(0, 13, cb);
+
+        var res = Put()
+  		        .word8(2)       // function code
+        	    .word8(2)    // register address
+	   	        .word8(3)       // coils 1 - 8
+                .word8(1)       // coils 9 - 13       
+		        .buffer();
+
+        socket.emit('data', res);
+
+        assert.ok(cb.calledOnce);
+
+        assert.deepEqual(cb.args[0][0], {
+            fc: 2,
+            byteCount: 2,
+	        coils: [
+                true,       // 1
+                true,       // 2
+                false,      // 3
+                false,      // 4
+                false,      // 5
+                false,      // 6
+                false,      // 7
+                false,      // 8
+                true,       // 9
+                false,      // 10
+                false,      // 11
+                false,      // 12
+                false,      // 13
+                false,      // filled in 14
+                false,      // filled in 15
+                false,      // filled in 16
+            ]   
+        });
+
+
+    });
+
+    it('should handle a wrong read discrete input request', function () {
+
+        var cb = sinon.spy();
+
+        // quantitiy is to big
+        client.readDiscreteInput(0, 2001, cb);
+
+        assert.ok(cb.calledOnce);
+        assert.deepEqual(cb.args[0][1], { });
+
+    });
 
 
   });
