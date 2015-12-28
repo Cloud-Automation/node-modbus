@@ -69,6 +69,24 @@ var ModbusClient = function (socket, resHandler) {
         
         },
 
+        readHoldingRegister: function (start, quantity, cb) {
+        
+            var fc      = 3,
+                defer   = Q.defer(),
+                pdu     = that.pduWithTwoParameter(fc, start, quantity);
+
+            if (!cb) {
+             
+                that.makeRequest(fc, pdu, that.promiseCallback(defer));
+            
+                return that.promise;
+
+            }
+
+            return that.makeRequest(fc, pdu, cb);
+        
+        },
+
         readInputRegister: function (start, quantity, cb) {
 
             var fc      = 4, 
@@ -117,6 +135,52 @@ var ModbusClient = function (socket, resHandler) {
             }
 
             return that.makeRequest(fc, pdu, cb);
+        
+        },
+
+        writeMultipleCoils: function (startAddress, coils, cb) {
+       
+            if (coils.length > 1968) {
+            
+                cb({}, true);
+                return;
+
+            }
+
+            var fc          = 15,
+                byteCount   = Math.ceil(coils.length / 8),
+                curByte     = 0,
+                cntr        = 0, 
+                defer       = Q.defer(),
+                pdu         = Put()
+                    .word8(fc)
+                    .word16be(startAddress)
+                    .word16be(coils.length)
+                    .word8(byteCount);
+
+                for (var i = 0; i < coils.length; i += 1) {
+
+                    curByte += coils[i]?Math.pow(2, cntr):0;
+
+                    cntr = (cntr + 1) % 8;
+
+                    if (cntr === 0) {
+                        pdu.word8(curByte);
+                    }
+                
+                }
+
+                pdu = pdu.buffer();
+                
+
+            if (!cb) {
+
+                that.makeRequest(fc, pdu, that.promiseCallback(defer));
+                return defer.promise;
+            
+            }
+
+            return that.makeRequest(fc, pdu, cb);        
         
         },
 

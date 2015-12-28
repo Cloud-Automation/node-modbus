@@ -11,7 +11,7 @@ exports.ExceptionMessage = {
 
     0x01 : 'ILLEGAL FUNCTION',
     0x02 : 'ILLEGAL DATA ADDRESS',
-    0x03 : 'ILLEGAL DATA VALE',
+    0x03 : 'ILLEGAL DATA VALUE',
     0x04 : 'SLAVE DEVICE FAILURE',
     0x05 : 'ACKNOWLEDGE',
     0x06 : 'SLAVE DEVICE BUSY',
@@ -174,6 +174,29 @@ exports.Client.ResponseHandler = {
             cb(resp);
         },
 
+    // ReadHoldingRegister
+    3: function (pdu, cb) {
+    
+            log("handling read holding register response.");
+
+            var fc          = pdu.readUInt8(0),
+                byteCount   = pdu.readUInt8(1);
+
+            var resp = {
+                fc          : fc,
+                byteCount   : byteCount,
+                register    : [ ]
+            };
+
+            var registerCount = byteCount / 2;
+
+            for (var i = 0; i < registerCount; i += 1) {
+                resp.register.push(pdu.readUInt16BE(2 + (i * 2)));
+            }
+
+            cb(resp);
+        
+    },
     // ReadInputRegister
     4 : function (pdu, cb) {
           
@@ -229,8 +252,25 @@ exports.Client.ResponseHandler = {
             };
 
             cb(resp);
+        },
+    // WriteMultipleCoils
+    15 : function (pdu, cb) {
+    
+            log("handling write multiple coils response");
 
-        }
+            var fc              = pdu.readUInt8(0),
+                startAddress    = pdu.readUInt16BE(1),
+                quantity        = pdu.readUInt16BE(3);
+    
+            var resp = {
+                fc              : fc,
+                startAddress    : startAddress,
+                quantity        : quantity
+            };
+
+            cb(resp);
+
+    }
         
 };
 

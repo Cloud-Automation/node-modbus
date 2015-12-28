@@ -33,6 +33,12 @@ var client = modbus.createTCPClient(8888, '127.0.0.1', function (err) {
 });
 
 // make some calls
+
+client.readHoldingRegister(0, 10, function (reps, err) {
+    // resp will look like { fc: 3, byteCount: 20, register: [ values 0 - 10 ] }
+    console.log(err, resp); 
+});
+
 client.readInputRegister(0, 10, function (resp, err) {
 	// resp will look like { fc: 4, byteCount: 20, register: [ values 0 - 10 ] }
 	console.log(err, resp);
@@ -51,6 +57,11 @@ client.writeSingleCoil(5, true, function (resp, err) {
 client.writeSingleRegister(13, 42, function (resp, err) {
 	// resp will look like { fc: 6, byteCount: 4, registerAddress: 13, registerValue: 42 }
 	console.log(err, resp);
+});
+
+client.writeMultipleCoils(3, [1, 0, 1, 0, 1, 1], function (resp, err) {
+    // resp will look like { fc: 15, startAddress: 3, quantity: 6 }
+    console.log(err, resp); 
 });
 ```
 
