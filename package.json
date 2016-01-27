@@ -6,7 +6,7 @@
   "main": "./src/jsModbus.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Cloud-Automation/modbus"
+    "url": "https://github.com/Cloud-Automation/node-modbus"
   },
   "dependencies": {
     "put": "0.0.6",
