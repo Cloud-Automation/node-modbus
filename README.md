@@ -34,7 +34,7 @@ var client = modbus.createTCPClient(8888, '127.0.0.1', function (err) {
 
 // make some calls
 
-client.readHoldingRegister(0, 10, function (reps, err) {
+client.readHoldingRegister(0, 10, function (resp, err) {
     // resp will look like { fc: 3, byteCount: 20, register: [ values 0 - 10 ] }
     console.log(err, resp); 
 });
