@@ -19,60 +19,74 @@ Simply `npm install -g mocha` and `npm install -g sinon`. To run the tests type 
 
 Please feel free to fork and add your own tests.
 
-Client example
+TCP Client example
 --------------
 ```javascript
 var modbus = require('jsmodbus');
 
 // create a modbus client
-var client = modbus.createTCPClient(8888, '127.0.0.1', function (err) {
-	if (err) {
-		console.log(err);
-		process.exit(0);
-	}
+var client = modbus.createTCPClient(host, port);
+
+client.on('connect', function () {
+
+    // make some calls
+
+    client.readCoils(0, 13).then(function (resp) {
+
+        // resp will look like { fc: 1, byteCount: 20, coils: [ values 0 - 13 ] } 
+        console.log(resp);
+
+    }).fail(console.log);
+
+    client.readDiscreteInput(0, 13).then(function (resp) {
+
+        // resp will look like { fc: 2, byteCount: 20, coils: [ values 0 - 13 ] } 
+        console.log(resp);
+
+    }).fail(console.log);
+
+    client.readHoldingRegister(0, 10).then(function (resp) {
+
+        // resp will look like { fc: 3, byteCount: 20, register: [ values 0 - 10 ] }
+        console.log(resp); 
+
+    }).fail(console.log);
+
+    client.readInputRegister(0, 10).then(function (resp) {
+
+	    // resp will look like { fc: 4, byteCount: 20, register: [ values 0 - 10 ] }
+	    console.log(resp);
+
+    }).fail(console.log);
+
+    client.writeSingleCoil(5, true).then(function (resp) {
+
+	    // resp will look like { fc: 5, byteCount: 4, outputAddress: 5, outputValue: true }
+	    console.log(resp);
+
+    }).fail(console.log);
+
+    client.writeSingleRegister(13, 42).then(function (resp) {
+
+	    // resp will look like { fc: 6, byteCount: 4, registerAddress: 13, registerValue: 42 }
+	    console.log(resp);
+
+    }).fail(console.log);
+
+    client.writeMultipleCoils(3, [1, 0, 1, 0, 1, 1]).then(function (resp) {
+
+        // resp will look like { fc: 15, startAddress: 3, quantity: 6 }
+        console.log(resp); 
+
+    }).fail(console.log);
+
 });
 
-// make some calls
+client.on('error', function (err) {
 
-client.readHoldingRegister(0, 10, function (resp, err) {
-    // resp will look like { fc: 3, byteCount: 20, register: [ values 0 - 10 ] }
-    console.log(err, resp); 
-});
-
-client.readCoils(0, 13, function (resp, err) {
-    // resp will look like { fc: 1, byteCount: 20, coils: [ values 0 - 13 ] } 
-    console.log(err, resp);
-});
-
-client.readDiscreteInput(0, 13, function (resp, err) {
-    // resp will look like { fc: 2, byteCount: 20, coils: [ values 0 - 13 ] } 
-    console.log(err, resp);
-});
-
-client.readInputRegister(0, 10, function (resp, err) {
-	// resp will look like { fc: 4, byteCount: 20, register: [ values 0 - 10 ] }
-	console.log(err, resp);
-});
-
-client.readCoils(5, 3, function (resp, err) {
-	// resp will look like { fc: 1, byteCount: 1, register: [ true, false, true ] }
-	console.log(err, resp);
-});
-
-client.writeSingleCoil(5, true, function (resp, err) {
-	// resp will look like { fc: 5, byteCount: 4, outputAddress: 5, outputValue: true }
-	console.log(err, resp);
-});
-
-client.writeSingleRegister(13, 42, function (resp, err) {
-	// resp will look like { fc: 6, byteCount: 4, registerAddress: 13, registerValue: 42 }
-	console.log(err, resp);
-});
-
-client.writeMultipleCoils(3, [1, 0, 1, 0, 1, 1], function (resp, err) {
-    // resp will look like { fc: 15, startAddress: 3, quantity: 6 }
-    console.log(err, resp); 
-});
+    console.log(err);
+    
+})
 ```
 
 Server example
