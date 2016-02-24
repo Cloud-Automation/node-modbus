@@ -25,7 +25,7 @@ TCP Client example
 var modbus = require('jsmodbus');
 
 // create a modbus client
-var client = modbus.createTCPClient(host, port);
+var client = modbus.client.tcp.complete({ 'host' : host, 'port' : port });
 
 client.on('connect', function () {
 
@@ -80,6 +80,13 @@ client.on('connect', function () {
 
     }).fail(console.log);
 
+    client.writeMultipleRegisters(4, [1, 2, 3, 4]).then(function (resp) {
+        
+        // resp will look like { fc : 16, startAddress: 4, quantity: 4 }
+        console.log(resp);
+        
+    }).fail(console.log);
+
 });
 
 client.on('error', function (err) {
@@ -92,50 +99,61 @@ client.on('error', function (err) {
 Server example
 --------------
 ```javascript
-var modbus = require('jsmodbus');
+    
+    var stampit = require('stampit'),
+        modbus = require('jsmodbus');
 
-// create readInputRegister handler
-var rirHandler = function (start, quantity) {
-  var resp = [];
-  for (var i = start; i < start + quantity; i += 1) {
-    resp.push(i);
-  }
+    var customServer = stampit()
+        .refs({
+            'logEnabled'        : true,
+            'port'              : 8888,
+            'responseDelay'     : 10, // so we do not fry anything when someone is polling this server
 
-  return [resp];
-};
+            // specify coils, holding and input register here as buffer or leave it for them to be new Buffer(1024)
+            coils               : new Buffer(1024),
+            holding             : new Buffer(1024),
+            input               : new Buffer(1024)
+        })
+        .compose(modbus.server.tcp.complete)
+        .init(function () {
+        
+            var init = function () {
 
-var coil = false;
-var writeCoilHandler = function (addr, value) {
+                // get the coils with this.getCoils() [ Buffer(1024) ]
+                // get the holding register with this.getHolding() [ Buffer(1024) ]
+                // get the input register with this.getInput() [ Buffer(1024) ]                
+              
+                // listen to requests 
 
-   if (addr === 0) {
-    coil = value;
-  }
+                this.on('readCoilsRequest', function (start, quantity) {
+                
+                    // do something, this will be executed in sync before the 
+                    // read coils request is executed 
+                    
+                });
 
-  return [addr, value];
+            }.bind(this);    
+            
+            
+            init();
+            
+        });
 
-};
+    customServer();
 
-// create Modbus TCP Server
-modbus.createTCPServer(8888, '127.0.0.1', function (err, modbusServer) {
-  // addHandler
-  modbusServer.addHandler(4, rirHandler);
-  modbusServer.addHandler(5, writeCoilHandler);
-});
-```
+    // you can of course always use a standard server like so
 
-Development
------------
+    var server = modbus.server.tcp.complete({ port : 8888 });
 
-To add other function codes on the client side see the test/serialClient.test.js and add a new test. To implement the test create an api call in src/serialClient.js and implement the pdu handler for the client in src/handler.js. That is mainly all.
+    // and interact with the register via the getCoils(), getHolding() and getInput() calls
 
-On the server side all you need to do is to implement the handler for the request and the response in the `exports.Server.RequestHandler` and `exports.Server.ResponseHandler`. Don't forget to test!
+    server.getHolding().writeUInt16BE(123, 1);
 
-That's it for now. Feel free to fork and implement more.
 
 License
 -------
 
-Copyright (C) 2014 Stefan Poeter (Stefan.Poeter[at]cloud-automation.de)
+Copyright (C) 2016 Stefan Poeter (Stefan.Poeter[at]cloud-automation.de)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
