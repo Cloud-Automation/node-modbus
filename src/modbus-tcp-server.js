@@ -1,13 +1,14 @@
 var stampit             = require('stampit'),
     ModbusServerCore    = require('./modbus-server-core.js'),
+    StateMachine        = require('stampit-state-machine'),
     Put                 = require('put'),
     net                 = require('net');
 
 module.exports = stampit()
-    .compose(ModbusServerCore)
+    .compose(ModbusServerCore, StateMachine)
     .init(function () {
     
-        var socket, server;
+        var server, socketCount = 0, fifo = [];
 
         var init = function () {
        
@@ -43,23 +44,27 @@ module.exports = stampit()
  
             this.log('server is listening on port', this.hostname + ':' + this.port);
 
+            this.on('newState_ready', flush);
+
+            this.setState('ready');
+
         }.bind(this);
 
-        var onSocketEnd = function (socket) {
+        var onSocketEnd = function (socket, socketId) {
         
             return function () {
             
-                this.log('connection closed.');
+                this.log('connection closed, socket', socketId);
             
             }.bind(this);
         
         }.bind(this);
 
-        var onSocketData = function (socket) {
+        var onSocketData = function (socket, socketId) {
         
             return function (data) {
 
-                this.log('received data');
+                this.log('received data socket',socketId, data.byteLength);
 
                 // 1. extract mbap
 
@@ -71,41 +76,61 @@ module.exports = stampit()
                         unit_id: mbap.readUInt8(6) 
                     }; 
 
-                this.log('MBAP extracted');
-
                 // 2. extract pdu
 
                 var pdu = data.slice(7, 7 + len - 1);
 
-                this.log('PDU extracted');
-
                 // emit data event and let the 
                 // listener handle the pdu
 
-                this.emit('data', pdu, function (response) {
+                fifo.push({ request : request, pdu : pdu, socket : socket });
+
+                flush();
            
-                    this.log('sending tcp data');
-
-                     var pkt = Put()
-                        .word16be(request.trans_id)        // transaction id
-                        .word16be(request.protocol_ver)    // protocol version
-                        .word16be(response.length + 1)  // pdu length
-                        .word8(request.unit_id)            // unit id
-                        .put(response)                  // the actual pdu
-                        .buffer();
-
-                    socket.write(pkt);
-
-                }.bind(this)); 
-            
             }.bind(this);
         
         }.bind(this);
 
-        var initiateSocket = function (socket) {
+        var flush = function () {
         
-            socket.on('end', onSocketEnd(socket));
-            socket.on('data', onSocketData(socket));
+            if (this.inState('processing')) {
+                return;
+            }
+
+            if (fifo.length === 0) {
+                return;
+            }
+
+            this.setState('processing');
+
+            var current = fifo.shift();
+
+            this.onData(current.pdu, function (response) {
+ 
+                this.log('sending tcp data');
+
+                 var pkt = Put()
+                    .word16be(current.request.trans_id)         // transaction id
+                    .word16be(current.request.protocol_ver)     // protocol version
+                    .word16be(response.length + 1)      // pdu length
+                    .word8(current.request.unit_id)             // unit id
+                    .put(response)                      // the actual pdu
+                    .buffer();
+
+                current.socket.write(pkt); 
+           
+                this.setState('ready');
+
+            }.bind(this));
+        
+        }.bind(this);
+
+        var initiateSocket = function (socket) {
+       
+            socketCount += 1;
+
+            socket.on('end', onSocketEnd(socket, socketCount));
+            socket.on('data', onSocketData(socket, socketCount));
         
         }.bind(this);    
 

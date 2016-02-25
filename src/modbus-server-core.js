@@ -28,14 +28,10 @@ var stampit         = require('stampit'),
             } else {
                 input = this.input;
             }
-
-            this.on('data', onData);        
         
         }.bind(this);
 
-        var onData = function (pdu, callback) {
-
-            this.log('receiving pdu');
+        this.onData = function (pdu, callback) {
 
              // get fc and byteCount in advance
             var fc          = pdu.readUInt8(0),
