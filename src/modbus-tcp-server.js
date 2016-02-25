@@ -83,12 +83,14 @@ module.exports = stampit()
                 // listener handle the pdu
 
                 this.emit('data', pdu, function (response) {
-                
+           
+                    this.log('sending tcp data');
+
                      var pkt = Put()
-                        .word16be(mbap.trans_id)        // transaction id
-                        .word16be(mbap.protocol_ver)    // protocol version
+                        .word16be(request.trans_id)        // transaction id
+                        .word16be(request.protocol_ver)    // protocol version
                         .word16be(response.length + 1)  // pdu length
-                        .word8(mbap.unit_id)            // unit id
+                        .word8(request.unit_id)            // unit id
                         .put(response)                  // the actual pdu
                         .buffer();
 

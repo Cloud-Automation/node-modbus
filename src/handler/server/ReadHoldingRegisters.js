@@ -24,7 +24,9 @@ module.exports = stampit()
                 this.log('handling read holding registers request.');
 
                 if (pdu.length !== 5) {
-                
+
+                    this.log('wrong pdu length.');
+
                     cb(Put().word8(0x83).word8(0x02).buffer());
                     return;
 
@@ -39,7 +41,8 @@ module.exports = stampit()
                 var mem = this.getHolding();
 
                 if (start > mem.length || start + (quantity * 2) > mem.length) {
-                
+
+                    this.log('request outside register boundaries.');                
                     cb(Put().word8(0x83).word8(0x02).buffer());
                     return;
 
@@ -52,6 +55,8 @@ module.exports = stampit()
                     response.word16be(mem.readUInt16BE(i));
 
                 }
+
+                this.log('finished read holding register request.');
 
                 cb(response.buffer());
 
