@@ -34,13 +34,14 @@ module.exports = stampit()
 
                 var fc          = pdu.readUInt8(0),
                     start       = pdu.readUInt16BE(1),
+                    byteStart   = start * 2,
                     quantity    = pdu.readUInt16BE(3);
 
-                this.emit('readHoldingRegistersRequest', start, quantity);
+                this.emit('readHoldingRegistersRequest', byteStart, quantity);
 
                 var mem = this.getHolding();
 
-                if (start > mem.length || start + (quantity * 2) > mem.length) {
+                if (byteStart > mem.length || byteStart + (quantity * 2) > mem.length) {
 
                     this.log('request outside register boundaries.');                
                     cb(Put().word8(0x83).word8(0x02).buffer());
@@ -50,7 +51,7 @@ module.exports = stampit()
 
                 var response = Put().word8(0x03).word8(quantity * 2);
 
-                for (var i = start; i < start + (quantity * 2); i += 2) {
+                for (var i = byteStart; i < byteStart + (quantity * 2); i += 2) {
          
                     response.word16be(mem.readUInt16BE(i));
 

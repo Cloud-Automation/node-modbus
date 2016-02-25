@@ -109,6 +109,11 @@ module.exports = stampit()
         
         }.bind(this);    
 
+        this.close = function (cb) {
+        
+            server.close(cb);
+        
+        };
 
         init();
     

@@ -32,13 +32,14 @@ module.exports = stampit()
 
                 var fc          = pdu.readUInt8(0),
                     address     = pdu.readUInt16BE(1),
+                    byteAddress = address * 2,
                     value       = pdu.readUInt16BE(3);
 
-                this.emit('preWriteSingleRegisterRequest', address, value);
+                this.emit('preWriteSingleRegisterRequest', byteAddress, value);
 
                 var mem = this.getHolding();
 
-                if (address > mem.length) {
+                if (byteAddress > mem.length) {
                 
                     cb(Put().word8(0x86).word8(0x02).buffer());
                     return;
@@ -47,9 +48,9 @@ module.exports = stampit()
 
                 var response = Put().word8(0x06).word16be(address).word16be(value).buffer();
 
-                mem.writeUInt16BE(value); 
+                mem.writeUInt16BE(value, byteAddress); 
 
-                this.emit('postWriteSingleRegisterRequest', address, value);
+                this.emit('postWriteSingleRegisterRequest', byteAddress, value);
 
                 cb(response);
 

@@ -32,6 +32,7 @@ module.exports = stampit()
 
                 var fc          = pdu.readUInt8(0),
                     start       = pdu.readUInt16BE(1),
+                    byteStart   = start * 2,
                     quantity    = pdu.readUInt16BE(3),
                     byteCount   = pdu.readUInt8(5);
 
@@ -42,11 +43,11 @@ module.exports = stampit()
                 
                 }
 
-                this.emit('preWriteMultipleRegistersRequest', start, quantity, byteCount);
+                this.emit('preWriteMultipleRegistersRequest', byteStart, quantity, byteCount);
 
                 var mem = this.getHolding();
 
-                if (start > mem.length || start + (quantity * 2) > mem.length) {
+                if (byteStart > mem.length || byteStart + (quantity * 2) > mem.length) {
                 
                     cb(Put().word8(0x90).word8(0x02).buffer());
                     return;
@@ -56,7 +57,7 @@ module.exports = stampit()
                 var response = Put().word8(0x10).word16be(start).word16be(quantity).buffer(),
                     j = 0, currentByte;
 
-                for (var i = start; i < start + byteCount; i += 1) {
+                for (var i = byteStart; i < byteStart + byteCount; i += 1) {
                 
                     mem.writeUInt8(pdu.readUInt8(6 + j + 0), i);
 
@@ -64,7 +65,7 @@ module.exports = stampit()
                 
                 }
 
-                this.emit('postWriteMultipleRegistersRequest', start, quantity, byteCount);
+                this.emit('postWriteMultipleRegistersRequest', byteStart, quantity, byteCount);
 
                 cb(response);
 
