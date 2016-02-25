@@ -42,7 +42,7 @@ module.exports = stampit()
                 
                 }
 
-                this.emit('writeMultipleRegistersRequest', start, quantity, byteCount);
+                this.emit('preWriteMultipleRegistersRequest', start, quantity, byteCount);
 
                 var mem = this.getHolding();
 
@@ -63,6 +63,8 @@ module.exports = stampit()
                     j += 1;   
                 
                 }
+
+                this.emit('postWriteMultipleRegistersRequest', start, quantity, byteCount);
 
                 cb(response);
 

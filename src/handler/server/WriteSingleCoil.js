@@ -41,7 +41,7 @@ module.exports = stampit()
                  
                 }
 
-                this.emit('writeSingleCoilRequest', address, value);
+                this.emit('preWriteSingleCoilRequest', address, value);
 
                 var mem = this.getCoils();
 
@@ -63,6 +63,8 @@ module.exports = stampit()
                 }
 
                 mem.writeUInt8(newValue, Math.floor(address / 8)); 
+
+                this.emit('postWriteSingleCoilRequest', address, value);
 
                 cb(response.buffer());
 

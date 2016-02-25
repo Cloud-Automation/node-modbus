@@ -132,6 +132,12 @@ Server example
                     
                 });
 
+                // the write request have pre and post listener
+                this.on('[pre][post]WriteSingleCoilRequest', function (address, value) {
+                    
+                    
+                });
+
             }.bind(this);    
             
             
@@ -148,10 +154,9 @@ Server example
     // and interact with the register via the getCoils(), getHolding() and getInput() calls
 
     server.getHolding().writeUInt16BE(123, 1);
+````
 
-
-License
--------
+## License
 
 Copyright (C) 2016 Stefan Poeter (Stefan.Poeter[at]cloud-automation.de)
 

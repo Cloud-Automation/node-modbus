@@ -35,7 +35,7 @@ module.exports = stampit()
                     quantity    = pdu.readUInt16BE(3),
                     byteCount   = pdu.readUInt8(5);
 
-                this.emit('writeMultipleCoilsRequest', start, quantity, byteCount);
+                this.emit('preWriteMultipleCoilsRequest', start, quantity, byteCount);
 
                 var mem = this.getCoils();
 
@@ -70,6 +70,8 @@ module.exports = stampit()
                     }
 
                 }
+
+                this.emit('postWriteMultipleCoilsRequest', start, quantity, byteCount);
 
                 cb(response);
 

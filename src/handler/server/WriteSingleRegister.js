@@ -34,7 +34,7 @@ module.exports = stampit()
                     address     = pdu.readUInt16BE(1),
                     value       = pdu.readUInt16BE(3);
 
-                this.emit('writeSingleRegisterRequest', address, value);
+                this.emit('preWriteSingleRegisterRequest', address, value);
 
                 var mem = this.getHolding();
 
@@ -48,6 +48,8 @@ module.exports = stampit()
                 var response = Put().word8(0x06).word16be(address).word16be(value).buffer();
 
                 mem.writeUInt16BE(value); 
+
+                this.emit('postWriteSingleRegisterRequest', address, value);
 
                 cb(response);
 
