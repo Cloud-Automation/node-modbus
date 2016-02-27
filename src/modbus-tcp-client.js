@@ -58,7 +58,7 @@ module.exports = stampit()
 
         var onData = function (data) {
  
-            this.log('received data');
+            this.logInfo('received data');
 
             var cnt = 0;
 
@@ -72,7 +72,7 @@ module.exports = stampit()
 
                 if (id === trashRequestId) {
                 
-                    this.log('current mbap contains trashed request id.');
+                    this.logInfo('current mbap contains trashed request id.');
 
                     return;
 
@@ -80,7 +80,7 @@ module.exports = stampit()
 
                 cnt += 7;
 
-                this.log('MBAP extracted');
+                this.logInfo('MBAP extracted');
 
                 // 2. extract pdu
 
@@ -88,7 +88,7 @@ module.exports = stampit()
 
                 cnt += pdu.length;
 
-                this.log('PDU extracted');
+                this.logInfo('PDU extracted');
 
                 // emit data event and let the 
                 // listener handle the pdu
@@ -101,7 +101,7 @@ module.exports = stampit()
 
         var onSend = function (pdu) {
 
-            this.log('Sending pdu to the socket.');
+            this.logInfo('Sending pdu to the socket.');
 
             reqId += 1;
 

@@ -14,7 +14,7 @@ module.exports = Stampit()
     
         var onResponse = function (pdu, request) {
  
-            this.log("handling read holding registers response.");
+            this.logInfo("handling read holding registers response.");
 
             var fc          = pdu.readUInt8(0),
                 byteCount   = pdu.readUInt8(1);

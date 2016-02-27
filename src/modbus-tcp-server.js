@@ -5,7 +5,8 @@ var stampit             = require('stampit'),
     net                 = require('net');
 
 module.exports = stampit()
-    .compose(ModbusServerCore, StateMachine)
+    .compose(ModbusServerCore)
+    .compose(StateMachine)
     .init(function () {
     
         var server, socketCount = 0, fifo = [];
@@ -24,7 +25,7 @@ module.exports = stampit()
             
             server.on('connection', function (s) {
 
-                this.log('new connection', s.address());
+                this.logInfo('new connection', s.address());
  
                 initiateSocket(s);
            
@@ -34,7 +35,7 @@ module.exports = stampit()
            
                 if (err) {
                 
-                    this.log('error while listening', err);
+                    this.logInfo('error while listening', err);
                     this.emit('error', err);
                     return;
 
@@ -42,7 +43,7 @@ module.exports = stampit()
 
             }.bind(this));
  
-            this.log('server is listening on port', this.hostname + ':' + this.port);
+            this.logInfo('server is listening on port', this.hostname + ':' + this.port);
 
             this.on('newState_ready', flush);
 
@@ -54,7 +55,7 @@ module.exports = stampit()
         
             return function () {
             
-                this.log('connection closed, socket', socketId);
+                this.logInfo('connection closed, socket', socketId);
             
             }.bind(this);
         
@@ -64,7 +65,7 @@ module.exports = stampit()
         
             return function (data) {
 
-                this.log('received data socket',socketId, data.byteLength);
+                this.logInfo('received data socket',socketId, data.byteLength);
 
                 // 1. extract mbap
 
@@ -107,7 +108,7 @@ module.exports = stampit()
 
             this.onData(current.pdu, function (response) {
  
-                this.log('sending tcp data');
+                this.logInfo('sending tcp data');
 
                  var pkt = Put()
                     .word16be(current.request.trans_id)         // transaction id

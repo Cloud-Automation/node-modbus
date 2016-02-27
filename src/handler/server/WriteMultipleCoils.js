@@ -7,7 +7,7 @@ module.exports = stampit()
     
         var init = function () {
        
-            this.log('initiating write multiple coils request handler.');
+            this.logInfo('initiating write multiple coils request handler.');
 
             if (!this.responseDelay) {
                 this.responseDelay = 0;
@@ -21,7 +21,7 @@ module.exports = stampit()
 
             setTimeout(function () {
 
-                this.log('handling write multiple coils request.');
+                this.logInfo('handling write multiple coils request.');
 
                 if (pdu.length < 3) {
                 

@@ -7,7 +7,7 @@ module.exports = stampit()
     
         var init = function () {
        
-            this.log('initiating read input registers request handler.');
+            this.logInfo('initiating read input registers request handler.');
 
             if (!this.responseDelay) {
                 this.responseDelay = 0;
@@ -21,7 +21,7 @@ module.exports = stampit()
 
             setTimeout(function () {
 
-                this.log('handling read input registers request.');
+                this.logInfo('handling read input registers request.');
 
                 if (pdu.length !== 5) {
                 

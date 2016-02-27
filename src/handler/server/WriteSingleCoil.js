@@ -7,7 +7,7 @@ module.exports = stampit()
     
         var init = function () {
        
-            this.log('initiating write single coil request handler.');
+            this.logInfo('initiating write single coil request handler.');
 
             if (!this.responseDelay) {
                 this.responseDelay = 0;
@@ -21,7 +21,7 @@ module.exports = stampit()
 
             setTimeout(function () {
 
-                this.log('handling write single coil request.');
+                this.logInfo('handling write single coil request.');
 
                 if (pdu.length !== 5) {
                 

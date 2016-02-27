@@ -14,7 +14,7 @@ module.exports = Stampit()
     
         var onResponse = function (pdu, request) {
  
-            this.log("handeling read coils response.");
+            this.logInfo("handeling read coils response.");
 
             var fc          = pdu.readUInt8(0),
                 byteCount   = pdu.readUInt8(1),

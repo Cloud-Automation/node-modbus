@@ -14,7 +14,7 @@ module.exports = stampit()
     
         var onResponse = function (pdu, request) {
  
-            this.log("handling multiple coils response.");
+            this.logInfo("handling multiple coils response.");
 
             var fc              = pdu.readUInt8(0),
                 startAddress    = pdu.readUInt16BE(1),

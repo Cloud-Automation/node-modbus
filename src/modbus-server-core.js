@@ -1,7 +1,7 @@
 var stampit         = require('stampit'),
     Put             = require('put'),
     EventBus        = require('stampit-event-bus'),
-    Log             = require('./stampit-log.js');
+    Log             = require('stampit-log');
 
  var core = stampit()
     .compose(EventBus, Log)
@@ -46,7 +46,7 @@ var stampit         = require('stampit'),
                 // socket with error code fc + 0x80 and
                 // exception code 0x01 (Illegal Function)
           
-                this.log('no handler for fc', fc);
+                this.logInfo('no handler for fc', fc);
 
                 callback(Put().word8(fc + 0x80).word8(0x01).buffer());
 
@@ -65,7 +65,7 @@ var stampit         = require('stampit'),
 
         this.setRequestHandler = function (fc, callback) {
        
-            this.log('setting request handler', fc);
+            this.logInfo('setting request handler', fc);
 
             handler[fc] = callback;
 

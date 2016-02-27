@@ -2,7 +2,7 @@
 var Util            = require('util'),
     Put             = require('put'),
     stampit         = require('stampit'),
-    Log             = require('./stampit-log.js'),
+    Log             = require('stampit-log'),
     StateMachine    = require('stampit-state-machine');
 
 var ExceptionMessage = {
@@ -20,7 +20,8 @@ var ExceptionMessage = {
 };
 
 module.exports = stampit()
-    .compose(StateMachine, Log)
+    .compose(StateMachine)
+    .compose(Log)
     .init(function () {
 
         var reqFifo         = [],
@@ -40,11 +41,11 @@ module.exports = stampit()
 
         var flush = function () {
 
-            this.log('Trying to flush data.');
+            this.logInfo('Trying to flush data.');
 
 
             if (reqFifo.length === 0) {
-                this.log('Nothing in request pipe.');
+                this.logInfo('Nothing in request pipe.');
                 return;
             }
 
@@ -61,7 +62,7 @@ module.exports = stampit()
             this.setState('waiting');
             this.emit('send', currentRequest.pdu);
             
-            this.log('Data flushed.');
+            this.logInfo('Data flushed.');
 
 
         }.bind(this);
@@ -101,10 +102,10 @@ module.exports = stampit()
           */
         var onData = function (pdu) {
 
-            this.log('received data');
+            this.logInfo('received data');
 
             if (!currentRequest) {
-                this.log('No current request.');
+                this.logInfo('No current request.');
                 return;
             }
 
@@ -113,7 +114,7 @@ module.exports = stampit()
 
             // check pdu for error
             if (handleErrorPDU(pdu)) {
-                this.log('Received pdu describes an error.');
+                this.logInfo('Received pdu describes an error.');
                 currentRequest = null;
                 this.setState('ready');
                 return;
@@ -123,7 +124,7 @@ module.exports = stampit()
             
             var handler = responseHandler[currentRequest.fc];
             if (!handler) {
-                this.log('Found not handler for fc', currentRequest.fc);
+                this.logInfo('Found not handler for fc', currentRequest.fc);
                 throw new Error('No handler implemented for fc ' + currentRequest.fc);
             }
 

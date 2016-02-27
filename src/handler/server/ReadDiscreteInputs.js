@@ -6,7 +6,7 @@ var handler = stampit()
     
         var init = function () {
        
-            this.log('initiating read discrete inputs request handler.');
+            this.logInfo('initiating read discrete inputs request handler.');
 
             if (!this.responseDelay) {
                 this.responseDelay = 0;
@@ -21,7 +21,7 @@ var handler = stampit()
 
             setTimeout(function () {
 
-                this.log('handling read discrete inputs request.');
+                this.logInfo('handling read discrete inputs request.');
 
 
                 if (pdu.length !== 5) {

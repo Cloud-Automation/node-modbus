@@ -14,6 +14,7 @@
     "serialport": "^2.0.6",
     "stampit": "^2.1.1",
     "stampit-event-bus": "^0.1.1",
+    "stampit-log": "^0.1.0",
     "stampit-state-machine": "^0.2.1"
   },
   "devDependencies": {
