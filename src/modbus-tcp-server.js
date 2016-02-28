@@ -126,12 +126,24 @@ module.exports = stampit()
         
         }.bind(this);
 
+        var onSocketError = function (socket, socketCount) {
+        
+            return function (e) {
+            
+                this.logError('Socker error', e);
+            
+            }.bind(this);
+        
+        
+        }.bind(this);
+
         var initiateSocket = function (socket) {
        
             socketCount += 1;
 
             socket.on('end', onSocketEnd(socket, socketCount));
             socket.on('data', onSocketData(socket, socketCount));
+            socket.on('error', onSocketError(socket, socketCount));
         
         }.bind(this);    
 
