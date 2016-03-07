@@ -3,7 +3,7 @@ var modbus          = require('../..'),
 
 client.on('connect', function () {
 
-    client.readHoldingRegister(process.argv[4], process.argv[5]).then(function (resp) {
+    client.readHoldingRegisters(process.argv[4], process.argv[5]).then(function (resp) {
     
         console.log(resp);
     
