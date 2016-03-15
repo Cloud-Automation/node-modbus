@@ -7,8 +7,10 @@ module.exports = stampit()
     .compose(ModbusCore)
     .init(function () {
     
-        var reqId = 0,
-            currentRequestId = reqId,
+        var reqId               = 0,
+            currentRequestId    = reqId,
+            closedOnPurpose     = false,
+            reconnect           = false,
             trashRequestId, 
             socket;
     
@@ -16,47 +18,72 @@ module.exports = stampit()
 
             this.setState('init');
 
-
             if (!this.unit_id) { this.unit_id = 0; }
             if (!this.protocol_version) { this.protocol_version = 0; }
             if (!this.port) { this.port = 502; }
             if (!this.host) { this.host = 'localhost'; }
-
-            socket = new Net.Socket();
-
-            socket.connect(this.port, this.host);
-
-            socket.on('connect', onConnect);
-            socket.on('end', onEnd);
-            socket.on('error', onError);
-            socket.on('data', onData);
+            if (!this.autoReconnect) { this.autoReconnect = false; }
 
             this.on('send', onSend);
-            this.on('trashCurrentRequest', onTrashCurrentRequest);
-            
+            this.on('newState_error', onError);
+            this.on('trashCurrentRequest', onTrashCurrentRequest); 
+
+            this.on('stateChanged', this.logInfo);
 
         }.bind(this);
 
-        var onConnect = function ()  {
+        var connect = function () {
+
+            this.setState('connect');
+
+            if (!socket) {
+
+                socket = new Net.Socket();
+
+                socket.on('connect', onSocketConnect);
+                socket.on('close', onSocketClose);
+                socket.on('error', onSocketError);
+                socket.on('data', onSocketData);
+ 
+            }
+
+            socket.connect(this.port, this.host);
+       
+        }.bind(this);
+
+        var onSocketConnect = function ()  {
       
             this.emit('connect');
             this.setState('ready');
         
         }.bind(this);
 
-        var onEnd = function () {
-        
-           this.setState('closed'); 
+        var onSocketClose = function (hadErrors) {
+
+            this.logInfo('Socket closed with error', hadErrors);
+
+            this.setState('closed'); 
+            this.emit('close');
+
+            if (!closedOnPurpose && (this.autoReconnect || reconnect)) {
+
+                reconnect = false;
+           
+                connect();
+            
+            } 
+       
+        }.bind(this);
+
+        var onSocketError = function (err) {
+
+            this.logError('Socket Error', err);
+
+            this.setState('error');
         
         }.bind(this);
 
-        var onError = function (err) {
-
-            this.emit('error', err);        
-        
-        }.bind(this);
-
-        var onData = function (data) {
+        var onSocketData = function (data) {
  
             this.logInfo('received data');
 
@@ -99,6 +126,15 @@ module.exports = stampit()
         
         }.bind(this);
 
+        var onError = function () {
+
+            this.logError('Client in error state.');
+
+            socket.destroy();
+
+        }.bind(this);
+
+
         var onSend = function (pdu) {
 
             this.logInfo('Sending pdu to the socket.');
@@ -125,10 +161,43 @@ module.exports = stampit()
         
         }.bind(this);
 
-        this.close = function () {
+        this.connect = function () {
+       
+            this.setState('connect');
+
+            connect();
+
+            return this;
         
+        };
+
+        this.reconnect = function () {
+
+            if (!this.inState('closed')) {
+                return this;
+            }
+
+            closedOnPurpose = false;
+            reconnect       = true;
+
+            this.logInfo('Reconnecting client.');
+
             socket.end();
+
+            return this;
         
+        };
+
+        this.close = function () {
+
+            closedOnPurpose = true;
+
+            this.logInfo('Closing client on purpose.');
+
+            socket.end();
+
+            return this;
+
         };
 
         init();

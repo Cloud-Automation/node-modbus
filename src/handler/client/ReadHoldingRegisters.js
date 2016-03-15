@@ -42,7 +42,9 @@ module.exports = Stampit()
         }.bind(this);
 
         this.readHoldingRegisters = function (start, quantity) {
-        
+      
+           this.logInfo('Starting read holding registers request.'); 
+
             var fc      = 3,
                 defer   = Q.defer(),
                 pdu     = Put().word8be(3).word16be(start).word16be(quantity).buffer();

@@ -25,7 +25,13 @@ TCP Client example
 var modbus = require('jsmodbus');
 
 // create a modbus client
-var client = modbus.client.tcp.complete({ 'host' : host, 'port' : port });
+var client = modbus.client.tcp.complete({ 
+        'host' : host, 
+        'port' : port,
+        'autoReconnect' : true 
+    });
+
+client.connect();
 
 client.on('connect', function () {
 

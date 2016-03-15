@@ -36,6 +36,7 @@ module.exports = stampit()
 
             this.on('data', onData);
             this.on('newState_ready', flush);
+            this.on('newState_closed', onClosed);
 
         }.bind(this);
 
@@ -54,8 +55,12 @@ module.exports = stampit()
             currentRequest.timeout = setTimeout(function () {
 
                 currentRequest.defer.reject({ err: 'timeout' });
-                this.emit('trashCurrentRequest');    
-                this.setState('ready');
+                this.emit('trashCurrentRequest');
+
+                this.logError('Request timed out.');
+
+                this.setState('error');
+//                this.setState('ready');
 
             }.bind(this), this.timeout);
 
@@ -65,6 +70,21 @@ module.exports = stampit()
             this.logInfo('Data flushed.');
 
 
+        }.bind(this);
+
+        var onClosed = function () {
+       
+            if (currentRequest) { 
+                this.logInfo('Clearing timeout of the current request.');
+                clearTimeout(currentRequest.timeout);
+            }
+
+            this.logInfo('Cleaning up request fifo.');
+            reqFifo.forEach(function () {
+                reqFifo.pop();
+            });
+            
+        
         }.bind(this);
 
         var handleErrorPDU = function (pdu) {
