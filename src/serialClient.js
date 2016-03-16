@@ -252,8 +252,6 @@ proto.promiseCallback = function (defer) {
 
     return function (resp, err) {
    
-        console.log(arguments);
-
         if (err) {
         
             defer.reject(err);
