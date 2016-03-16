@@ -54,7 +54,7 @@ client.on('connect', function () {
 
     }).fail(console.log);
 
-    client.readHoldingRegister(0, 10).then(function (resp) {
+    client.readHoldingRegisters(0, 10).then(function (resp) {
 
         // resp will look like { fc: 3, byteCount: 20, register: [ values 0 - 10 ] }
         console.log(resp); 
