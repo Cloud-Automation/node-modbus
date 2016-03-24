@@ -18,8 +18,8 @@ module.exports = stampit()
 
             this.setState('init');
 
-            if (!this.unit_id) { this.unit_id = 0; }
-            if (!this.protocol_version) { this.protocol_version = 0; }
+            if (!this.unitId) { this.unitId = 0; }
+            if (!this.protocolVersion) { this.protocolVersion = 0; }
             if (!this.port) { this.port = 502; }
             if (!this.host) { this.host = 'localhost'; }
             if (!this.autoReconnect) { this.autoReconnect = false; }
@@ -143,9 +143,9 @@ module.exports = stampit()
 
             var pkt = Put()
                 .word16be(reqId)                 // transaction id
-                .word16be(this.protocol_version) // protocol version
+                .word16be(this.protocolVersion) // protocol version
                 .word16be(pdu.length + 1)        // pdu length
-                .word8(this.unit_id)	         // unit id
+                .word8(this.unitId)	             // unit id
                 .put(pdu)                        // the actual pdu
                 .buffer();
 
