@@ -7,7 +7,7 @@ var stampit         = require('stampit'),
 
 describe("Modbus Server Core Tests.", function () {
 
-    var ModbusCore = require('../src/modbus-server-core.js').refs({ 'logEnabled' : false });
+    var ModbusCore = require('../src/modbus-server-core.js').refs({ 'logEnabled' : true });
 
     describe('Exception Tests.', function () {
     
@@ -25,7 +25,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp); 
+            core.onData(request, resp); 
         
         });
 
@@ -52,7 +52,7 @@ describe("Modbus Server Core Tests.", function () {
 
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
                     
         });
 
@@ -70,7 +70,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
  
@@ -88,7 +88,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
     
@@ -115,7 +115,7 @@ describe("Modbus Server Core Tests.", function () {
 
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
                     
         });
 
@@ -133,7 +133,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
  
@@ -151,7 +151,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
     
@@ -181,14 +181,14 @@ describe("Modbus Server Core Tests.", function () {
 
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
                     
         });
 
         it('should handle a read holding registers request with a start address outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Put().word8(0x03).word16be(1024 +1).word16be(10).buffer(),
+                request     = Put().word8(0x03).word16be(1024 + 1).word16be(10).buffer(),
                 exResponse  = Put().word8(0x83).word8be(0x02).buffer();
 
             var resp = function (response) {
@@ -199,7 +199,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
  
@@ -217,7 +217,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
     });
@@ -248,7 +248,7 @@ describe("Modbus Server Core Tests.", function () {
 
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
                     
         });
 
@@ -266,7 +266,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
  
@@ -284,7 +284,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
     });
@@ -311,7 +311,7 @@ describe("Modbus Server Core Tests.", function () {
 
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
                     
         });
 
@@ -329,7 +329,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
  
@@ -347,7 +347,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
     
@@ -377,7 +377,7 @@ describe("Modbus Server Core Tests.", function () {
 
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
                     
         });
 
@@ -395,7 +395,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
  
@@ -423,7 +423,7 @@ describe("Modbus Server Core Tests.", function () {
 
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
                     
         });
 
@@ -441,7 +441,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
 
@@ -459,7 +459,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
  
@@ -489,22 +489,22 @@ describe("Modbus Server Core Tests.", function () {
                     .word16be(3)
                     .buffer();
 
-            core.getHolding().writeUInt16BE(0x0000, 5);
-            core.getHolding().writeUInt16BE(0x0000, 7);
-            core.getHolding().writeUInt16BE(0x0000, 9);
+            core.getHolding().writeUInt16BE(0x0000, 10);
+            core.getHolding().writeUInt16BE(0x0000, 12);
+            core.getHolding().writeUInt16BE(0x0000, 14);
 
             var resp = function (response) {
           
                 assert.equal(response.compare(exResponse), 0);
-                assert.equal(core.getHolding().readUInt16BE(5), 0x0001);
-                assert.equal(core.getHolding().readUInt16BE(7), 0x0002);
-                assert.equal(core.getHolding().readUInt16BE(9), 0x0003);
+                assert.equal(core.getHolding().readUInt16BE(10), 0x0001);
+                assert.equal(core.getHolding().readUInt16BE(12), 0x0002);
+                assert.equal(core.getHolding().readUInt16BE(14), 0x0003);
 
                 done();
 
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
                     
         });
 
@@ -522,7 +522,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
 
@@ -540,7 +540,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
  
@@ -558,7 +558,7 @@ describe("Modbus Server Core Tests.", function () {
             
             };
 
-            core.emit('data', request, resp);
+            core.onData(request, resp);
         
         });
  
