@@ -7,7 +7,7 @@ module.exports = stampit()
     
         var init = function () {
        
-            this.logInfo('initiating write multiple registers request handler.');
+            this.log.debug('initiating write multiple registers request handler.');
 
             if (!this.responseDelay) {
                 this.responseDelay = 0;
@@ -21,7 +21,7 @@ module.exports = stampit()
 
             setTimeout(function () {
 
-                this.logInfo('handling write multiple registers request.');
+                this.log.debug('handling write multiple registers request.');
 
                 if (pdu.length < 3) {
                 

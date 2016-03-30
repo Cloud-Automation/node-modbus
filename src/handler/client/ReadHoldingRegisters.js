@@ -14,7 +14,7 @@ module.exports = Stampit()
     
         var onResponse = function (pdu, request) {
  
-            this.logInfo("handling read holding registers response.");
+            this.log.debug("handling read holding registers response.");
 
             var fc          = pdu.readUInt8(0),
                 byteCount   = pdu.readUInt8(1);
@@ -43,7 +43,7 @@ module.exports = Stampit()
 
         this.readHoldingRegisters = function (start, quantity) {
       
-           this.logInfo('Starting read holding registers request.'); 
+           this.log.debug('Starting read holding registers request.'); 
 
             var fc      = 3,
                 defer   = Q.defer(),

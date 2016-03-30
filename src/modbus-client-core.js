@@ -42,11 +42,11 @@ module.exports = stampit()
 
         var flush = function () {
 
-            this.logInfo('Trying to flush data.');
+            this.log.debug('Trying to flush data.');
 
 
             if (reqFifo.length === 0) {
-                this.logInfo('Nothing in request pipe.');
+                this.log.debug('Nothing in request pipe.');
                 return;
             }
 
@@ -67,7 +67,7 @@ module.exports = stampit()
             this.setState('waiting');
             this.emit('send', currentRequest.pdu);
             
-            this.logInfo('Data flushed.');
+            this.log.debug('Data flushed.');
 
 
         }.bind(this);
@@ -75,11 +75,11 @@ module.exports = stampit()
         var onClosed = function () {
        
             if (currentRequest) { 
-                this.logInfo('Clearing timeout of the current request.');
+                this.log.debug('Clearing timeout of the current request.');
                 clearTimeout(currentRequest.timeout);
             }
 
-            this.logInfo('Cleaning up request fifo.');
+            this.log.debug('Cleaning up request fifo.');
             reqFifo.forEach(function () {
                 reqFifo.pop();
             });
@@ -122,10 +122,10 @@ module.exports = stampit()
           */
         var onData = function (pdu) {
 
-            this.logInfo('received data');
+            this.log.debug('received data');
 
             if (!currentRequest) {
-                this.logInfo('No current request.');
+                this.log.debug('No current request.');
                 return;
             }
 
@@ -134,7 +134,7 @@ module.exports = stampit()
 
             // check pdu for error
             if (handleErrorPDU(pdu)) {
-                this.logInfo('Received pdu describes an error.');
+                this.log.debug('Received pdu describes an error.');
                 currentRequest = null;
                 this.setState('ready');
                 return;
@@ -144,7 +144,7 @@ module.exports = stampit()
             
             var handler = responseHandler[currentRequest.fc];
             if (!handler) {
-                this.logInfo('Found not handler for fc', currentRequest.fc);
+                this.log.debug('Found not handler for fc', currentRequest.fc);
                 throw new Error('No handler implemented for fc ' + currentRequest.fc);
             }
 

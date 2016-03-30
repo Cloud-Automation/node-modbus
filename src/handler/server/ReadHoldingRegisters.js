@@ -7,7 +7,7 @@ module.exports = stampit()
     
         var init = function () {
        
-            this.logInfo('initiating read holding registers request handler.');
+            this.log.debug('initiating read holding registers request handler.');
 
             if (!this.responseDelay) {
                 this.responseDelay = 0;
@@ -21,11 +21,11 @@ module.exports = stampit()
 
             setTimeout(function () {
 
-                this.logInfo('handling read holding registers request.');
+                this.log.debug('handling read holding registers request.');
 
                 if (pdu.length !== 5) {
 
-                    this.logInfo('wrong pdu length.');
+                    this.log.debug('wrong pdu length.');
 
                     cb(Put().word8(0x83).word8(0x02).buffer());
                     return;
@@ -43,7 +43,7 @@ module.exports = stampit()
 
                 if (byteStart > mem.length || byteStart + (quantity * 2) > mem.length) {
 
-                    this.logInfo('request outside register boundaries.');                
+                    this.log.debug('request outside register boundaries.');                
                     cb(Put().word8(0x83).word8(0x02).buffer());
                     return;
 
@@ -57,7 +57,7 @@ module.exports = stampit()
 
                 }
 
-                this.logInfo('finished read holding register request.');
+                this.log.debug('finished read holding register request.');
 
                 cb(response.buffer());
 

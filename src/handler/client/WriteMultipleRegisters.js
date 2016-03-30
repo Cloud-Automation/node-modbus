@@ -14,7 +14,7 @@ module.exports = stampit()
     
         var onResponse = function (pdu, request) {
  
-            this.logInfo("handling multiple registers response.");
+            this.log.debug("handling multiple registers response.");
 
             var fc              = pdu.readUInt8(0),
                 startAddress    = pdu.readUInt16BE(1),

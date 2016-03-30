@@ -14,7 +14,7 @@ module.exports = Stampit()
     
         var onResponse = function (pdu, request) {
  
-            this.logInfo("handling write single register response.");
+            this.log.debug("handling write single register response.");
 
             var fc              = pdu.readUInt8(0),
         		registerAddress = pdu.readUInt16BE(1),

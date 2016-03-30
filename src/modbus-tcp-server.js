@@ -25,7 +25,7 @@ module.exports = stampit()
             
             server.on('connection', function (s) {
 
-                this.logInfo('new connection', s.address());
+                this.log.debug('new connection', s.address());
  
                 initiateSocket(s);
            
@@ -35,7 +35,7 @@ module.exports = stampit()
            
                 if (err) {
                 
-                    this.logInfo('error while listening', err);
+                    this.log.debug('error while listening', err);
                     this.emit('error', err);
                     return;
 
@@ -43,7 +43,7 @@ module.exports = stampit()
 
             }.bind(this));
  
-            this.logInfo('server is listening on port', this.hostname + ':' + this.port);
+            this.log.debug('server is listening on port', this.hostname + ':' + this.port);
 
             this.on('newState_ready', flush);
 
@@ -55,7 +55,7 @@ module.exports = stampit()
         
             return function () {
             
-                this.logInfo('connection closed, socket', socketId);
+                this.log.debug('connection closed, socket', socketId);
             
             }.bind(this);
         
@@ -65,7 +65,7 @@ module.exports = stampit()
         
             return function (data) {
 
-                this.logInfo('received data socket',socketId, data.byteLength);
+                this.log.debug('received data socket',socketId, data.byteLength);
 
                 // 1. extract mbap
 
@@ -108,7 +108,7 @@ module.exports = stampit()
 
             this.onData(current.pdu, function (response) {
  
-                this.logInfo('sending tcp data');
+                this.log.debug('sending tcp data');
 
                  var pkt = Put()
                     .word16be(current.request.trans_id)         // transaction id

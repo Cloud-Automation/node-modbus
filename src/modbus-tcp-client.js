@@ -28,7 +28,7 @@ module.exports = stampit()
             this.on('newState_error', onError);
             this.on('trashCurrentRequest', onTrashCurrentRequest); 
 
-            this.on('stateChanged', this.logInfo);
+            this.on('stateChanged', this.log.debug);
 
         }.bind(this);
 
@@ -60,7 +60,8 @@ module.exports = stampit()
 
         var onSocketClose = function (hadErrors) {
 
-            this.logInfo('Socket closed with error', hadErrors);
+            this.log.debug('Socket closed with error', hadErrors);
+
 
             this.setState('closed'); 
             this.emit('close');
@@ -85,7 +86,7 @@ module.exports = stampit()
 
         var onSocketData = function (data) {
  
-            this.logInfo('received data');
+            this.log.debug('received data');
 
             var cnt = 0;
 
@@ -99,7 +100,7 @@ module.exports = stampit()
 
                 if (id === trashRequestId) {
                 
-                    this.logInfo('current mbap contains trashed request id.');
+                    this.log.debug('current mbap contains trashed request id.');
 
                     return;
 
@@ -107,7 +108,7 @@ module.exports = stampit()
 
                 cnt += 7;
 
-                this.logInfo('MBAP extracted');
+                this.log.debug('MBAP extracted');
 
                 // 2. extract pdu
 
@@ -115,7 +116,7 @@ module.exports = stampit()
 
                 cnt += pdu.length;
 
-                this.logInfo('PDU extracted');
+                this.log.debug('PDU extracted');
 
                 // emit data event and let the 
                 // listener handle the pdu
@@ -137,7 +138,7 @@ module.exports = stampit()
 
         var onSend = function (pdu) {
 
-            this.logInfo('Sending pdu to the socket.');
+            this.log.debug('Sending pdu to the socket.');
 
             reqId += 1;
 
@@ -180,7 +181,7 @@ module.exports = stampit()
             closedOnPurpose = false;
             reconnect       = true;
 
-            this.logInfo('Reconnecting client.');
+            this.log.debug('Reconnecting client.');
 
             socket.end();
 
@@ -192,7 +193,7 @@ module.exports = stampit()
 
             closedOnPurpose = true;
 
-            this.logInfo('Closing client on purpose.');
+            this.log.debug('Closing client on purpose.');
 
             socket.end();
 

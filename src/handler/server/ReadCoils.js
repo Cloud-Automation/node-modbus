@@ -7,7 +7,7 @@ module.exports = stampit()
     
         var init = function () {
        
-            this.logInfo('initiating read coils request handler.');
+            this.log.debug('initiating read coils request handler.');
 
             if (!this.responseDelay) {
                 this.responseDelay = 0;
@@ -21,7 +21,7 @@ module.exports = stampit()
 
             setTimeout(function () {
 
-                this.logInfo('handling read coils request.');
+                this.log.debug('handling read coils request.');
 
 
                 if (pdu.length !== 5) {

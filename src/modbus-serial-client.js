@@ -47,7 +47,7 @@ module.exports = stampit()
 
         var onData = function (pdu) {
         
-            this.logInfo('received data');
+            this.log.debug('received data');
 
             this.emit('data', pdu);             
         

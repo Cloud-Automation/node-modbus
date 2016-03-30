@@ -13,7 +13,7 @@ module.exports = Stampit()
 
         var onResponse = function (pdu, request) {
         
-            this.logInfo("handling write single coil response.");
+            this.log.debug("handling write single coil response.");
 
             var fc              = pdu.readUInt8(0),
                 outputAddress   = pdu.readUInt16BE(1),
