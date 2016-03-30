@@ -1,6 +1,6 @@
 {
   "name": "jsmodbus",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Implementation for the Serial/TCP Modbus protocol.",
   "author": "Stefan Poeter <stefan.poeter@cloud-automation.de>",
   "main": "./src/modbus.js",
@@ -14,7 +14,7 @@
     "serialport": "^2.0.6",
     "stampit": "^2.1.1",
     "stampit-event-bus": "^0.1.1",
-    "stampit-log": "^0.1.0",
+    "stampit-log": "^0.2.0",
     "stampit-state-machine": "^0.2.1"
   },
   "devDependencies": {
