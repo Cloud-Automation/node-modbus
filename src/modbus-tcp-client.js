@@ -81,6 +81,7 @@ module.exports = stampit()
             this.logError('Socket Error', err);
 
             this.setState('error');
+            this.emit('error', err);
         
         }.bind(this);
 
