@@ -26,11 +26,12 @@ var modbus = require('jsmodbus');
 
 // create a modbus client
 var client = modbus.client.tcp.complete({ 
-        'host'          : host, 
-        'port'          : port,
-        'autoReconnect' : true,
-        'timeout'       : 5000,
-        'unitId'        : 0
+        'host'              : host, 
+        'port'              : port,
+        'autoReconnect'     : true,
+        'reconnectTimeout'  : 1000,
+        'timeout'           : 5000,
+        'unitId'            : 0
     });
 
 client.connect();
