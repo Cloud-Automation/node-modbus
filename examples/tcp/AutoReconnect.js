@@ -3,6 +3,7 @@ var modbus          = require('../..'),
         'host' : process.argv[2], 
         'port' : process.argv[3],
         'autoReconnect' : true,
+        'reconnectTimeout' : 5000,
         'logEnabled'    : true
     }).connect(),
     successCount    = 0,

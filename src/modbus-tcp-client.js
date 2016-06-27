@@ -23,6 +23,7 @@ module.exports = stampit()
             if (!this.port) { this.port = 502; }
             if (!this.host) { this.host = 'localhost'; }
             if (!this.autoReconnect) { this.autoReconnect = false; }
+            if (!this.reconnectTimeout) { this.reconnectTimeout = 0; }
 
             this.on('send', onSend);
             this.on('newState_error', onError);
@@ -68,9 +69,12 @@ module.exports = stampit()
 
             if (!closedOnPurpose && (this.autoReconnect || reconnect)) {
 
-                reconnect = false;
+                setTimeout(function () {
+
+                    reconnect = false;
            
-                connect();
+                    connect();
+                }, this.reconnectTimeout || 0);
             
             } 
        
