@@ -1,13 +1,14 @@
 var stampit         = require('stampit'),
     Put             = require('put'),
-    SerialPort      = require('serialport').SerialPort,
     ModbusCore      = require('./modbus-client-core.js');
 
 module.exports = stampit()
     .compose(ModbusCore)
     .init(function () {
     
-        var serialport;
+    
+        var SerialPort = require('serialport').SerialPort,
+            serialport;
 
         var init = function () {
         

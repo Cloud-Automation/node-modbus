@@ -1,9 +1,14 @@
-var ModbusClient    = require('../..'),
-    client          = ModbusClient.createTcpClient('192.168.1.2', 502);
+var modbus          = require('../..'),
+    client          = modbus.client.tcp.complete({
+                        'host' : process.argv[2],
+                        'port' : process.argv[3],
+                        'logEnabled'    : true,
+                        'logLevel'      : 'debug',
+                        'logTimestamp'  : true });
 
 client.on('connect', function () {
 
-    client.readInputRegister(0, 12).then(function (resp) {
+    client.readInputRegisters(process.argv[4], process.argv[5]).then(function (resp) {
     
         console.log(resp);
     
@@ -26,3 +31,4 @@ client.on('error', function (err) {
 
 });
 
+client.connect();

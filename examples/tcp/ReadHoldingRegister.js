@@ -26,3 +26,4 @@ client.on('error', function (err) {
 
 });
 
+client.connect();

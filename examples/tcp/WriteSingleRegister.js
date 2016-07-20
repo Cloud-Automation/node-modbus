@@ -1,10 +1,14 @@
-var ModbusClient  = require('../..'),
-    client = ModbusClient.createTcpClient('192.168.1.2', 502);
+var modbus  = require('../..'),
+    client = modbus.client.tcp.complete({
+        'host'  : process.argv[2], 
+        'port'  : process.argv[3],
+        'logEnabled' : true,
+        'logLevel'   : 'debug' });
 
 // override logger function
 client.on('connect', function () { 
     
-    client.writeSingleRegister(5, 123).then(function (resp) {
+    client.writeSingleRegister(process.argv[4], process.argv[5]).then(function (resp) {
 
         console.log(resp);
 
@@ -26,4 +30,4 @@ client.on('error', function (err) {
 
 });
 
-
+client.connect();
