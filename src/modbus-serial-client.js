@@ -19,11 +19,9 @@ module.exports = stampit()
             if (!this.portName) { throw new Error('No portname.' );}
             if (!this.baudRate) { this.baudRate = 115200; }
             
-            this.baudRate = 115200;
-
             serialport = new SerialPort(this.portName, {
                 baudRate : this.baudrate,
-                parity : 'even'
+                parity : 'none'
             });
 
             serialport.on('open', onOpen);
