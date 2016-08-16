@@ -1,17 +1,17 @@
+"use strict";
+
 var fs = require('fs');
 
 exports.client = {
-    tcp     : {
-        core        : require('./modbus-tcp-client.js'),
-        complete    : require('./modbus-tcp-client.js')
+    tcp: {
+        core: require('./modbus-tcp-client.js'),
+        complete: require('./modbus-tcp-client.js')
     },
-    serial  : {
-        core        : require('./modbus-serial-client.js'),
-        complete    : require('./modbus-serial-client.js')
+    serial: {
+        core: require('./modbus-serial-client.js'),
+        complete: require('./modbus-serial-client.js')
     },
-    handler : {
-    
-    }
+    handler: {}
 
 };
 
@@ -22,18 +22,18 @@ fs.readdirSync(__dirname + '/handler/client')
 
     }).forEach(function (file) {
 
-        exports.client.tcp.complete = exports.client.tcp.complete.compose(require('./handler/client/' + file));
-        exports.client.serial.complete = exports.client.serial.complete.compose(require('./handler/client/' + file));
-        exports.client.handler[file.substr(0, file.length - 3)] = require('./handler/client/' + file);
+    exports.client.tcp.complete = exports.client.tcp.complete.compose(require('./handler/client/' + file));
+    exports.client.serial.complete = exports.client.serial.complete.compose(require('./handler/client/' + file));
+    exports.client.handler[file.substr(0, file.length - 3)] = require('./handler/client/' + file);
 
-    });
+});
 
-exports.server = { 
-    tcp         : {
-        core        : require('./modbus-tcp-server.js'),
-        complete    : require('./modbus-tcp-server.js'),
+exports.server = {
+    tcp: {
+        core: require('./modbus-tcp-server.js'),
+        complete: require('./modbus-tcp-server.js')
     },
-    handler     : { }
+    handler: {}
 };
 
 fs.readdirSync(__dirname + '/handler/server')
@@ -43,8 +43,8 @@ fs.readdirSync(__dirname + '/handler/server')
 
     }).forEach(function (file) {
 
-        exports.server.tcp.complete = exports.server.tcp.complete.compose(require('./handler/server/' + file));
-        exports.server.handler[file.substr(0, file.length - 3)] = require('./handler/server/' + file);
+    exports.server.tcp.complete = exports.server.tcp.complete.compose(require('./handler/server/' + file));
+    exports.server.handler[file.substr(0, file.length - 3)] = require('./handler/server/' + file);
 
-    });
+});
 

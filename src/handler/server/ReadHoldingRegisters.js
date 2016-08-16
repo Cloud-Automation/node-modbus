@@ -1,12 +1,14 @@
-var stampit     = require('stampit'),
-    Put         = require('put');
+"use strict";
+
+var Stampit = require('stampit'),
+    Put = require('put');
 
 
-module.exports = stampit()
+module.exports = new Stampit()
     .init(function () {
-    
+
         var init = function () {
-       
+
             this.log.debug('initiating read holding registers request handler.');
 
             if (!this.responseDelay) {
@@ -14,9 +16,9 @@ module.exports = stampit()
             }
 
             this.setRequestHandler(3, onRequest);
-        
+
         }.bind(this);
-    
+
         var onRequest = function (pdu, cb) {
 
             setTimeout(function () {
@@ -27,15 +29,15 @@ module.exports = stampit()
 
                     this.log.debug('wrong pdu length.');
 
-                    cb(Put().word8(0x83).word8(0x02).buffer());
+                    cb(new Put().word8(0x83).word8(0x02).buffer());
                     return;
 
                 }
 
-                var fc          = pdu.readUInt8(0),
-                    start       = pdu.readUInt16BE(1),
-                    byteStart   = start * 2,
-                    quantity    = pdu.readUInt16BE(3);
+                var fc = pdu.readUInt8(0),
+                    start = pdu.readUInt16BE(1),
+                    byteStart = start * 2,
+                    quantity = pdu.readUInt16BE(3);
 
                 this.emit('readHoldingRegistersRequest', byteStart, quantity);
 
@@ -43,16 +45,16 @@ module.exports = stampit()
 
                 if (byteStart > mem.length || byteStart + (quantity * 2) > mem.length) {
 
-                    this.log.debug('request outside register boundaries.');                
-                    cb(Put().word8(0x83).word8(0x02).buffer());
+                    this.log.debug('request outside register boundaries.');
+                    cb(new Put().word8(0x83).word8(0x02).buffer());
                     return;
 
                 }
 
-                var response = Put().word8(0x03).word8(quantity * 2);
+                var response = new Put().word8(0x03).word8(quantity * 2);
 
                 for (var i = byteStart; i < byteStart + (quantity * 2); i += 2) {
-         
+
                     response.word16be(mem.readUInt16BE(i));
 
                 }
@@ -62,10 +64,10 @@ module.exports = stampit()
                 cb(response.buffer());
 
             }.bind(this), this.responseDelay);
-        
+
         }.bind(this);
-    
+
 
         init();
-    
+
     });

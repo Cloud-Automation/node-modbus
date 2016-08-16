@@ -1,39 +1,22 @@
-var stampit         = require('stampit'),
-    Put             = require('put'),
-    Net             = require('net'),
-    ModbusCore      = require('./modbus-client-core.js');
+"use strict";
+
+var stampit = require('stampit'),
+    Put = require('put'),
+    Net = require('net'),
+    ModbusCore = require('./modbus-client-core.js');
 
 module.exports = stampit()
     .compose(ModbusCore)
     .init(function () {
-    
-        var reqId               = 0,
-            currentRequestId    = reqId,
-            closedOnPurpose     = false,
-            reconnect           = false,
-            trashRequestId, 
-            socket;
-    
-        var init = function () {
 
-            this.setState('init');
+        var reqId = 0,
+            currentRequestId = reqId,
+            closedOnPurpose = false,
+            reconnect = false,
+            trashRequestId,
+            socket = null;
 
-            if (!this.unitId) { this.unitId = 0; }
-            if (!this.protocolVersion) { this.protocolVersion = 0; }
-            if (!this.port) { this.port = 502; }
-            if (!this.host) { this.host = 'localhost'; }
-            if (!this.autoReconnect) { this.autoReconnect = false; }
-            if (!this.reconnectTimeout) { this.reconnectTimeout = 0; }
-
-            this.on('send', onSend);
-            this.on('newState_error', onError);
-            this.on('trashCurrentRequest', onTrashCurrentRequest); 
-
-            this.on('stateChanged', this.log.debug);
-
-        }.bind(this);
-
-        var connect = function () {
+        var do_connect = function () {
 
             this.setState('connect');
 
@@ -45,18 +28,18 @@ module.exports = stampit()
                 socket.on('close', onSocketClose);
                 socket.on('error', onSocketError);
                 socket.on('data', onSocketData);
- 
+
             }
 
             socket.connect(this.port, this.host);
-       
+
         }.bind(this);
 
-        var onSocketConnect = function ()  {
-      
+        var onSocketConnect = function () {
+
             this.emit('connect');
             this.setState('ready');
-        
+
         }.bind(this);
 
         var onSocketClose = function (hadErrors) {
@@ -64,7 +47,7 @@ module.exports = stampit()
             this.log.debug('Socket closed with error', hadErrors);
 
 
-            this.setState('closed'); 
+            this.setState('closed');
             this.emit('close');
 
             if (!closedOnPurpose && (this.autoReconnect || reconnect)) {
@@ -72,12 +55,12 @@ module.exports = stampit()
                 setTimeout(function () {
 
                     reconnect = false;
-           
-                    connect();
+                    do_connect();
+
                 }, this.reconnectTimeout || 0);
-            
-            } 
-       
+
+            }
+
         }.bind(this);
 
         var onSocketError = function (err) {
@@ -86,29 +69,28 @@ module.exports = stampit()
 
             this.setState('error');
             this.emit('error', err);
-        
+
         }.bind(this);
 
         var onSocketData = function (data) {
- 
+
             this.log.debug('received data');
 
             var cnt = 0;
+            var pdu, mbap, id, len;
 
             while (cnt < data.length) {
 
                 // 1. extract mbap
 
-                var mbap    = data.slice(cnt, cnt + 7),
-                    id      = mbap.readUInt16BE(0),
-                    len     = mbap.readUInt16BE(4);
+                mbap = data.slice(cnt, cnt + 7);
+                id = mbap.readUInt16BE(0);
+                len = mbap.readUInt16BE(4);
 
                 if (id === trashRequestId) {
-                
+
                     this.log.debug('current mbap contains trashed request id.');
-
                     return;
-
                 }
 
                 cnt += 7;
@@ -117,19 +99,17 @@ module.exports = stampit()
 
                 // 2. extract pdu
 
-                var pdu = data.slice(cnt, cnt + len - 1);
-
+                pdu = data.slice(cnt, cnt + len - 1);
                 cnt += pdu.length;
 
                 this.log.debug('PDU extracted');
 
                 // emit data event and let the 
                 // listener handle the pdu
-
                 this.emit('data', pdu);
 
             }
-        
+
         }.bind(this);
 
         var onError = function () {
@@ -147,34 +127,34 @@ module.exports = stampit()
 
             reqId += 1;
 
-            var pkt = Put()
-                .word16be(reqId)                 // transaction id
-                .word16be(this.protocolVersion) // protocol version
-                .word16be(pdu.length + 1)        // pdu length
-                .word8(this.unitId)	             // unit id
-                .put(pdu)                        // the actual pdu
+            var pkt = new Put()
+                .word16be(reqId)                    // transaction id
+                .word16be(this.protocolVersion)     // protocol version
+                .word16be(pdu.length + 1)           // pdu length
+                .word8(this.unitId)                 // unit id
+                .put(pdu)                           // the actual pdu
                 .buffer();
 
             currentRequestId = reqId;
 
             socket.write(pkt);
-        
+
         }.bind(this);
 
         var onTrashCurrentRequest = function () {
-        
+
             trashRequestId = currentRequestId;
-        
+
         }.bind(this);
 
         this.connect = function () {
-       
+
             this.setState('connect');
 
-            connect();
+            do_connect();
 
             return this;
-        
+
         };
 
         this.reconnect = function () {
@@ -184,14 +164,14 @@ module.exports = stampit()
             }
 
             closedOnPurpose = false;
-            reconnect       = true;
+            reconnect = true;
 
             this.log.debug('Reconnecting client.');
 
             socket.end();
 
             return this;
-        
+
         };
 
         this.close = function () {
@@ -206,6 +186,37 @@ module.exports = stampit()
 
         };
 
+        var init = function () {
+
+            this.setState('init');
+
+            if (!this.unitId) {
+                this.unitId = 0;
+            }
+            if (!this.protocolVersion) {
+                this.protocolVersion = 0;
+            }
+            if (!this.port) {
+                this.port = 502;
+            }
+            if (!this.host) {
+                this.host = 'localhost';
+            }
+            if (!this.autoReconnect) {
+                this.autoReconnect = false;
+            }
+            if (!this.reconnectTimeout) {
+                this.reconnectTimeout = 0;
+            }
+
+            this.on('send', onSend);
+            this.on('newState_error', onError);
+            this.on('trashCurrentRequest', onTrashCurrentRequest);
+
+            this.on('stateChanged', this.log.debug);
+
+        }.bind(this);
+
         init();
-    
+
     });

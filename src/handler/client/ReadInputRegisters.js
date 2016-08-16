@@ -1,28 +1,30 @@
+"use strict";
+
 var Stampit = require('stampit'),
-    Q       = require('q'),
-    Put     = require('put');
+    Q = require('q'),
+    Put = require('put');
 
 
-module.exports = Stampit()
+module.exports = new Stampit()
     .init(function () {
-    
+
         var init = function () {
-        
+
             this.addResponseHandler(4, onResponse);
-        
+
         }.bind(this);
-    
+
         var onResponse = function (pdu, request) {
-             
+
             this.log.debug("handling read input registers response.");
 
-            var fc          = pdu.readUInt8(0),
-                byteCount   = pdu.readUInt8(1);
+            var fc = pdu.readUInt8(0),
+                byteCount = pdu.readUInt8(1);
 
             var resp = {
-                fc          : fc,
-                byteCount   : byteCount,
-                register    : []
+                fc: fc,
+                byteCount: byteCount,
+                register: []
             };
 
             if (fc !== 4) {
@@ -37,15 +39,15 @@ module.exports = Stampit()
             }
 
             request.defer.resolve(resp);
- 
-       
+
+
         }.bind(this);
 
         this.readInputRegisters = function (start, quantity) {
- 
-            var fc      = 4, 
-                defer   = Q.defer(),
-                pdu     = Put().word8be(4).word16be(start).word16be(quantity).buffer();
+
+            var fc = 4,
+                defer = Q.defer(),
+                pdu = Put().word8be(4).word16be(start).word16be(quantity).buffer();
 
             this.queueRequest(fc, pdu, defer);
 
@@ -54,5 +56,5 @@ module.exports = Stampit()
         };
 
         init();
-    
+
     });
