@@ -74,15 +74,33 @@ module.exports = stampit()
             if (!this.portName) {
                 throw new Error('No portname.');
             }
+
             if (!this.baudRate) {
-                this.baudRate = 115200;
+                this.baudRate = 9600; // the most are working with 9600
             }
 
-            this.baudRate = 115200;
+            if (!this.dataBits) {
+                this.dataBits = 8;
+            }
+
+            if (!this.stopBits) {
+                this.stopBits = 1;
+            }
+
+            if (!this.parity) {
+                this.parity = 'none';
+            }
+
+            if (!this.flowControl) {
+                this.flowControl = 'xon';
+            }
 
             serialport = new SerialPort(this.portName, {
                 baudRate: this.baudrate,
-                parity: 'even'
+                parity: this.parity,
+                dataBits: this.dataBits,
+                stopBits: this.stopBits,
+                flowControl: this.flowControl
             });
 
             serialport.on('open', onOpen);
