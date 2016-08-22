@@ -12,6 +12,26 @@ module.exports = stampit()
         var SerialPort = require('serialport').SerialPort,
             serialport;
 
+        var idleParser = function(timeout) {
+            var data = new Buffer(0);
+            var timeoutVar;
+            return function(emitter, buffer) {
+              // Callback function called when data is received (buffer)
+              // Cancel any previous timeout
+              clearTimeout(timeoutVar);
+              // Append received data
+              data = Buffer.concat([data, buffer]);
+              // Fire a new timer
+              timeoutVar = setTimeout(function() {
+                  emitter.emit('data', data);
+                  // empty buffer (though in an ugly way)
+                  data = data.slice(data.length);
+              }, timeout);
+            };
+        };
+
+
+
         var init = function () {
         
             this.setState('init');
@@ -21,7 +41,8 @@ module.exports = stampit()
             
             serialport = new SerialPort(this.portName, {
                 baudRate : this.baudrate,
-                parity : 'none'
+                parity : 'none',
+                parser: idleParser(20),
             });
 
             serialport.on('open', onOpen);
