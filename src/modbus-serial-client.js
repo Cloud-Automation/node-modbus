@@ -91,16 +91,14 @@ module.exports = stampit()
                 this.parity = 'none';
             }
 
-            if (!this.flowControl) {
-                this.flowControl = 'xon';
-            }
+            // TODO: flowControl - ['xon', 'xoff', 'xany', 'rtscts']
 
+            // TODO: settings - ['brk', 'cts', 'dtr', 'dts', 'rts']
             serialport = new SerialPort(this.portName, {
                 baudRate: this.baudrate,
                 parity: this.parity,
                 dataBits: this.dataBits,
-                stopBits: this.stopBits,
-                flowControl: this.flowControl
+                stopBits: this.stopBits
             });
 
             serialport.on('open', onOpen);
