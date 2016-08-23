@@ -49,7 +49,7 @@ client.on('connect', function () {
 
     }).fail(console.log);
 
-    client.readDiscreteInput(0, 13).then(function (resp) {
+    client.readDiscreteInputs(0, 13).then(function (resp) {
 
         // resp will look like { fc: 2, byteCount: 20, coils: [ values 0 - 13 ] } 
         console.log(resp);
@@ -63,7 +63,7 @@ client.on('connect', function () {
 
     }).fail(console.log);
 
-    client.readInputRegister(0, 10).then(function (resp) {
+    client.readInputRegisters(0, 10).then(function (resp) {
 
 	    // resp will look like { fc: 4, byteCount: 20, register: [ values 0 - 10 ] }
 	    console.log(resp);
