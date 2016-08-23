@@ -1,9 +1,9 @@
 "use strict";
 
-var Stampit = require('stampit'),
+var stampit = require('stampit'),
     Put = require('put');
 
-var handler = new Stampit()
+var handler = stampit()
     .init(function () {
 
         var init = function () {

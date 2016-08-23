@@ -1,11 +1,11 @@
 "use strict";
 
-var Stampit = require('stampit'),
+var stampit = require('stampit'),
     Q = require('q'),
     Put = require('put');
 
 
-module.exports = new Stampit()
+module.exports = stampit()
     .init(function () {
 
         var init = function () {
