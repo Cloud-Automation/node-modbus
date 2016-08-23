@@ -2,6 +2,8 @@ var stampit         = require('stampit'),
     Put             = require('put'),
     ModbusCore      = require('./modbus-client-core.js');
 
+var crc16modbus = require('crc').crc16modbus;
+
 module.exports = stampit()
     .compose(ModbusCore)
     .init(function () {
@@ -10,6 +12,26 @@ module.exports = stampit()
         var SerialPort = require('serialport').SerialPort,
             serialport;
 
+        var idleParser = function(timeout) {
+            var data = new Buffer(0);
+            var timeoutVar;
+            return function(emitter, buffer) {
+              // Callback function called when data is received (buffer)
+              // Cancel any previous timeout
+              clearTimeout(timeoutVar);
+              // Append received data
+              data = Buffer.concat([data, buffer]);
+              // Fire a new timer
+              timeoutVar = setTimeout(function() {
+                  emitter.emit('data', data);
+                  // empty buffer (though in an ugly way)
+                  data = data.slice(data.length);
+              }, timeout);
+            };
+        };
+
+
+
         var init = function () {
         
             this.setState('init');
@@ -17,11 +39,10 @@ module.exports = stampit()
             if (!this.portName) { throw new Error('No portname.' );}
             if (!this.baudRate) { this.baudRate = 115200; }
             
-            this.baudRate = 115200;
-
             serialport = new SerialPort(this.portName, {
                 baudRate : this.baudrate,
-                parity : 'even'
+                parity : 'none',
+                parser: idleParser(20),
             });
 
             serialport.on('open', onOpen);
@@ -49,8 +70,8 @@ module.exports = stampit()
         var onData = function (pdu) {
         
             this.log.debug('received data');
-
-            this.emit('data', pdu);             
+            // Compared to ModBus TCP, ModBus RTU adds the device address which we need to remove
+            this.emit('data', pdu.slice(1));
         
         }.bind(this);
 
@@ -62,18 +83,16 @@ module.exports = stampit()
     
         var onSend = function (pdu) {
 
+            // TODO: slave address is now hard-coded to 1
             var pkt = Put()
                 .word8(1)
                 .put(pdu),
                 buf = pkt.buffer();
-                crc = 0;
 
+            var crc = crc16modbus(buf);
 
-            for (var i = 0; i < buf.length; i += 1) {
-                crc = (buf.readUInt8(i) + crc) % 0xFFFF; 
-            }
-               
-            pkt = pkt.word16be(crc).buffer(); 
+            // Add CRC in little-endian mode (least significant byte first)
+            pkt = pkt.word16le(crc).buffer();
 
             for (var j = 0; j < pkt.length; j += 1) {
                 console.log(pkt.readUInt8(j).toString(16));

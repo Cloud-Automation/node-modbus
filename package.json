@@ -9,6 +9,7 @@
     "url": "https://github.com/Cloud-Automation/node-modbus"
   },
   "dependencies": {
+    "crc": "^3.4.0",
     "put": "0.0.6",
     "q": "1.0.1",
     "serialport": "^3.0.0",
