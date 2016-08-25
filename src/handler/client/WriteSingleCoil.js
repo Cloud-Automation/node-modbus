@@ -40,7 +40,7 @@ module.exports = stampit()
 
             var fc = 5,
                 defer = Q.defer(),
-                pdu = new Put().word8be(5).word16be(address).word16be(value ? 0xff00 : 0x0000).buffer();
+                pdu = Put().word8be(5).word16be(address).word16be(value ? 0xff00 : 0x0000).buffer();
 
             this.queueRequest(fc, pdu, defer);
 

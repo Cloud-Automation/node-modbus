@@ -27,7 +27,7 @@ module.exports = stampit()
 
                 if (pdu.length !== 5) {
 
-                    cb(new Put().word8(0x85).word8(0x02).buffer());
+                    cb(Put().word8(0x85).word8(0x02).buffer());
                     return;
 
                 }
@@ -49,12 +49,12 @@ module.exports = stampit()
 
                 if (address > mem.length * 8) {
 
-                    cb(new Put().word8(0x85).word8(0x02).buffer());
+                    cb(Put().word8(0x85).word8(0x02).buffer());
                     return;
 
                 }
 
-                var response = new Put().word8(0x05).word16be(address).word16be(value ? 0xFF00 : 0x0000),
+                var response = Put().word8(0x05).word16be(address).word16be(value ? 0xFF00 : 0x0000),
                     oldValue = mem.readUInt8(Math.floor(address / 8)),
                     newValue;
 

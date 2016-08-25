@@ -41,7 +41,7 @@ module.exports = stampit()
 
                 this.log.debug('sending tcp data');
 
-                var pkt = new Put()
+                var pkt = Put()
                     .word16be(current.request.trans_id)         // transaction id
                     .word16be(current.request.protocol_ver)     // protocol version
                     .word16be(response.length + 1)              // pdu length

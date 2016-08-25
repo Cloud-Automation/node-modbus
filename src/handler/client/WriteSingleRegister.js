@@ -41,7 +41,7 @@ module.exports = stampit()
 
             var fc = 6,
                 defer = Q.defer(),
-                pdu = new Put().word8be(6).word16be(address).word16be(value).buffer();
+                pdu = Put().word8be(6).word16be(address).word16be(value).buffer();
 
             this.queueRequest(fc, pdu, defer);
 

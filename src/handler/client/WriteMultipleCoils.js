@@ -53,7 +53,7 @@ module.exports = stampit()
                 byteCount = Math.ceil(coils.length / 8),
                 curByte = 0,
                 cntr = 0,
-                pdu = new Put()
+                pdu = Put()
                     .word8(fc)
                     .word16be(startAddress)
                     .word16be(coils.length)

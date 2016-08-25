@@ -28,7 +28,7 @@ module.exports = stampit()
 
                 if (pdu.length !== 5) {
 
-                    cb(new Put().word8(0x81).word8(0x02).buffer());
+                    cb(Put().word8(0x81).word8(0x02).buffer());
                     return;
 
                 }
@@ -43,14 +43,14 @@ module.exports = stampit()
 
                 if (start > mem.length * 8 || start + quantity > mem.length * 8) {
 
-                    cb(new Put().word8(0x81).word8(0x02).buffer());
+                    cb(Put().word8(0x81).word8(0x02).buffer());
                     return;
 
                 }
 
                 var val = 0,
                     j = 0,
-                    response = new Put().word8(0x01).word8(Math.floor(quantity / 8) + (quantity % 8 === 0 ? 0 : 1));
+                    response = Put().word8(0x01).word8(Math.floor(quantity / 8) + (quantity % 8 === 0 ? 0 : 1));
 
                 for (var i = start; i < start + quantity; i += 1) {
 

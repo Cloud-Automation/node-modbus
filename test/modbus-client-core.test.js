@@ -2,7 +2,7 @@
 
 "use strict";
 
-var Stampit = require('stampit'),
+var stampit = require('stampit'),
     assert = require("assert"),
     Put = require('put'),
     sinon = require('sinon'),
@@ -16,11 +16,11 @@ describe("Modbus Serial Client", function () {
     describe('Read Coils Tests.', function () {
 
         var ReadCoils = require('../src/handler/client/ReadCoils.js'),
-            ModbusClient = new Stampit().compose(ModbusClientCore, ReadCoils);
+            ModbusClient = stampit().compose(ModbusClientCore, ReadCoils);
 
         it("should read coils just fine.", function (done) {
 
-            var client = new ModbusClient();
+            var client = ModbusClient();
 
             client.readCoils(0, 10).then(function (resp) {
 
@@ -37,14 +37,14 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', new Put().word8(1).word8be(2).word8be(85).word8be(1).buffer());
+            client.emit('data', Put().word8(1).word8be(2).word8be(85).word8be(1).buffer());
 
 
         });
 
         it("Should fail reading coils.", function (done) {
 
-            var client = new ModbusClient();
+            var client = ModbusClient();
 
             client.readCoils(0, 10).fail(function (resp) {
 
@@ -57,7 +57,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', new Put().word8be(0x81).word8be(1).buffer());
+            client.emit('data', Put().word8be(0x81).word8be(1).buffer());
 
         });
 
@@ -66,11 +66,11 @@ describe("Modbus Serial Client", function () {
     describe('Read Discrete Inputs Tests.', function () {
 
         var ReadDiscreteInputs = require('../src/handler/client/ReadDiscreteInputs.js'),
-            ModbusClient = new Stampit().compose(ModbusClientCore, ReadDiscreteInputs);
+            ModbusClient = stampit().compose(ModbusClientCore, ReadDiscreteInputs);
 
         it('should read discrete inputs just fine.', function (done) {
 
-            var client = new ModbusClient();
+            var client = ModbusClient();
 
             client.readDiscreteInputs(0, 5).then(function (resp) {
 
@@ -87,13 +87,13 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', new Put().word8be(2).word8be(1).word8be(15).buffer());
+            client.emit('data', Put().word8be(2).word8be(1).word8be(15).buffer());
 
         });
 
         it('should fail reading discrete inputs.', function (done) {
 
-            var client = new ModbusClient();
+            var client = ModbusClient();
 
             client.readDiscreteInputs(0, 5).then(function (resp) {
 
@@ -106,7 +106,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', new Put().word8be(0x82).word8be(0x02).buffer());
+            client.emit('data', Put().word8be(0x82).word8be(0x02).buffer());
 
         });
 
@@ -116,11 +116,11 @@ describe("Modbus Serial Client", function () {
     describe('Read Holding Registers Tests.', function () {
 
         var ReadHoldingRegisters = require('../src/handler/client/ReadHoldingRegisters.js'),
-            ModbusClient = new Stampit().compose(ModbusClientCore, ReadHoldingRegisters);
+            ModbusClient = stampit().compose(ModbusClientCore, ReadHoldingRegisters);
 
         it('should read holding register just fine.', function (done) {
 
-            var client = new ModbusClient(true);
+            var client = ModbusClient(true);
 
             client.readHoldingRegisters(0, 5).then(function (resp) {
 
@@ -137,7 +137,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', new Put()
+            client.emit('data', Put()
                 .word8be(3)
                 .word8be(10)
                 .word16be(1)
@@ -152,7 +152,7 @@ describe("Modbus Serial Client", function () {
 
         it('should fail reading holding register.', function (done) {
 
-            var client = new ModbusClient();
+            var client = ModbusClient();
 
             client.readHoldingRegisters(0, 5).then(function (resp) {
 
@@ -165,7 +165,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', new Put().word8be(0x83).word8be(0x03).buffer());
+            client.emit('data', Put().word8be(0x83).word8be(0x03).buffer());
 
         });
 
@@ -174,11 +174,11 @@ describe("Modbus Serial Client", function () {
     describe('Read input registers tests.', function () {
 
         var ReadInputRegisters = require('../src/handler/client/ReadInputRegisters.js'),
-            ModbusClient = new Stampit().compose(ModbusClientCore, ReadInputRegisters);
+            ModbusClient = stampit().compose(ModbusClientCore, ReadInputRegisters);
 
         it('should read input registers just fine.', function (done) {
 
-            var client = new ModbusClient(true);
+            var client = ModbusClient(true);
 
             client.readInputRegisters(0, 5).then(function (resp) {
 
@@ -195,7 +195,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', new Put()
+            client.emit('data', Put()
                 .word8be(4)
                 .word8be(10)
                 .word16be(5)
@@ -210,7 +210,7 @@ describe("Modbus Serial Client", function () {
 
         it('should fail reading input register.', function (done) {
 
-            var client = new ModbusClient();
+            var client = ModbusClient();
 
             client.readInputRegisters(0, 5).then(function (resp) {
 
@@ -223,7 +223,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', new Put().word8be(0x84).word8be(0x03).buffer());
+            client.emit('data', Put().word8be(0x84).word8be(0x03).buffer());
 
         });
 
@@ -233,11 +233,11 @@ describe("Modbus Serial Client", function () {
     describe('Write single coil tests.', function () {
 
         var WriteSingleCoil = require('../src/handler/client/WriteSingleCoil.js'),
-            ModbusClient = new Stampit().compose(ModbusClientCore, WriteSingleCoil);
+            ModbusClient = stampit().compose(ModbusClientCore, WriteSingleCoil);
 
         it('should write a single coil just fine.', function (done) {
 
-            var client = new ModbusClient(true);
+            var client = ModbusClient(true);
 
             client.writeSingleCoil(3, true).then(function (resp) {
 
@@ -256,7 +256,7 @@ describe("Modbus Serial Client", function () {
             client.setState('ready');
             client.emit(
                 'data',
-                new Put()
+                Put()
                     .word8be(5)
                     .word16be(3)
                     .word16be(0xFF00)
@@ -267,7 +267,7 @@ describe("Modbus Serial Client", function () {
 
         it('should fail writing single coil.', function (done) {
 
-            var client = new ModbusClient();
+            var client = ModbusClient();
 
             client.writeSingleCoil(4, false).then(function (resp) {
 
@@ -290,11 +290,11 @@ describe("Modbus Serial Client", function () {
     describe('Write single register tests.', function () {
 
         var WriteSingleRegister = require('../src/handler/client/WriteSingleRegister.js'),
-            ModbusClient = new Stampit().compose(ModbusClientCore, WriteSingleRegister);
+            ModbusClient = stampit().compose(ModbusClientCore, WriteSingleRegister);
 
         it('should write a single register just fine.', function (done) {
 
-            var client = new ModbusClient(true);
+            var client = ModbusClient(true);
 
             client.writeSingleRegister(3, 123).then(function (resp) {
 
@@ -313,7 +313,7 @@ describe("Modbus Serial Client", function () {
             client.setState('ready');
             client.emit(
                 'data',
-                new Put()
+                Put()
                     .word8be(6)
                     .word16be(3)
                     .word16be(123)
@@ -324,7 +324,7 @@ describe("Modbus Serial Client", function () {
 
         it('should fail writing single register.', function (done) {
 
-            var client = new ModbusClient();
+            var client = ModbusClient();
 
             client.writeSingleRegister(4, false).then(function (resp) {
 
@@ -337,7 +337,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', new Put().word8be(0x86).word8be(0x01).buffer());
+            client.emit('data', Put().word8be(0x86).word8be(0x01).buffer());
 
         });
 
@@ -347,11 +347,11 @@ describe("Modbus Serial Client", function () {
     describe('Write multiple coils tests.', function () {
 
         var WriteMultipleCoils = require('../src/handler/client/WriteMultipleCoils.js'),
-            ModbusClient = new Stampit().compose(ModbusClientCore, WriteMultipleCoils);
+            ModbusClient = stampit().compose(ModbusClientCore, WriteMultipleCoils);
 
         it('should write multiple coils just fine.', function (done) {
 
-            var client = new ModbusClient(true);
+            var client = ModbusClient(true);
 
             client.writeMultipleCoils(3, [true, false, true, false]).then(function (resp) {
 
@@ -370,7 +370,7 @@ describe("Modbus Serial Client", function () {
             client.setState('ready');
             client.emit(
                 'data',
-                new Put()
+                Put()
                     .word8be(15)
                     .word16be(3)
                     .word16be(4)
@@ -381,7 +381,7 @@ describe("Modbus Serial Client", function () {
 
         it('should fail writing multiple coils.', function (done) {
 
-            var client = new ModbusClient();
+            var client = ModbusClient();
 
             client.writeMultipleCoils(4, [true, false, true, false]).then(function (resp) {
 
@@ -394,7 +394,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', new Put().word8be(0x8F).word8be(0x02).buffer());
+            client.emit('data', Put().word8be(0x8F).word8be(0x02).buffer());
 
         });
 
@@ -404,11 +404,11 @@ describe("Modbus Serial Client", function () {
     describe('Write multiple registers tests.', function () {
 
         var WriteMultipleRegisters = require('../src/handler/client/WriteMultipleRegisters.js'),
-            ModbusClient = new Stampit().compose(ModbusClientCore, WriteMultipleRegisters);
+            ModbusClient = stampit().compose(ModbusClientCore, WriteMultipleRegisters);
 
         it('should write multiple registers just fine.', function (done) {
 
-            var client = new ModbusClient(true);
+            var client = ModbusClient(true);
 
             client.writeMultipleRegisters(3, [1, 2, 3]).then(function (resp) {
 
@@ -427,7 +427,7 @@ describe("Modbus Serial Client", function () {
             client.setState('ready');
             client.emit(
                 'data',
-                new Put()
+                Put()
                     .word8be(0x10)
                     .word16be(0x0003)
                     .word16be(0x0004)
@@ -441,7 +441,7 @@ describe("Modbus Serial Client", function () {
 
         it('should fail writing multiple registers.', function (done) {
 
-            var client = new ModbusClient();
+            var client = ModbusClient();
 
             client.writeMultipleRegisters(1025, [1, 2, 3]).then(function (resp) {
 
@@ -454,7 +454,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', new Put().word8be(0x90).word8be(0x02).buffer());
+            client.emit('data', Put().word8be(0x90).word8be(0x02).buffer());
 
         });
 
@@ -464,11 +464,11 @@ describe("Modbus Serial Client", function () {
     describe('Timeout tests.', function () {
 
         var ReadHoldingRegisters = require('../src/handler/client/ReadHoldingRegisters.js'),
-            ModbusClient = new Stampit().compose(ModbusClientCore, ReadHoldingRegisters);
+            ModbusClient = stampit().compose(ModbusClientCore, ReadHoldingRegisters);
 
         it('should timeout a read holding registers request.', function (done) {
 
-            var client = new ModbusClient({'timeout': 200});
+            var client = ModbusClient({'timeout': 200});
 
             client.readHoldingRegisters(3, 10).then(function (resp) {
 
@@ -486,7 +486,7 @@ describe("Modbus Serial Client", function () {
 
         it('should timeout a read holding registers request, but the request comes after the timeout.', function (done) {
 
-            var client = new ModbusClient({'timeout': 200});
+            var client = ModbusClient({'timeout': 200});
 
             client.readHoldingRegisters(3, 10).then(function (resp) {
 
@@ -504,7 +504,7 @@ describe("Modbus Serial Client", function () {
 
                 client.emit(
                     'data',
-                    new Put()
+                    Put()
                         .word8be(3)
                         .word8be(10)
                         .word16be(1)

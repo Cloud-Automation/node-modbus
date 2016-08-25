@@ -27,7 +27,7 @@ module.exports = stampit()
 
                 if (pdu.length !== 5) {
 
-                    cb(new Put().word8(0x84).word8(0x02).buffer());
+                    cb(Put().word8(0x84).word8(0x02).buffer());
                     return;
 
                 }
@@ -43,12 +43,12 @@ module.exports = stampit()
 
                 if (byteStart > mem.length || byteStart + (quantity * 2) > mem.length) {
 
-                    cb(new Put().word8(0x84).word8(0x02).buffer());
+                    cb(Put().word8(0x84).word8(0x02).buffer());
                     return;
 
                 }
 
-                var response = new Put().word8(0x04).word8(quantity * 2);
+                var response = Put().word8(0x04).word8(quantity * 2);
 
                 for (var i = byteStart; i < byteStart + (quantity * 2); i += 2) {
 

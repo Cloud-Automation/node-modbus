@@ -127,7 +127,7 @@ module.exports = stampit()
 
             reqId += 1;
 
-            var pkt = new Put()
+            var pkt = Put()
                 .word16be(reqId)                    // transaction id
                 .word16be(this.protocolVersion)     // protocol version
                 .word16be(pdu.length + 1)           // pdu length

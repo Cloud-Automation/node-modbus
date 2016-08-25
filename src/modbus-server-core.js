@@ -50,7 +50,7 @@ var core = stampit()
 
                 this.log.debug('no handler for fc', fc);
 
-                callback(new Put().word8(fc + 0x80).word8(0x01).buffer());
+                callback(Put().word8(fc + 0x80).word8(0x01).buffer());
 
                 return;
 

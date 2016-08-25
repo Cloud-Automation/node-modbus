@@ -40,7 +40,7 @@ module.exports = stampit()
 
         var onSend = function (pdu) {
 
-            var pkt = new Put()
+            var pkt = Put()
                     .word8(1)
                     .put(pdu),
                 buf = pkt.buffer(),

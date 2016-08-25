@@ -52,7 +52,7 @@ module.exports = stampit()
             var fc = 16,
                 byteCount = Math.ceil(register.length * 2),
                 curByte = 0,
-                pdu = new Put()
+                pdu = Put()
                     .word8(fc)
                     .word16be(startAddress)
                     .word16be(register.length)

@@ -27,7 +27,7 @@ module.exports = stampit()
 
                 if (pdu.length < 3) {
 
-                    cb(new Put().word8(0x90).word8(0x02).buffer());
+                    cb(Put().word8(0x90).word8(0x02).buffer());
                     return;
 
                 }
@@ -40,7 +40,7 @@ module.exports = stampit()
 
                 if (quantity > 0x007b) {
 
-                    cb(new Put().word8(0x90).word8(0x03).buffer());
+                    cb(Put().word8(0x90).word8(0x03).buffer());
                     return;
 
                 }
@@ -56,7 +56,7 @@ module.exports = stampit()
 
                 }
 
-                var response = new Put().word8(0x10).word16be(start).word16be(quantity).buffer(),
+                var response = Put().word8(0x10).word16be(start).word16be(quantity).buffer(),
                     j = 0,
                     currentByte;
 
