@@ -1,15 +1,15 @@
-var modbus          = require('../..'),
-    client          = modbus.client.tcp.complete({ 
-        'host' : process.argv[2], 
-        'port' : process.argv[3],
-        'autoReconnect' : true,
-        'reconnectTimeout' : 5000,
-        'logEnabled'    : true
+var modbus = require('../..'),
+    client = modbus.client.tcp.complete({
+        'host': process.argv[2],
+        'port': process.argv[3],
+        'autoReconnect': true,
+        'reconnectTimeout': 5000,
+        'logEnabled': true
     }).connect(),
-    successCount    = 0,
-    errorCount      = 0,
-    reconnectCount  = 0,
-    firstTime       = true,
+    successCount = 0,
+    errorCount = 0,
+    reconnectCount = 0,
+    firstTime = true,
     intId;
 
 var start = function () {
@@ -17,7 +17,7 @@ var start = function () {
     console.log('Starting request...');
 
     client.readHoldingRegisters(process.argv[4], process.argv[5]).then(function (resp) {
-    
+
         successCount += 1;
 
         console.log('Success', successCount, 'Errors', errorCount, 'Reconnect', reconnectCount);
@@ -33,7 +33,7 @@ var start = function () {
         errorCount += 1;
 
         console.log('Success', successCount, 'Errors', errorCount, 'Reconnect', reconnectCount);
-      
+
         console.log('Request finished UNsuccessfull.');
 
     });
@@ -72,13 +72,12 @@ process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
 
 
-
 client.on('close', function () {
 
     console.log('Client closed, stopping interval.');
 
     stop();
-    
+
 });
 
 
