@@ -1,28 +1,30 @@
-var Stampit = require('stampit'),
-    Q       = require('q'),
-    Put     = require('put');
+"use strict";
+
+var stampit = require('stampit'),
+    Q = require('q'),
+    Put = require('put');
 
 
-module.exports = Stampit()
+module.exports = stampit()
     .init(function () {
-    
+
         var init = function () {
-        
+
             this.addResponseHandler(3, onResponse);
-        
+
         }.bind(this);
-    
+
         var onResponse = function (pdu, request) {
- 
+
             this.log.debug("handling read holding registers response.");
 
-            var fc          = pdu.readUInt8(0),
-                byteCount   = pdu.readUInt8(1);
+            var fc = pdu.readUInt8(0),
+                byteCount = pdu.readUInt8(1);
 
             var resp = {
-                fc          : fc,
-                byteCount   : byteCount,
-                register    : [ ]
+                fc: fc,
+                byteCount: byteCount,
+                register: []
             };
 
             if (fc !== 3) {
@@ -37,17 +39,17 @@ module.exports = Stampit()
             }
 
             request.defer.resolve(resp);
- 
-       
+
+
         }.bind(this);
 
         this.readHoldingRegisters = function (start, quantity) {
-      
-           this.log.debug('Starting read holding registers request.'); 
 
-            var fc      = 3,
-                defer   = Q.defer(),
-                pdu     = Put().word8be(3).word16be(start).word16be(quantity).buffer();
+            this.log.debug('Starting read holding registers request.');
+
+            var fc = 3,
+                defer = Q.defer(),
+                pdu = Put().word8be(3).word16be(start).word16be(quantity).buffer();
 
             this.queueRequest(fc, pdu, defer);
 
@@ -56,5 +58,5 @@ module.exports = Stampit()
         };
 
         init();
-    
+
     });

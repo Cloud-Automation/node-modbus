@@ -1,21 +1,22 @@
+"use strict";
 
-var Util            = require('util'),
-    Put             = require('put'),
-    stampit         = require('stampit'),
-    Log             = require('stampit-log'),
-    StateMachine    = require('stampit-state-machine');
+var Util = require('util'),
+    Put = require('put'),
+    stampit = require('stampit'),
+    Log = require('stampit-log'),
+    StateMachine = require('stampit-state-machine');
 
 var ExceptionMessage = {
 
-    0x01 : 'ILLEGAL FUNCTION',
-    0x02 : 'ILLEGAL DATA ADDRESS',
-    0x03 : 'ILLEGAL DATA VALUE',
-    0x04 : 'SLAVE DEVICE FAILURE',
-    0x05 : 'ACKNOWLEDGE',
-    0x06 : 'SLAVE DEVICE BUSY',
-    0x08 : 'MEMORY PARITY ERROR',
-    0x0A : 'GATEWAY PATH UNAVAILABLE',
-    0x0B : 'GATEWAY TARGET DEVICE FAILED TO RESPOND'
+    0x01: 'ILLEGAL FUNCTION',
+    0x02: 'ILLEGAL DATA ADDRESS',
+    0x03: 'ILLEGAL DATA VALUE',
+    0x04: 'SLAVE DEVICE FAILURE',
+    0x05: 'ACKNOWLEDGE',
+    0x06: 'SLAVE DEVICE BUSY',
+    0x08: 'MEMORY PARITY ERROR',
+    0x0A: 'GATEWAY PATH UNAVAILABLE',
+    0x0B: 'GATEWAY TARGET DEVICE FAILED TO RESPOND'
 
 };
 
@@ -24,21 +25,9 @@ module.exports = stampit()
     .compose(Log)
     .init(function () {
 
-        var reqFifo         = [],
-            responseHandler = { },
-            currentRequest  = null;
-   
-        var init = function () {
-      
-            if (!this.timeout) {
-                this.timeout = 5 * 1000; // 5s
-            }
-
-            this.on('data', onData);
-            this.on('newState_ready', flush);
-            this.on('newState_closed', onClosed);
-
-        }.bind(this);
+        var reqFifo = [],
+            responseHandler = {},
+            currentRequest = null;
 
         var flush = function () {
 
@@ -54,27 +43,26 @@ module.exports = stampit()
 
             currentRequest.timeout = setTimeout(function () {
 
-                currentRequest.defer.reject({ err: 'timeout' });
+                currentRequest.defer.reject({err: 'timeout'});
                 this.emit('trashCurrentRequest');
 
                 this.logError('Request timed out.');
 
                 this.setState('error');
-//                this.setState('ready');
 
             }.bind(this), this.timeout);
 
             this.setState('waiting');
             this.emit('send', currentRequest.pdu);
-            
+
             this.log.debug('Data flushed.');
 
 
         }.bind(this);
 
         var onClosed = function () {
-       
-            if (currentRequest) { 
+
+            if (currentRequest) {
                 this.log.debug('Clearing timeout of the current request.');
                 clearTimeout(currentRequest.timeout);
             }
@@ -83,23 +71,23 @@ module.exports = stampit()
             reqFifo.forEach(function () {
                 reqFifo.pop();
             });
-            
-        
+
+
         }.bind(this);
 
         var handleErrorPDU = function (pdu) {
-       
+
             var errorCode = pdu.readUInt8(0);
 
             // if error code is smaller than 0x80
             // ths pdu describes no error 
-            
+
             if (errorCode < 0x80) {
                 return false;
             }
 
             // pdu describes an error
-            
+
             var exceptionCode = pdu.readUInt8(1),
                 message = ExceptionMessage[exceptionCode];
 
@@ -113,13 +101,13 @@ module.exports = stampit()
             currentRequest.defer.reject(err);
 
             return true;
-        
+
         }.bind(this);
 
         /**
-          *  Handle the incoming data, cut out the mbap
-          *  packet and send the pdu to the listener
-          */
+         *  Handle the incoming data, cut out the mbap
+         *  packet and send the pdu to the listener
+         */
         var onData = function (pdu) {
 
             this.log.debug('received data');
@@ -141,7 +129,7 @@ module.exports = stampit()
             }
 
             // handle pdu
-            
+
             var handler = responseHandler[currentRequest.fc];
             if (!handler) {
                 this.log.debug('Found not handler for fc', currentRequest.fc);
@@ -149,21 +137,21 @@ module.exports = stampit()
             }
 
             handler(pdu, currentRequest);
-       
+
             this.setState('ready');
- 
+
         }.bind(this);
 
         this.addResponseHandler = function (fc, handler) {
-        
+
             responseHandler[fc] = handler;
 
             return this;
-        
+
         }.bind(this);
 
         this.queueRequest = function (fc, pdu, defer) {
-        
+
             var req = {
                 fc: fc,
                 defer: defer,
@@ -175,9 +163,21 @@ module.exports = stampit()
             if (this.inState('ready')) {
                 flush();
             }
-        
+
         };
 
+        var init = function () {
+
+            if (!this.timeout) {
+                this.timeout = 5 * 1000; // 5s
+            }
+
+            this.on('data', onData);
+            this.on('newState_ready', flush);
+            this.on('newState_closed', onClosed);
+
+        }.bind(this);
+
         init();
-    
+
     });
