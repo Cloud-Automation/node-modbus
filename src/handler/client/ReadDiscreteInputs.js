@@ -22,6 +22,7 @@ module.exports = Stampit()
                 resp        = {
                     fc          : fc,
                     byteCount   : byteCount,
+                    payload     : pdu.slice(2),
                     coils       : []
                 };
 

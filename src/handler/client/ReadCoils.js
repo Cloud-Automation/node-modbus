@@ -23,6 +23,7 @@ module.exports = Stampit()
             var resp = {
                     fc          : fc,
                     byteCount   : byteCount,
+                    payload     : pdu.slice(2),
                     coils       : [] 
                 };
 
