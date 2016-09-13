@@ -41,7 +41,27 @@ describe("Modbus Server Core Tests.", function () {
             var core        = Core(),
                 request     = Put().word8(0x01).word16be(0).word16be(5).buffer(),
                 exResponse  = Put().word8(0x01).word8(1).word8(0x15).buffer();         
-     
+
+            core.getCoils().writeUInt8(0x15, 0); 
+
+            var resp = function (response) {
+           
+                assert.equal(response.compare(exResponse), 0);
+
+                done();
+
+            };
+
+            core.onData(request, resp);
+                    
+        });
+
+        it('should handle a read coils request with odd start address just fine.', function (done) {
+
+            var core        = Core(),
+                request     = Put().word8(0x01).word16be(2).word16be(5).buffer(),
+                exResponse  = Put().word8(0x01).word8(1).word8(0x05).buffer();         
+
             core.getCoils().writeUInt8(0x15, 0); 
 
             var resp = function (response) {
@@ -104,6 +124,26 @@ describe("Modbus Server Core Tests.", function () {
             var core        = Core(),
                 request     = Put().word8(0x02).word16be(0).word16be(5).buffer(),
                 exResponse  = Put().word8(0x02).word8(1).word8(0x15).buffer();         
+     
+            core.getInput().writeUInt8(0x15, 0); 
+
+            var resp = function (response) {
+           
+                assert.equal(response.compare(exResponse), 0);
+
+                done();
+
+            };
+
+            core.onData(request, resp);
+                    
+        });
+
+        it('should handle a read discrete inputs request with odd start address just fine.', function (done) {
+
+            var core        = Core(),
+                request     = Put().word8(0x02).word16be(2).word16be(5).buffer(),
+                exResponse  = Put().word8(0x02).word8(1).word8(0x05).buffer();         
      
             core.getInput().writeUInt8(0x15, 0); 
 
