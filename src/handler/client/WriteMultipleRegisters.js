@@ -39,37 +39,46 @@ module.exports = stampit()
         this.writeMultipleRegisters = function (startAddress, register) {
  
             var defer = Q.defer();
-
-            if (register.length > 0x007b) {
-
-                defer.reject();
-                return;
-
-            }
-
             var fc          = 16,
-                byteCount   = Math.ceil(register.length * 2),
-                curByte     = 0,
                 pdu         = Put()
                                 .word8(fc)
                                 .word16be(startAddress)
-                                .word16be(register.length)
-                                .word8(byteCount);
 
-            for (var i = 0; i < register.length; i += 1) {
+            if(register instanceof Buffer) {
 
-                pdu.word16be(register[i]);
-            
+              if(register.length/2 > 0x007b) {
+                defer.reject();
+              }
+
+              pdu.word16be(register.length/2)
+                 .word8(register.length)
+                 .put(register)
+            }
+            else if(register instanceof Array) {
+
+              if (register.length > 0x007b) {
+                  defer.reject();
+                  return;
+              }
+
+              var byteCount   = Math.ceil(register.length * 2),
+                  curByte     = 0
+
+              pdu.word16be(register.length)
+                 .word8(byteCount)
+
+              for (var i = 0; i < register.length; i += 1) {
+                  pdu.word16be(register[i]);
+              }
+            } else {
+              defer.reject();
             }
 
             pdu = pdu.buffer();
-            
 
             this.queueRequest(fc, pdu, defer);
 
-
             return defer.promise;
-
         };
 
         init();

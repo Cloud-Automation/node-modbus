@@ -36,44 +36,49 @@ module.exports = stampit()
        
         }.bind(this);
 
-        this.writeMultipleCoils = function (startAddress, coils) {
+        this.writeMultipleCoils = function (startAddress, coils, N) {
  
             var defer = Q.defer();
-
-            if (coils.length > 1968) {
-
-                defer.reject();
-                return;
-
-            }
-
             var fc          = 15,
-                byteCount   = Math.ceil(coils.length / 8),
-                curByte     = 0,
-                cntr        = 0, 
                 pdu         = Put()
                                 .word8(fc)
                                 .word16be(startAddress)
-                                .word16be(coils.length)
-                                .word8(byteCount);
 
-            for (var i = 0; i < coils.length; i += 1) {
+            if (coils instanceof Buffer) {
 
-                curByte += coils[i]?Math.pow(2, cntr):0;
+              pdu.word16be(N)
+                 .word8(coils.length)
+                 .put(coils)
+            } else if (coils instanceof Array) {
 
-                cntr = (cntr + 1) % 8;
+              if (coils.length > 1968) {
+                defer.reject();
+                return;
+              }
 
-                if (cntr === 0) {
-                    pdu.word8(curByte);
-                }
-            
+              var byteCount   = Math.ceil(coils.length / 8),
+                  curByte     = 0,
+                  cntr        = 0
+
+              pdu.word16be(coils.length)
+                 .word8(byteCount);
+
+              for (var i = 0; i < coils.length; i += 1) {
+
+                  curByte += coils[i]?Math.pow(2, cntr):0;
+
+                  cntr = (cntr + 1) % 8;
+
+                  if (cntr === 0 || i === coils.length - 1 ) {
+                      pdu.word8(curByte)
+                      curByte = 0
+                  }
+              }
             }
 
             pdu = pdu.buffer();
             
-
             this.queueRequest(fc, pdu, defer);
-
 
             return defer.promise;
 

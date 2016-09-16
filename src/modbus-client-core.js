@@ -24,9 +24,10 @@ module.exports = stampit()
     .compose(Log)
     .init(function () {
 
-        var reqFifo         = [],
-            responseHandler = { },
+        var responseHandler = { },
             currentRequest  = null;
+
+        this.reqFifo = [];
    
         var init = function () {
       
@@ -45,12 +46,12 @@ module.exports = stampit()
             this.log.debug('Trying to flush data.');
 
 
-            if (reqFifo.length === 0) {
+            if (this.reqFifo.length === 0) {
                 this.log.debug('Nothing in request pipe.');
                 return;
             }
 
-            currentRequest = reqFifo.shift();
+            currentRequest = this.reqFifo.shift();
 
             currentRequest.timeout = setTimeout(function () {
 
@@ -80,8 +81,8 @@ module.exports = stampit()
             }
 
             this.log.debug('Cleaning up request fifo.');
-            reqFifo.forEach(function () {
-                reqFifo.pop();
+            this.reqFifo.forEach(function () {
+                this.reqFifo.pop();
             });
             
         
@@ -170,7 +171,7 @@ module.exports = stampit()
                 pdu: pdu
             };
 
-            reqFifo.push(req);
+            this.reqFifo.push(req);
 
             if (this.inState('ready')) {
                 flush();
