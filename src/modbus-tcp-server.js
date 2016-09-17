@@ -10,6 +10,7 @@ module.exports = stampit()
     .init(function () {
     
         var server, socketCount = 0, fifo = [];
+        var clients = []
 
         var init = function () {
        
@@ -27,6 +28,7 @@ module.exports = stampit()
 
                 this.log.debug('new connection', s.address());
  
+                clients.push(s)
                 initiateSocket(s);
            
             }.bind(this));
@@ -149,7 +151,14 @@ module.exports = stampit()
 
         this.close = function (cb) {
         
-            server.close(cb);
+          for(var c in clients) {
+            clients[c].destroy()
+          }
+
+          server.close(function() {
+            server.unref() 
+            if(cb) { cb() } 
+          });
         
         };
 

@@ -47,23 +47,25 @@ module.exports = stampit()
                 }
 
                 var val = 0, 
-                    j = 0,
+                    thisByteBitCount = 0,
                     response = Put().word8(0x01).word8(Math.floor(quantity / 8) + (quantity % 8 === 0 ? 0 : 1));
 
-                for (var i = start; i < start + quantity; i += 1) {
+                for (var totalBitCount = start; totalBitCount < start + quantity; totalBitCount += 1) {
      
-                    val += mem.readUInt8(Math.floor(i / 8)) &  Math.pow(2, i % 8);
-               
-                    j += 1;
+                    var buf = mem.readUInt8(Math.floor(totalBitCount / 8))
+                    var mask = 1 << (totalBitCount % 8)
 
-                    if (j % 8 === 0 || i === (start + quantity) - 1) {
+                    if(buf & mask) {
+                      val += 1 << (thisByteBitCount % 8)
+                    }
+               
+                    thisByteBitCount += 1;
+
+                    if (thisByteBitCount % 8 === 0 || totalBitCount === (start + quantity) - 1) {
                    
                         response.word8(val);
                         val = 0;
-                    
                     }
-
-
                 }
 
                 cb(response.buffer());

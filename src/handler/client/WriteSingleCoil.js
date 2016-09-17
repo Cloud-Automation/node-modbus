@@ -38,7 +38,8 @@ module.exports = Stampit()
  
             var fc      = 5,
                 defer   = Q.defer(), 
-                pdu     = Put().word8be(5).word16be(address).word16be(value?0xff00:0x0000).buffer();
+                payload = (value instanceof Buffer) ? (value.readUInt8(0) > 0) : value,
+                pdu     = Put().word8be(5).word16be(address).word16be(payload?0xff00:0x0000).buffer();
 
             this.queueRequest(fc, pdu, defer);
 

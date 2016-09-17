@@ -23,7 +23,9 @@ module.exports = Stampit()
             var resp = {
                 fc              : fc,
                 registerAddress : registerAddress,
-                registerValue   : registerValue
+                registerValue   : registerValue,
+                registerValueRaw: pdu.slice(1,2),
+                registerValueRaw: pdu.slice(3,2)
             };
 
             if (fc !== 6) {
@@ -39,7 +41,8 @@ module.exports = Stampit()
  
             var fc      = 6,
                 defer   = Q.defer(),
-                pdu     = Put().word8be(6).word16be(address).word16be(value).buffer();
+                payload = (value instanceof Buffer) ? value : Put().word16be(value).buffer(),
+                pdu     = Put().word8be(6).word16be(address).put(payload).buffer();
 
             this.queueRequest(fc, pdu, defer);
 
