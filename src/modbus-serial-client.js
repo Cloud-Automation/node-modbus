@@ -11,17 +11,38 @@ module.exports = stampit()
             serialport;
 
         var init = function () {
-        
+
             this.setState('init');
 
-            if (!this.portName) { throw new Error('No portname.' );}
-            if (!this.baudRate) { this.baudRate = 115200; }
-            
-            this.baudRate = 115200;
+            if (!this.portName) {
+                throw new Error('No portname.');
+            }
+
+            if (!this.baudRate) {
+                this.baudRate = 9600; // the most are working with 9600
+            }
+
+            if (!this.dataBits) {
+                this.dataBits = 8;
+            }
+
+            if (!this.stopBits) {
+                this.stopBits = 1;
+            }
+
+            if (!this.parity) {
+                this.parity = 'none';
+            }
+
+            // TODO: flowControl - ['xon', 'xoff', 'xany', 'rtscts']
+
+            // TODO: settings - ['brk', 'cts', 'dtr', 'dts', 'rts']
 
             serialport = new SerialPort(this.portName, {
-                baudRate : this.baudrate,
-                parity : 'even'
+                baudRate: this.baudrate,
+                parity: this.parity,
+                dataBits: this.dataBits,
+                stopBits: this.stopBits
             });
 
             serialport.on('open', onOpen);
@@ -30,7 +51,7 @@ module.exports = stampit()
             serialport.on('error', onError);
 
             this.on('send', onSend);
-        
+
         }.bind(this);
     
         var onOpen = function () {

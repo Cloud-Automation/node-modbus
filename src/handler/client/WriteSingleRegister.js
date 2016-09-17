@@ -24,7 +24,7 @@ module.exports = Stampit()
                 fc              : fc,
                 registerAddress : registerAddress,
                 registerValue   : registerValue,
-                registerValueRaw: pdu.slice(1,2),
+                registerAddressRaw: pdu.slice(1,2),
                 registerValueRaw: pdu.slice(3,2)
             };
 
