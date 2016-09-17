@@ -1,5 +1,11 @@
 var modbus          = require('../..'),
-    client          = modbus.client.tcp.complete({ 'host' : process.argv[2], 'port' : process.argv[3]});
+    client          = modbus.client.tcp.complete({ 
+        'host' : process.argv[2], 
+        'port' : process.argv[3],
+        'unitId' : 1,
+        'logEnabled' : true,
+        'logLevel' : 'debug'
+    });
 
 client.on('connect', function () {
 
