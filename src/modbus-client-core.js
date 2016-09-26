@@ -81,9 +81,7 @@ module.exports = stampit()
             }
 
             this.log.debug('Cleaning up request fifo.');
-            this.reqFifo.forEach(function () {
-                this.reqFifo.pop();
-            });
+            this.reqFifo = [];
             
         
         }.bind(this);
