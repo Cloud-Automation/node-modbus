@@ -39,7 +39,7 @@ module.exports = stampit()
             // TODO: settings - ['brk', 'cts', 'dtr', 'dts', 'rts']
 
             serialport = new SerialPort(this.portName, {
-                baudRate: this.baudrate,
+                baudRate: this.baudRate,
                 parity: this.parity,
                 dataBits: this.dataBits,
                 stopBits: this.stopBits
