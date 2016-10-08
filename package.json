@@ -11,6 +11,7 @@
   "dependencies": {
     "put": "0.0.6",
     "q": "1.0.1",
+    "crc": "3.4.0",
     "serialport": "^4.0.1",
     "stampit": "^2.1.2",
     "stampit-event-bus": "^0.1.1",
