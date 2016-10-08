@@ -71,7 +71,9 @@ module.exports = stampit()
         var onData = function (pdu) {
         
             this.log.debug('received data');
-            this.emit('data', pdu.slice(1));
+            if( crc.crc16modbus(pdu) === 0 ) { /* PDU is valid if CRC across whole PDU equals 0, else ignore and do nothing */
+              this.emit('data', pdu.slice(1));
+            }
         
         }.bind(this);
 
