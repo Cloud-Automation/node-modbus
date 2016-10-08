@@ -1,4 +1,5 @@
 var stampit         = require('stampit'),
+    crc             = require('crc'),
     Put             = require('put'),
     ModbusCore      = require('./modbus-client-core.js');
 
@@ -70,8 +71,7 @@ module.exports = stampit()
         var onData = function (pdu) {
         
             this.log.debug('received data');
-
-            this.emit('data', pdu);             
+            this.emit('data', pdu.slice(1));
         
         }.bind(this);
 
@@ -84,18 +84,15 @@ module.exports = stampit()
         var onSend = function (pdu) {
 
             var pkt = Put()
-                .word8(1)
+                .word8(this.unitId)
                 .put(pdu),
                 buf = pkt.buffer();
-                crc = 0;
+            
+                crc16 = 0;
+                crc16= crc.crc16modbus(buf);
+                pkt = pkt.word16le(crc16).buffer();
 
-
-            for (var i = 0; i < buf.length; i += 1) {
-                crc = (buf.readUInt8(i) + crc) % 0xFFFF; 
-            }
-               
-            pkt = pkt.word16be(crc).buffer(); 
-
+            
             for (var j = 0; j < pkt.length; j += 1) {
                 console.log(pkt.readUInt8(j).toString(16));
             }
