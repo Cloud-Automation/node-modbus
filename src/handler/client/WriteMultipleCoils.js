@@ -42,13 +42,13 @@ module.exports = stampit()
             var fc          = 15,
                 pdu         = Put()
                                 .word8(fc)
-                                .word16be(startAddress)
+                                .word16be(startAddress);
 
             if (coils instanceof Buffer) {
 
               pdu.word16be(N)
                  .word8(coils.length)
-                 .put(coils)
+                 .put(coils);
             } else if (coils instanceof Array) {
 
               if (coils.length > 1968) {
@@ -58,7 +58,7 @@ module.exports = stampit()
 
               var byteCount   = Math.ceil(coils.length / 8),
                   curByte     = 0,
-                  cntr        = 0
+                  cntr        = 0;
 
               pdu.word16be(coils.length)
                  .word8(byteCount);
@@ -70,8 +70,8 @@ module.exports = stampit()
                   cntr = (cntr + 1) % 8;
 
                   if (cntr === 0 || i === coils.length - 1 ) {
-                      pdu.word8(curByte)
-                      curByte = 0
+                      pdu.word8(curByte);
+                      curByte = 0;
                   }
               }
             }
