@@ -8,7 +8,7 @@ module.exports = stampit()
     .init(function () {
     
     
-        var SerialPort = require('serialport').SerialPort,
+        var SerialPort = require('serialport'),
             serialport;
 
         var init = function () {
