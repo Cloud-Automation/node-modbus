@@ -32,7 +32,7 @@ module.exports = stampit()
 
                 }
 
-                var fc          = pdu.readUInt8(0),
+                var //fc          = pdu.readUInt8(0),
                     start       = pdu.readUInt16BE(1),
                     byteStart   = start * 2,
                     quantity    = pdu.readUInt16BE(3);

@@ -31,13 +31,13 @@ var handler = stampit()
 
                 }
 
-                var fc          = pdu.readUInt8(0),
+                var //fc          = pdu.readUInt8(0),
                     start       = pdu.readUInt16BE(1),
                     quantity    = pdu.readUInt16BE(3);
 
                 this.emit('readDiscreteInputsRequest', start, quantity);
 
-                var mem = this.getInput();
+                var mem = this.getDiscrete();
 
                 if (start > mem.length * 8 || start + quantity > mem.length * 8) {
                 
@@ -52,8 +52,8 @@ var handler = stampit()
 
                 for (var totalBitCount = start; totalBitCount < start + quantity; totalBitCount += 1) {
      
-                    var buf = mem.readUInt8(Math.floor(totalBitCount / 8))
-                    var mask = 1 << (totalBitCount % 8)
+                    var buf = mem.readUInt8(Math.floor(totalBitCount / 8));
+                    var mask = 1 << (totalBitCount % 8);
 
                     if(buf & mask) {
                       val += 1 << (thisByteBitCount % 8)
