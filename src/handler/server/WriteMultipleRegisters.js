@@ -30,7 +30,7 @@ module.exports = stampit()
 
                 }
 
-                var fc          = pdu.readUInt8(0),
+                var //fc          = pdu.readUInt8(0),
                     start       = pdu.readUInt16BE(1),
                     byteStart   = start * 2,
                     quantity    = pdu.readUInt16BE(3),
@@ -55,7 +55,7 @@ module.exports = stampit()
                 }
 
                 var response = Put().word8(0x10).word16be(start).word16be(quantity).buffer(),
-                    j = 0, currentByte;
+                    j = 0;
 
                 for (var i = byteStart; i < byteStart + byteCount; i += 1) {
                 

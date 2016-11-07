@@ -30,7 +30,7 @@ module.exports = stampit()
 
                 }
 
-                var fc          = pdu.readUInt8(0),
+                var //fc          = pdu.readUInt8(0),
                     address     = pdu.readUInt16BE(1),
                     byteAddress = address * 2,
                     value       = pdu.readUInt16BE(3);

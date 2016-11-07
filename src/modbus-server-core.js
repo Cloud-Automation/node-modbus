@@ -3,11 +3,11 @@ var stampit         = require('stampit'),
     EventBus        = require('stampit-event-bus'),
     Log             = require('stampit-log');
 
- var core = stampit()
+var core = stampit()
     .compose(EventBus, Log)
     .init(function () {
-   
-        var coils, holding, input, handler = { };
+
+        var coils, holding, input, discrete, handler = { };
 
         var init = function () {
 
@@ -28,71 +28,81 @@ var stampit         = require('stampit'),
             } else {
                 input = this.input;
             }
-        
+            if (!this.discrete) {
+                discrete = new Buffer(1024);
+            } else {
+                discrete = this.discrete;
+            }
         }.bind(this);
 
         this.onData = function (pdu, callback) {
 
-             // get fc and byteCount in advance
-            var fc          = pdu.readUInt8(0),
-                byteCount   = pdu.readUInt8(1);
+            // get fc and byteCount in advance
+            var fc          = pdu.readUInt8(0);
+                //byteCount   = pdu.readUInt8(1);
 
             // get the pdu handler
             var reqHandler  = handler[fc];
 
             if (!reqHandler) {
 
-                // write a error/exception pkt to the 
+                // write a error/exception pkt to the
                 // socket with error code fc + 0x80 and
                 // exception code 0x01 (Illegal Function)
-          
+
                 this.log.debug('no handler for fc', fc);
 
                 callback(Put().word8(fc + 0x80).word8(0x01).buffer());
 
                 return;
-            
+
             }
 
             reqHandler(pdu, function (response) {
- 
+
                 callback(response);
-                   
+
             }.bind(this));
 
-        
+
         }.bind(this);
 
         this.setRequestHandler = function (fc, callback) {
-       
+
             this.log.debug('setting request handler', fc);
 
             handler[fc] = callback;
 
             return this;
-        
+
         };
 
         this.getCoils = function () {
-        
+
             return coils;
-        
+
         };
 
         this.getInput = function () {
-        
+
             return input;
-        
+
         };
 
         this.getHolding = function () {
-        
+
             return holding;
-        
+
+        };
+
+        this.getDiscrete = function () {
+
+            return discrete;
+
         };
 
         init();
-    
+
     });
 
- module.exports = core;
+module.exports = core;

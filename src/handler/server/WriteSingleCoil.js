@@ -30,9 +30,9 @@ module.exports = stampit()
 
                 }
 
-                var fc          = pdu.readUInt8(0),
+                var //fc          = pdu.readUInt8(0),
                     address     = pdu.readUInt16BE(1),
-                    value       = pdu.readUInt16BE(3) === 0x0000?false:true;
+                    value       = (pdu.readUInt16BE(3) === 0x0000);
 
                 if (pdu.readUInt16BE(3) !== 0x0000 && pdu.readUInt16BE(3) !== 0xFF00) {
                 

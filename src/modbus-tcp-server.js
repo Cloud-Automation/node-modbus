@@ -8,12 +8,14 @@ module.exports = stampit()
     .compose(ModbusServerCore)
     .compose(StateMachine)
     .init(function () {
-    
+        'use strict';
+
         var server, socketCount = 0, fifo = [];
-        var clients = []
+        var clients = [];
+        var buffer  = new Buffer(0);
 
         var init = function () {
-       
+
             if (!this.port) {
                 this.port = 502;
             }
@@ -23,28 +25,32 @@ module.exports = stampit()
             }
 
             server = net.createServer();
-            
+
             server.on('connection', function (s) {
 
                 this.log.debug('new connection', s.address());
- 
-                clients.push(s)
+
+                clients.push(s);
                 initiateSocket(s);
-           
+                this.emit('connection', s.address());
+
             }.bind(this));
 
+            server.on('disconnect', function (s) {
+                this.emit('close', s.address());
+            });
+
             server.listen(this.port, this.hostname, function (err) {
-           
+
                 if (err) {
-                
+
                     this.log.debug('error while listening', err);
                     this.emit('error', err);
-                    return;
 
                 }
 
             }.bind(this));
- 
+
             this.log.debug('server is listening on port', this.hostname + ':' + this.port);
 
             this.on('newState_ready', flush);
@@ -54,48 +60,61 @@ module.exports = stampit()
         }.bind(this);
 
         var onSocketEnd = function (socket, socketId) {
-        
+
             return function () {
-            
+                this.emit('close');
                 this.log.debug('connection closed, socket', socketId);
-            
+
             }.bind(this);
-        
+
         }.bind(this);
 
         var onSocketData = function (socket, socketId) {
-        
+
             return function (data) {
 
-                this.log.debug('received data socket',socketId, data.byteLength);
+                this.log.debug('received data socket', socketId, data.byteLength);
 
-                // 1. extract mbap
+                buffer = Buffer.concat([buffer, data]);
 
-                var mbap    = data.slice(0, 0 + 7),
-                    len     = mbap.readUInt16BE(4);
-                    request = { 
-                        trans_id: mbap.readUInt16BE(0),
-                        protocol_ver: mbap.readUInt16BE(2),
-                        unit_id: mbap.readUInt8(6) 
-                    }; 
+                while (buffer.length > 8) {
 
-                // 2. extract pdu
+                    // 1. extract mbap
 
-                var pdu = data.slice(7, 7 + len - 1);
+                    var len     = buffer.readUInt16BE(4);
+                    var request = {
+                        trans_id: buffer.readUInt16BE(0),
+                        protocol_ver: buffer.readUInt16BE(2),
+                        unit_id: buffer.readUInt8(6)
+                    };
 
-                // emit data event and let the 
-                // listener handle the pdu
+                    this.log.debug('MBAP extracted');
 
-                fifo.push({ request : request, pdu : pdu, socket : socket });
+                    // 2. extract pdu
+                    if (buffer.length < 7 + len - 1) {
+                        break; // wait for next bytes
+                    }
 
-                flush();
-           
+                    var pdu = buffer.slice(7, 7 + len - 1);
+
+                    this.log.debug('PDU extracted');
+
+                    // emit data event and let the
+                    // listener handle the pdu
+
+                    fifo.push({ request : request, pdu : pdu, socket : socket });
+
+                    flush();
+
+                    buffer = buffer.slice(pdu.length + 7, buffer.length);
+                }
+
             }.bind(this);
-        
+
         }.bind(this);
 
         var flush = function () {
-        
+
             if (this.inState('processing')) {
                 return;
             }
@@ -109,10 +128,10 @@ module.exports = stampit()
             var current = fifo.shift();
 
             this.onData(current.pdu, function (response) {
- 
+
                 this.log.debug('sending tcp data');
 
-                 var pkt = Put()
+                var pkt = Put()
                     .word16be(current.request.trans_id)         // transaction id
                     .word16be(current.request.protocol_ver)     // protocol version
                     .word16be(response.length + 1)      // pdu length
@@ -120,49 +139,54 @@ module.exports = stampit()
                     .put(response)                      // the actual pdu
                     .buffer();
 
-                current.socket.write(pkt); 
-           
+                current.socket.write(pkt);
+
                 this.setState('ready');
 
             }.bind(this));
-        
+
         }.bind(this);
 
         var onSocketError = function (socket, socketCount) {
-        
+
             return function (e) {
-            
-                this.logError('Socker error', e);
-            
+                this.emit('error', e);
+
+                this.logError('Socket error', e);
+
             }.bind(this);
-        
-        
+
+
         }.bind(this);
 
         var initiateSocket = function (socket) {
-       
+
             socketCount += 1;
 
             socket.on('end', onSocketEnd(socket, socketCount));
             socket.on('data', onSocketData(socket, socketCount));
             socket.on('error', onSocketError(socket, socketCount));
-        
-        }.bind(this);    
+
+        }.bind(this);
 
         this.close = function (cb) {
-        
-          for(var c in clients) {
-            clients[c].destroy()
-          }
 
-          server.close(function() {
-            server.unref() 
-            if(cb) { cb() } 
-          });
-        
+            for(var c in clients) {
+                clients[c].destroy()
+            }
+
+            server.close(function() {
+                server.unref();
+                if(cb) { cb() }
+            });
+
+        };
+
+        this.getClients = function () {
+            return clients;
         };
 
         init();
-    
-    
+
+
     });

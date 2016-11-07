@@ -10,6 +10,7 @@ module.exports = stampit()
     
         var SerialPort = require('serialport'),
             serialport;
+        var buffer     = new Buffer(0);
 
         var init = function () {
 
@@ -68,11 +69,69 @@ module.exports = stampit()
         
         }.bind(this);
 
-        var onData = function (pdu) {
+        function toStrArray(buf) {
+            if (!buf || !buf.length) return '';
+            var text = '';
+            for (var i = 0; i < buf.length; i++) {
+                text += (text ? ',' : '') + buf[i];
+            }
+            return text;
+        }
+
+        var onData = function (data) {
         
-            this.log.debug('received data');
-            if( crc.crc16modbus(pdu) === 0 ) { /* PDU is valid if CRC across whole PDU equals 0, else ignore and do nothing */
-              this.emit('data', pdu.slice(1));
+            this.log.debug('received data ' + data.length + ' bytes');
+            buffer = Buffer.concat([buffer, data]);
+
+            while (buffer.length > 4) {
+
+                // 1. there is no mbap
+                // 2. extract pdu
+
+                // 0 - device ID
+                // 1 - Function CODE
+                // 2 - Bytes length
+                // 3.. Data
+                // checksum.(2 bytes
+                var len;
+                var pdu;
+                // if response for write
+                if (buffer[1] === 5 || buffer[1] === 6 || buffer[1] === 15 || buffer[1] === 16) {
+                    if (buffer.length < 8) {
+                        break;
+                    }
+                    pdu = buffer.slice(0, 8);  // 1 byte device ID + 1 byte FC + 2 bytes address + 2 bytes value + 2 bytes CRC
+                } else if (buffer[1] > 0 && buffer[1] < 5){
+                    len = buffer[2];
+
+                    if (buffer.length < len + 5) {
+                        break;
+                    }
+
+                    pdu = buffer.slice(0, len + 5); // 1 byte deviceID + 1 byte FC + 1 byte length  + 2 bytes CRC
+                } else {
+                    // unknown function code
+                    this.logError('unknown function code: ' + buffer[1]);
+                    // reset buffer and try again
+                    buffer = [];
+                    break;
+                }
+
+                if (crc.crc16modbus(pdu) === 0) { /* PDU is valid if CRC across whole PDU equals 0, else ignore and do nothing */
+                    if (pdu[0] !== this.unitId) {
+                        // answer for wrong device
+                        this.log.debug('received answer for wrong ID ' + buffer[0] + ', expected ' + this.unitId);
+                    }
+                    // emit data event and let the
+                    // listener handle the pdu
+                    this.emit('data', pdu.slice(1, pdu.length - 2));
+                } else {
+                    this.logError('Wrong CRC for frame: ' + toStrArray(pdu));
+                    // reset buffer and try again
+                    buffer = [];
+                    break;
+                }
+                buffer = buffer.slice(pdu.length, buffer.length);
             }
         
         }.bind(this);
@@ -90,20 +149,13 @@ module.exports = stampit()
                 .put(pdu),
                 buf = pkt.buffer();
             
-                crc16 = 0;
-                crc16= crc.crc16modbus(buf);
-                pkt = pkt.word16le(crc16).buffer();
-
-            
-            for (var j = 0; j < pkt.length; j += 1) {
-                console.log(pkt.readUInt8(j).toString(16));
-            }
+            var crc16 = crc.crc16modbus(buf);
+            pkt = pkt.word16le(crc16).buffer();
  
             serialport.write(pkt, function (err) {
             
                 if (err) {
                     this.emit('error', err);
-                    return;
                 }
             
             }.bind(this));
