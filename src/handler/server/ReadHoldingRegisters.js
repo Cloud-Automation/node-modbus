@@ -1,6 +1,4 @@
-var stampit     = require('stampit'),
-    Put         = require('put');
-
+var stampit     = require('stampit')
 
 module.exports = stampit()
     .init(function () {
@@ -25,11 +23,15 @@ module.exports = stampit()
 
                 if (pdu.length !== 5) {
 
-                    this.log.debug('wrong pdu length.');
+                  this.log.debug('wrong pdu length.');
 
-                    cb(Put().word8(0x83).word8(0x02).buffer());
-                    return;
+                  var buf = Buffer.allocUnsafe(2)
 
+                  buf.writeUInt8(0x83, 0)
+                  buf.writeUInt8(0x02, 1)
+                  cb(buf)
+
+                  return;
                 }
 
                 var fc          = pdu.readUInt8(0),
@@ -43,23 +45,25 @@ module.exports = stampit()
 
                 if (byteStart > mem.length || byteStart + (quantity * 2) > mem.length) {
 
-                    this.log.debug('request outside register boundaries.');                
-                    cb(Put().word8(0x83).word8(0x02).buffer());
-                    return;
+                  this.log.debug('request outside register boundaries.');                
+                  var buf = Buffer.allocUnsafe(2)
 
+                  buf.writeUInt8(0x83, 0)
+                  buf.writeUInt8(0x02, 1)
+                  cb(buf)
+                  return;
                 }
 
-                var response = Put().word8(0x03).word8(quantity * 2);
+                var head = Buffer.allocUnsafe(2)
+                 
+                head.writeUInt8(0x03, 0)
+                head.writeUInt8(quantity * 2, 1)
 
-                for (var i = byteStart; i < byteStart + (quantity * 2); i += 2) {
-         
-                    response.word16be(mem.readUInt16BE(i));
-
-                }
+                var response = Buffer.concat([head, mem.slice(byteStart * 2, byteStart * 2 + quantity * 2)])  
 
                 this.log.debug('finished read holding register request.');
 
-                cb(response.buffer());
+                cb(response);
 
             }.bind(this), this.responseDelay);
         

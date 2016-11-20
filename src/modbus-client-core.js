@@ -1,4 +1,3 @@
-
 var Util            = require('util'),
     stampit         = require('stampit'),
     Log             = require('stampit-log'),

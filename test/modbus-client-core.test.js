@@ -1,8 +1,5 @@
-
-
 var stampit         = require('stampit'),
-    assert          = require("assert"),
-    Put             = require('put'),
+    assert          = require('assert'),
     sinon           = require('sinon'),
     util            = require('util'),
     eventEmitter    = require('events').EventEmitter;
@@ -27,7 +24,7 @@ describe("Modbus Serial Client", function () {
                 assert.equal(resp.fc, 1);
                 assert.equal(resp.byteCount, 2);
                 assert.equal(resp.coils.length, 16);
-                assert.deepEqual(resp.payload, new Buffer([85, 1]))
+                assert.deepEqual(resp.payload, Buffer.from([85, 1]))
                 assert.deepEqual(resp.coils, [true, false, true, false, true, false, true, false, true, false, false, false, false, false, false, false]);
             
                 done();
@@ -35,9 +32,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', Put().word8(1).word8be(2).word8be(85).word8be(1).buffer() );
-
-
+            client.emit('data', Buffer.from([1,2,85,1]));
         });
 
         it("Should fail reading coils.", function (done) {
@@ -51,7 +46,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', Put().word8be(0x81).word8be(1).buffer());
+            client.emit('data', Buffer.from([0x81, 0x01]))
         
         });
 
@@ -71,7 +66,7 @@ describe("Modbus Serial Client", function () {
                 assert.equal(resp.fc, 2);
                 assert.equal(resp.byteCount, 1);
                 assert.equal(resp.coils.length, 8);
-                assert.deepEqual(resp.payload, new Buffer([15]));
+                assert.deepEqual(resp.payload, Buffer.from([15]));
                 assert.deepEqual(resp.coils, [true, true, true, true, false, false, false, false]);
 
                 done();
@@ -79,7 +74,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', Put().word8be(2).word8be(1).word8be(15).buffer());
+            client.emit('data', Buffer.from([0x02, 0x01, 0x0F]))
         
         });
 
@@ -98,7 +93,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', Put().word8be(0x82).word8be(0x02).buffer()); 
+            client.emit('data', Buffer.from([0x82, 0x02]))
         
         });
     
@@ -118,7 +113,7 @@ describe("Modbus Serial Client", function () {
            
                 assert.equal(resp.fc, 3);
                 assert.equal(resp.byteCount, 10);
-                assert.deepEqual(resp.payload, new Buffer([0,1,0,2,0,3,0,4,0,5]));
+                assert.deepEqual(resp.payload, Buffer.from([0,1,0,2,0,3,0,4,0,5]));
                 assert.deepEqual(resp.register, [1, 2, 3, 4, 5]);
 
                 done();
@@ -128,15 +123,7 @@ describe("Modbus Serial Client", function () {
             client.setState('ready');
             client.emit(
                 'data', 
-                Put()
-                    .word8be(3)
-                    .word8be(10)
-                    .word16be(1)
-                    .word16be(2)
-                    .word16be(3)
-                    .word16be(4)
-                    .word16be(5)
-                    .buffer()
+                Buffer.from([0x03,0x0A,0x00,0x01,0x00,0x02,0x00,0x03,0x00,0x04,0x00,0x05])
             );
         
         });
@@ -156,7 +143,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', Put().word8be(0x83).word8be(0x03).buffer()); 
+            client.emit('data', Buffer.from([0x83,0x03]))
         
         });
     
@@ -176,7 +163,7 @@ describe("Modbus Serial Client", function () {
          
                 assert.equal(resp.fc, 4);
                 assert.equal(resp.byteCount, 10);
-                assert.deepEqual(resp.payload, new Buffer([0,5,0,4,0,3,0,2,0,1]))
+                assert.deepEqual(resp.payload, Buffer.from([0,5,0,4,0,3,0,2,0,1]))
                 assert.deepEqual(resp.register, [5, 4, 3, 2, 1]);
 
                 done();
@@ -186,15 +173,7 @@ describe("Modbus Serial Client", function () {
             client.setState('ready');
             client.emit(
                 'data', 
-                Put()
-                    .word8be(4)
-                    .word8be(10)
-                    .word16be(5)
-                    .word16be(4)
-                    .word16be(3)
-                    .word16be(2)
-                    .word16be(1)
-                    .buffer()
+                Buffer.from([0x04,0x0A,0x00,0x05,0x00,0x04,0x00,0x03,0x00,0x02,0x00,0x01])
             );
         
         });
@@ -214,7 +193,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', Put().word8be(0x84).word8be(0x03).buffer()); 
+            client.emit('data', Buffer.from([0x84,0x03]))
         
         });
     
@@ -249,11 +228,7 @@ describe("Modbus Serial Client", function () {
             client.setState('ready');
             client.emit(
                 'data', 
-                Put()
-                    .word8be(5)
-                    .word16be(3)
-                    .word16be(0xFF00)
-                    .buffer()
+                Buffer.from([0x05,0x00,0x03,0xFF,0x00])
             );
         });
 
@@ -261,7 +236,7 @@ describe("Modbus Serial Client", function () {
         
             var client = ModbusClient(true);
 
-            client.writeSingleCoil(3, new Buffer([1])).then(function (resp) {
+            client.writeSingleCoil(3, Buffer.from([1])).then(function (resp) {
            
                 assert.equal(resp.fc, 5);
                 assert.equal(resp.outputAddress, 3);
@@ -280,11 +255,7 @@ describe("Modbus Serial Client", function () {
             client.setState('ready');
             client.emit(
                 'data', 
-                Put()
-                    .word8be(5)
-                    .word16be(3)
-                    .word16be(0xFF00)
-                    .buffer()
+                Buffer.from([0x05,0x00,0x03,0xFF,0x00])
             );
         });
 
@@ -292,7 +263,7 @@ describe("Modbus Serial Client", function () {
         
             var client = ModbusClient(true);
 
-            client.writeSingleCoil(3, new Buffer([0])).then(function (resp) {
+            client.writeSingleCoil(3, Buffer.from([0])).then(function (resp) {
            
                 assert.equal(resp.fc, 5);
                 assert.equal(resp.outputAddress, 3);
@@ -311,11 +282,7 @@ describe("Modbus Serial Client", function () {
             client.setState('ready');
             client.emit(
                 'data', 
-                Put()
-                    .word8be(5)
-                    .word16be(3)
-                    .word16be(0x0000)
-                    .buffer()
+                Buffer.from([0x05,0x00,0x03,0x00,0x00])
             );
         });
 
@@ -334,8 +301,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', Put().word8be(0x85).word8be(0x04).buffer()); 
-        
+            client.emit('data', Buffer.from([0x85,0x04]))
         });
     
     
@@ -369,11 +335,7 @@ describe("Modbus Serial Client", function () {
             client.setState('ready');
             client.emit(
                 'data', 
-                Put()
-                    .word8be(6)
-                    .word16be(3)
-                    .word16be(123)
-                    .buffer()
+                Buffer.from([0x06,0x00,0x03,0x00,0x7B])
             );
         
         });
@@ -382,7 +344,7 @@ describe("Modbus Serial Client", function () {
         
             var client = ModbusClient(true);
 
-            client.writeSingleRegister(3, new Buffer([0x00, 0x7b])).then(function (resp) {
+            client.writeSingleRegister(3, Buffer.from([0x00, 0x7b])).then(function (resp) {
            
                 assert.equal(resp.fc, 6);
                 assert.equal(resp.registerAddress, 3);
@@ -401,11 +363,7 @@ describe("Modbus Serial Client", function () {
             client.setState('ready');
             client.emit(
                 'data', 
-                Put()
-                    .word8be(6)
-                    .word16be(3)
-                    .word16be(123)
-                    .buffer()
+                Buffer.from([0x06,0x00,0x03,0x00,0x7B])
             );
         });
 
@@ -424,7 +382,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', Put().word8be(0x86).word8be(0x01).buffer()); 
+            client.emit('data', Buffer.from([0x86,0x01]))
         
         });
     
@@ -464,14 +422,7 @@ describe("Modbus Serial Client", function () {
             client.setState('ready');
             client.emit(
                 'data', 
-                Put()
-                    .word8be(15)
-                    .word16be(20)
-                    .word16be(10)
-                    .word8be(2)
-                    .word8be(0xCD)
-                    .word8be(0x01)
-                    .buffer()
+                Buffer.from([0x0F,0x00,0x14,0x00,0x0A,0x02,0xCD,0x01])
             );
         });
 
@@ -479,7 +430,7 @@ describe("Modbus Serial Client", function () {
         
             var client = ModbusClient(true);
 
-            client.writeMultipleCoils(20, new Buffer([0xCD, 0x01]), 10)
+            client.writeMultipleCoils(20, Buffer.from([0xCD, 0x01]), 10)
             .then(function (resp) {
            
                 assert.equal(resp.fc, 15);
@@ -503,14 +454,7 @@ describe("Modbus Serial Client", function () {
             client.setState('ready');
             client.emit(
                 'data', 
-                Put()
-                    .word8be(15)
-                    .word16be(20)
-                    .word16be(10)
-                    .word8be(2)
-                    .word8be(0xCD)
-                    .word8be(0x01)
-                    .buffer()
+                Buffer.from([0x0F,0x00,0x14,0x00,0x0A,0x02,0xCD,0x01])
             );
         
         });
@@ -530,7 +474,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', Put().word8be(0x8F).word8be(0x02).buffer()); 
+            client.emit('data', Buffer.from([0x8F, 0x02]))
         
         });
     
@@ -569,14 +513,7 @@ describe("Modbus Serial Client", function () {
             client.setState('ready');
             client.emit(
               'data', 
-              Put()
-                .word8be(16)
-                .word16be(3)
-                .word16be(3)
-                .word16be(1)
-                .word16be(2)
-                .word16be(350)
-                .buffer()
+              Buffer.from([0x10,0x00,0x03,0x00,0x03,0x00,0x01,0x00,0x02,0x01,0x6F])
             );
         });
 
@@ -584,7 +521,7 @@ describe("Modbus Serial Client", function () {
         
           var client = ModbusClient(true);
 
-          client.writeMultipleRegisters(3, new Buffer([0x00, 0xc4]))
+          client.writeMultipleRegisters(3, Buffer.from([0x00, 0xc4]))
           
           var pdu = client.queueSpy().pdu
 
@@ -611,7 +548,7 @@ describe("Modbus Serial Client", function () {
             }).done();
 
             client.setState('ready');
-            client.emit('data', Put().word8be(0x90).word8be(0x02).buffer()); 
+            client.emit('data', Buffer.from([0x90, 0x02]))
         
         });
     
@@ -659,15 +596,7 @@ describe("Modbus Serial Client", function () {
  
                 client.emit(
                     'data', 
-                    Put()
-                        .word8be(3)
-                        .word8be(10)
-                        .word16be(1)
-                        .word16be(2)
-                        .word16be(3)
-                        .word16be(4)
-                        .word16be(5)
-                        .buffer()
+                    Buffer.from([0x03,0x0A,0x00,0x01,0x00,0x02,0x00,0x03,0x00,0x04,0x00,0x05])
                     );
             
                 done();

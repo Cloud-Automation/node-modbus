@@ -1,6 +1,4 @@
-var stampit     = require('stampit'),
-    Put         = require('put');
-
+var stampit     = require('stampit')
 
 module.exports = stampit()
     .init(function () {
@@ -25,9 +23,12 @@ module.exports = stampit()
 
                 if (pdu.length < 3) {
                 
-                    cb(Put().word8(0x90).word8(0x02).buffer());
-                    return;
+                  var buf = Buffer.allocUnsafe(2)
 
+                  buf.writeUInt8(0x90, 0)
+                  buf.writeUInt8(0x02, 1)
+                  cb(buf)
+                  return
                 }
 
                 var fc          = pdu.readUInt8(0),
@@ -38,9 +39,12 @@ module.exports = stampit()
 
                 if (quantity > 0x007b) {
                 
-                    cb(Put().word8(0x90).word8(0x03).buffer());
-                    return;
-                
+                  var buf = Buffer.allocUnsafe(2)
+
+                  buf.writeUInt8(0x90, 0)
+                  buf.writeUInt8(0x03, 1)
+                  cb(buf)
+                  return
                 }
 
                 this.emit('preWriteMultipleRegistersRequest', byteStart, quantity, byteCount);
@@ -49,21 +53,20 @@ module.exports = stampit()
 
                 if (byteStart > mem.length || byteStart + (quantity * 2) > mem.length) {
                 
-                    cb(Put().word8(0x90).word8(0x02).buffer());
-                    return;
+                  var buf = Buffer.allocUnsafe(2)
 
+                  buf.writeUInt8(0x90, 0)
+                  buf.writeUInt8(0x02, 1)
+                  cb(buf)
+                  return
                 }
 
-                var response = Put().word8(0x10).word16be(start).word16be(quantity).buffer(),
-                    j = 0, currentByte;
+                var response = Buffer.allocUnsafe(5)
+                response.writeUInt8(0x10, 0)
+                response.writeUInt16BE(start, 1)
+                response.writeUInt16BE(quantity, 3)
 
-                for (var i = byteStart; i < byteStart + byteCount; i += 1) {
-                
-                    mem.writeUInt8(pdu.readUInt8(6 + j + 0), i);
-
-                    j += 1;   
-                
-                }
+                pdu.copy(mem, byteStart, 6, 6 + byteCount)
 
                 this.emit('postWriteMultipleRegistersRequest', byteStart, quantity, byteCount);
 
