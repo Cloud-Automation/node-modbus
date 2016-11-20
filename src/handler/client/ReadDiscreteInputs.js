@@ -1,7 +1,5 @@
 var Stampit = require('stampit'),
-    Promise = require('bluebird'),
-    Put     = require('put');
-
+    Promise = require('bluebird')
 
 module.exports = Stampit()
     .init(function () {
@@ -48,15 +46,16 @@ module.exports = Stampit()
  
             var fc      = 2,
                 defer   = Promise.defer(),
-                pdu     = Put().word8be(2).word16be(start).word16be(quantity).buffer();
+                pdu     = Buffer.allocUnsafe(5)
+
+            pdu.writeUInt8(fc)
+            pdu.writeUInt16BE(start,1)
+            pdu.writeUInt16BE(quantity,3)
 
             if (quantity > 2000) {    
 
                 defer.reject(); 
-         
                 return defer.promise; 
-                
-
             }
 
             this.queueRequest(fc, pdu, defer);

@@ -1,7 +1,5 @@
 var stampit = require('stampit'),
-    Promise = require('bluebird'),
-    Put     = require('put');
-
+    Promise = require('bluebird')
 
 module.exports = stampit()
     .init(function () {
@@ -40,9 +38,11 @@ module.exports = stampit()
  
             var defer = Promise.defer();
             var fc          = 16,
-                pdu         = Put()
-                                .word8(fc)
-                                .word16be(startAddress)
+                basePdu     = Buffer.allocUnsafe(6),
+                pdu 
+
+            basePdu.writeUInt8(fc)
+            basePdu.writeUInt16BE(startAddress, 1)
 
             if(register instanceof Buffer) {
 
@@ -50,9 +50,10 @@ module.exports = stampit()
                 defer.reject();
               }
 
-              pdu.word16be(register.length/2)
-                 .word8(register.length)
-                 .put(register)
+              basePdu.writeUInt16BE(register.length/2,3)
+              basePdu.writeUInt8(register.length,5)
+
+              pdu = Buffer.concat([basePdu, register])
             }
             else if(register instanceof Array) {
 
@@ -64,17 +65,19 @@ module.exports = stampit()
               var byteCount   = Math.ceil(register.length * 2),
                   curByte     = 0
 
-              pdu.word16be(register.length)
-                 .word8(byteCount)
+              var payloadPdu  = Buffer.allocUnsafe(byteCount)
+
+              basePdu.writeUInt16BE(register.length, 3)
+              basePdu.writeUInt8(byteCount, 5)
 
               for (var i = 0; i < register.length; i += 1) {
-                  pdu.word16be(register[i]);
+                  payloadPdu.writeUInt16BE(register[i],2*i)
               }
+
+              pdu = Buffer.concat([basePdu, payloadPdu])
             } else {
               defer.reject();
             }
-
-            pdu = pdu.buffer();
 
             this.queueRequest(fc, pdu, defer);
 

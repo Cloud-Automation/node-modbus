@@ -1,7 +1,5 @@
 var stampit = require('stampit'),
-    Promise = require('bluebird'),
-    Put     = require('put');
-
+    Promise = require('bluebird')
 
 module.exports = stampit()
     .init(function () {
@@ -40,15 +38,18 @@ module.exports = stampit()
  
             var defer = Promise.defer();
             var fc          = 15,
-                pdu         = Put()
-                                .word8(fc)
-                                .word16be(startAddress);
+                basePdu     = Buffer.allocUnsafe(6)
+            var pdu
+
+            basePdu.writeUInt8(fc,0)
+            basePdu.writeUInt16BE(startAddress,1)
 
             if (coils instanceof Buffer) {
 
-              pdu.word16be(N)
-                 .word8(coils.length)
-                 .put(coils);
+              basePdu.writeUInt16BE(N, 3)
+              basePdu.writeUInt8(coils.length, 5)
+              pdu = Buffer.concat([basePdu, coils])
+
             } else if (coils instanceof Array) {
 
               if (coils.length > 1968) {
@@ -58,10 +59,12 @@ module.exports = stampit()
 
               var byteCount   = Math.ceil(coils.length / 8),
                   curByte     = 0,
-                  cntr        = 0;
+                  curByteIdx  = 0,
+                  cntr        = 0
+              var payloadPdu = Buffer.allocUnsafe(byteCount)
 
-              pdu.word16be(coils.length)
-                 .word8(byteCount);
+              basePdu.writeUInt16BE(coils.length, 3)
+              basePdu.writeUInt8(byteCount, 5)
 
               for (var i = 0; i < coils.length; i += 1) {
 
@@ -70,14 +73,15 @@ module.exports = stampit()
                   cntr = (cntr + 1) % 8;
 
                   if (cntr === 0 || i === coils.length - 1 ) {
-                      pdu.word8(curByte);
-                      curByte = 0;
+                      payloadPdu.writeUInt8(curByte, curByteIdx)
+                      curByteIdx = curByteIdx + 1
+                      curByte = 0
                   }
               }
+
+              pdu = Buffer.concat([basePdu, payloadPdu])
             }
 
-            pdu = pdu.buffer();
-            
             this.queueRequest(fc, pdu, defer);
 
             return defer.promise;
