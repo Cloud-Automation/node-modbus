@@ -1,5 +1,5 @@
 var Stampit = require('stampit'),
-    Q       = require('q'),
+    Promise = require('bluebird'),
     Put     = require('put');
 
 module.exports = Stampit()
@@ -37,7 +37,7 @@ module.exports = Stampit()
         this.writeSingleCoil = function (address, value) {
  
             var fc      = 5,
-                defer   = Q.defer(), 
+                defer   = Promise.defer(), 
                 payload = (value instanceof Buffer) ? (value.readUInt8(0) > 0) : value,
                 pdu     = Put().word8be(5).word16be(address).word16be(payload?0xff00:0x0000).buffer();
 

@@ -1,5 +1,5 @@
 var Stampit = require('stampit'),
-    Q       = require('q'),
+    Promise = require('bluebird'),
     Put     = require('put');
 
 
@@ -47,7 +47,7 @@ module.exports = Stampit()
         this.readDiscreteInputs = function (start, quantity) {
  
             var fc      = 2,
-                defer   = Q.defer(),
+                defer   = Promise.defer(),
                 pdu     = Put().word8be(2).word16be(start).word16be(quantity).buffer();
 
             if (quantity > 2000) {    

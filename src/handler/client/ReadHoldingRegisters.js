@@ -1,5 +1,5 @@
 var Stampit = require('stampit'),
-    Q       = require('q'),
+    Promise = require('bluebird'),
     Put     = require('put');
 
 
@@ -47,7 +47,7 @@ module.exports = Stampit()
            this.log.debug('Starting read holding registers request.'); 
 
             var fc      = 3,
-                defer   = Q.defer(),
+                defer   = Promise.defer(),
                 pdu     = Put().word8be(3).word16be(start).word16be(quantity).buffer();
 
             this.queueRequest(fc, pdu, defer);

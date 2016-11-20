@@ -1,5 +1,5 @@
 var Stampit = require('stampit'),
-    Q       = require('q'),
+    Promise = require('bluebird'),
     Put     = require('put');
 
 
@@ -50,7 +50,7 @@ module.exports = Stampit()
         this.readCoils = function (start, quantity) {
  
             var fc      = 1,
-                defer   = Q.defer(),
+                defer   = Promise.defer(),
                 pdu     = Put().word8(fc).word16be(start).word16be(quantity).buffer();
 
             this.queueRequest(fc, pdu, defer);

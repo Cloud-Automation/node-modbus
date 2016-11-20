@@ -1,5 +1,5 @@
 var Stampit = require('stampit'),
-    Q       = require('q'),
+    Promise = require('bluebird'),
     Put     = require('put');
 
 
@@ -45,7 +45,7 @@ module.exports = Stampit()
         this.readInputRegisters = function (start, quantity) {
  
             var fc      = 4, 
-                defer   = Q.defer(),
+                defer   = Promise.defer(),
                 pdu     = Put().word8be(4).word16be(start).word16be(quantity).buffer();
 
             this.queueRequest(fc, pdu, defer);

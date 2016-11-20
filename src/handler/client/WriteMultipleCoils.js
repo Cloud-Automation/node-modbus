@@ -1,5 +1,5 @@
 var stampit = require('stampit'),
-    Q       = require('q'),
+    Promise = require('bluebird'),
     Put     = require('put');
 
 
@@ -38,7 +38,7 @@ module.exports = stampit()
 
         this.writeMultipleCoils = function (startAddress, coils, N) {
  
-            var defer = Q.defer();
+            var defer = Promise.defer();
             var fc          = 15,
                 pdu         = Put()
                                 .word8(fc)

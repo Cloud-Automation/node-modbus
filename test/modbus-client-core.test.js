@@ -44,7 +44,7 @@ describe("Modbus Serial Client", function () {
         
             var client = ModbusClient();
 
-            client.readCoils(0, 10).fail(function (resp) {
+            client.readCoils(0, 10).catch(function (resp) {
             
                 done();
 
@@ -91,7 +91,7 @@ describe("Modbus Serial Client", function () {
             
                 assert.ok(false);
             
-            }).fail(function (err) {
+            }).catch(function (err) {
             
                 done();
             
@@ -149,7 +149,7 @@ describe("Modbus Serial Client", function () {
             
                 assert.ok(false);
             
-            }).fail(function (err) {
+            }).catch(function (err) {
             
                 done();
             
@@ -207,7 +207,7 @@ describe("Modbus Serial Client", function () {
             
                 assert.ok(false);
             
-            }).fail(function (err) {
+            }).catch(function (err) {
             
                 done();
             
@@ -327,7 +327,7 @@ describe("Modbus Serial Client", function () {
             
                 done(true);
 
-            }).fail(function (err) {
+            }).catch(function (err) {
             
                 done();
             
@@ -417,7 +417,7 @@ describe("Modbus Serial Client", function () {
             
                 done(true);
 
-            }).fail(function (err) {
+            }).catch(function (err) {
             
                 done();
             
@@ -523,7 +523,7 @@ describe("Modbus Serial Client", function () {
             
                 done(true);
 
-            }).fail(function (err) {
+            }).catch(function (err) {
             
                 done();
             
@@ -604,7 +604,7 @@ describe("Modbus Serial Client", function () {
             
                 done(true);
 
-            }).fail(function (err) {
+            }).catch(function (err) {
             
                 done();
             
@@ -628,14 +628,12 @@ describe("Modbus Serial Client", function () {
             var client = ModbusClient({ 'timeout' : 200 });
 
             client.readHoldingRegisters(3, 10).then(function (resp) {
-           
-                done(true);
             
-            }).fail(function (err) {
+            }).catch(function (err) {
             
-                done(err.err !== 'timeout');
-
-            }).done();
+                assert.equal(err.err, 'timeout');
+                done()
+            });
 
             client.setState('ready');
        
@@ -649,7 +647,7 @@ describe("Modbus Serial Client", function () {
            
                 done(true);
             
-            }).fail(function (err) {
+            }).catch(function (err) {
             
                 assert.equal(err.err, 'timeout');
 
