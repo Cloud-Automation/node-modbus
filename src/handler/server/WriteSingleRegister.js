@@ -1,6 +1,4 @@
-var stampit     = require('stampit'),
-    Put         = require('put');
-
+var stampit     = require('stampit')
 
 module.exports = stampit()
     .init(function () {
@@ -25,9 +23,12 @@ module.exports = stampit()
 
                 if (pdu.length !== 5) {
                 
-                    cb(Put().word8(0x86).word8(0x02).buffer());
-                    return;
+                  var buf = Buffer.allocUnsafe(2)
 
+                  buf.writeUInt8(0x86, 0)
+                  buf.writeUInt8(0x02, 1)
+                  cb(buf)
+                  return
                 }
 
                 var //fc          = pdu.readUInt8(0),
@@ -41,12 +42,19 @@ module.exports = stampit()
 
                 if (byteAddress > mem.length) {
                 
-                    cb(Put().word8(0x86).word8(0x02).buffer());
-                    return;
+                  var buf = Buffer.allocUnsafe(2)
 
+                  buf.writeUInt8(0x86, 0)
+                  buf.writeUInt8(0x02, 1)
+                  cb(buf)
+                  return
                 }
 
-                var response = Put().word8(0x06).word16be(address).word16be(value).buffer();
+                var response = Buffer.allocUnsafe(5)
+
+                response.writeUInt8(0x06)
+                response.writeUInt16BE(address, 1)
+                response.writeUInt16BE(value, 3)
 
                 mem.writeUInt16BE(value, byteAddress); 
 

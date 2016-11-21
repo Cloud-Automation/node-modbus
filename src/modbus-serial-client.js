@@ -1,6 +1,5 @@
 var stampit         = require('stampit'),
     crc             = require('crc'),
-    Put             = require('put'),
     ModbusCore      = require('./modbus-client-core.js');
 
 module.exports = stampit()
@@ -144,14 +143,23 @@ module.exports = stampit()
     
         var onSend = function (pdu) {
 
-            var pkt = Put()
-                .word8(this.unitId)
-                .put(pdu),
-                buf = pkt.buffer();
-            
+            var crc = 0;
+
+            var base = Buffer.allocUnsafe(1);
+            base.writeUInt8(1);
+            var buf = Buffer.concat([base, pdu]);
+
+            for (var i = 0; i < buf.length; i += 1) {
+                crc = (buf.readUInt8(i) + crc) % 0xFFFF;
+            }
+
             var crc16 = crc.crc16modbus(buf);
-            pkt = pkt.word16le(crc16).buffer();
- 
+
+            var crcBuf = Buffer.allocUnsafe(2);
+            crcBuf.writeUInt16LE(crc16, 0);
+
+            var pkt = Buffer.concat([buf, crcBuf]);
+
             serialport.write(pkt, function (err) {
             
                 if (err) {
@@ -159,16 +167,13 @@ module.exports = stampit()
                 }
             
             }.bind(this));
-        
+
         }.bind(this);
 
         this.close = function () {
-        
             serialport.close();
-        
         };
 
         init();
-    
-    
+
     });
