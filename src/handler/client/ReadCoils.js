@@ -12,11 +12,10 @@ module.exports = Stampit()
     
         var onResponse = function (pdu, request) {
  
-            this.log.debug("handeling read coils response.");
+            this.log.debug("handling read coils response.");
 
             var fc          = pdu.readUInt8(0),
-                byteCount   = pdu.readUInt8(1),
-                bitCount    = byteCount * 8;
+                byteCount   = pdu.readUInt8(1);
 
             var resp = {
                     fc          : fc,
