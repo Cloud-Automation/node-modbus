@@ -31,7 +31,7 @@ fs.readdirSync(__dirname + '/handler/client')
 exports.server = { 
     tcp         : {
         core        : require('./modbus-tcp-server.js'),
-        complete    : require('./modbus-tcp-server.js'),
+        complete    : require('./modbus-tcp-server.js')
     },
     handler     : { }
 };
