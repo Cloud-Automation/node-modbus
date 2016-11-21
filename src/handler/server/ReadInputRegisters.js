@@ -23,15 +23,15 @@ module.exports = stampit()
 
                 if (pdu.length !== 5) {
                 
-                  var buf = Buffer.allocUnsafe(2)
-
-                  buf.writeUInt8(0x84, 0)
-                  buf.writeUInt8(0x02, 1)
-                  cb(buf)
-                  return;
+                    var buf = Buffer.allocUnsafe(2);
+  
+                    buf.writeUInt8(0x84, 0);
+                    buf.writeUInt8(0x02, 1);
+                    cb(buf);
+                    return;
                 }
 
-                var fc          = pdu.readUInt8(0),
+                var //fc          = pdu.readUInt8(0), //unused
                     start       = pdu.readUInt16BE(1),
                     byteStart   = start * 2,
                     quantity    = pdu.readUInt16BE(3);
@@ -42,20 +42,20 @@ module.exports = stampit()
 
                 if (byteStart > mem.length || byteStart + (quantity * 2) > mem.length) {
                 
-                  var buf = Buffer.allocUnsafe(2)
+                  var buf = Buffer.allocUnsafe(2);
 
-                  buf.writeUInt8(0x84, 0)
-                  buf.writeUInt8(0x02, 1)
-                  cb(buf)
+                  buf.writeUInt8(0x84, 0);
+                  buf.writeUInt8(0x02, 1);
+                  cb(buf);
                   return;
                 }
 
-                var head = Buffer.allocUnsafe(2)
+                var head = Buffer.allocUnsafe(2);
                  
-                head.writeUInt8(0x04, 0)
-                head.writeUInt8(quantity * 2, 1)
+                head.writeUInt8(0x04, 0);
+                head.writeUInt8(quantity * 2, 1);
 
-                var response = Buffer.concat([head, mem.slice(byteStart * 2, byteStart * 2 + quantity * 2)])  
+                var response = Buffer.concat([head, mem.slice(byteStart * 2, byteStart * 2 + quantity * 2)]);
 
 
                 cb(response);
