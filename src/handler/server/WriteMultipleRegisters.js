@@ -1,4 +1,4 @@
-var stampit     = require('stampit')
+var stampit     = require('stampit');
 
 module.exports = stampit()
     .init(function () {
@@ -23,15 +23,15 @@ module.exports = stampit()
 
                 if (pdu.length < 3) {
                 
-                  var buf = Buffer.allocUnsafe(2)
+                  var buf = Buffer.allocUnsafe(2);
 
-                  buf.writeUInt8(0x90, 0)
-                  buf.writeUInt8(0x02, 1)
-                  cb(buf)
-                  return
+                  buf.writeUInt8(0x90, 0);
+                  buf.writeUInt8(0x02, 1);
+                  cb(buf);
+                  return;
                 }
 
-                var fc          = pdu.readUInt8(0),
+                var //fc          = pdu.readUInt8(0), //unused
                     start       = pdu.readUInt16BE(1),
                     byteStart   = start * 2,
                     quantity    = pdu.readUInt16BE(3),
@@ -39,12 +39,12 @@ module.exports = stampit()
 
                 if (quantity > 0x007b) {
                 
-                  var buf = Buffer.allocUnsafe(2)
-
-                  buf.writeUInt8(0x90, 0)
-                  buf.writeUInt8(0x03, 1)
-                  cb(buf)
-                  return
+                    var buf = Buffer.allocUnsafe(2);
+  
+                    buf.writeUInt8(0x90, 0);
+                    buf.writeUInt8(0x03, 1);
+                    cb(buf);
+                    return;
                 }
 
                 this.emit('preWriteMultipleRegistersRequest', byteStart, quantity, byteCount);
@@ -53,20 +53,20 @@ module.exports = stampit()
 
                 if (byteStart > mem.length || byteStart + (quantity * 2) > mem.length) {
                 
-                  var buf = Buffer.allocUnsafe(2)
+                  var buf = Buffer.allocUnsafe(2);
 
-                  buf.writeUInt8(0x90, 0)
-                  buf.writeUInt8(0x02, 1)
-                  cb(buf)
-                  return
+                  buf.writeUInt8(0x90, 0);
+                  buf.writeUInt8(0x02, 1);
+                  cb(buf);
+                  return;
                 }
 
-                var response = Buffer.allocUnsafe(5)
-                response.writeUInt8(0x10, 0)
-                response.writeUInt16BE(start, 1)
-                response.writeUInt16BE(quantity, 3)
+                var response = Buffer.allocUnsafe(5);
+                response.writeUInt8(0x10, 0);
+                response.writeUInt16BE(start, 1);
+                response.writeUInt16BE(quantity, 3);
 
-                pdu.copy(mem, byteStart, 6, 6 + byteCount)
+                pdu.copy(mem, byteStart, 6, 6 + byteCount);
 
                 this.emit('postWriteMultipleRegistersRequest', byteStart, quantity, byteCount);
 
