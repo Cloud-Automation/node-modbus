@@ -1,5 +1,4 @@
-var Util            = require('util'),
-    stampit         = require('stampit'),
+var stampit         = require('stampit'),
     Log             = require('stampit-log'),
     StateMachine    = require('stampit-state-machine');
 
