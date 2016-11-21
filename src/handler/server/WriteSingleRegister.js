@@ -1,4 +1,4 @@
-var stampit     = require('stampit')
+var stampit     = require('stampit');
 
 module.exports = stampit()
     .init(function () {
@@ -22,16 +22,16 @@ module.exports = stampit()
                 this.log.debug('handling write single register request.');
 
                 if (pdu.length !== 5) {
-                
-                  var buf = Buffer.allocUnsafe(2)
-
-                  buf.writeUInt8(0x86, 0)
-                  buf.writeUInt8(0x02, 1)
-                  cb(buf)
-                  return
+                    
+                    var buf = Buffer.allocUnsafe(2);
+  
+                    buf.writeUInt8(0x86, 0);
+                    buf.writeUInt8(0x02, 1);
+                    cb(buf);
+                    return;
                 }
 
-                var fc          = pdu.readUInt8(0),
+                var //fc          = pdu.readUInt8(0), // unused
                     address     = pdu.readUInt16BE(1),
                     byteAddress = address * 2,
                     value       = pdu.readUInt16BE(3);
@@ -42,19 +42,19 @@ module.exports = stampit()
 
                 if (byteAddress > mem.length) {
                 
-                  var buf = Buffer.allocUnsafe(2)
-
-                  buf.writeUInt8(0x86, 0)
-                  buf.writeUInt8(0x02, 1)
-                  cb(buf)
-                  return
+                    var buf = Buffer.allocUnsafe(2);
+  
+                    buf.writeUInt8(0x86, 0);
+                    buf.writeUInt8(0x02, 1);
+                    cb(buf);
+                    return;
                 }
 
-                var response = Buffer.allocUnsafe(5)
+                var response = Buffer.allocUnsafe(5);
 
-                response.writeUInt8(0x06)
-                response.writeUInt16BE(address, 1)
-                response.writeUInt16BE(value, 3)
+                response.writeUInt8(0x06);
+                response.writeUInt16BE(address, 1);
+                response.writeUInt16BE(value, 3);
 
                 mem.writeUInt16BE(value, byteAddress); 
 
