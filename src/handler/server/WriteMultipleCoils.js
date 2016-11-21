@@ -23,15 +23,15 @@ module.exports = stampit()
 
                 if (pdu.length < 3) {
                 
-                  var buf = Buffer.allocUnsafe(2)
+                  var buf = Buffer.allocUnsafe(2);
 
-                  buf.writeUInt8(0x8F, 0)
-                  buf.writeUInt8(0x02, 1)
-                  cb(buf)
-                  return
+                  buf.writeUInt8(0x8F, 0);
+                  buf.writeUInt8(0x02, 1);
+                  cb(buf);
+                  return;
                 }
 
-                var fc          = pdu.readUInt8(0),
+                var //fc          = pdu.readUInt8(0), // unused
                     start       = pdu.readUInt16BE(1),
                     quantity    = pdu.readUInt16BE(3),
                     byteCount   = pdu.readUInt8(5);
@@ -43,23 +43,23 @@ module.exports = stampit()
                 // error response
                 if (start > mem.length * 8 || start + quantity > mem.length * 8) {
                 
-                  var buf = Buffer.allocUnsafe(2)
+                  var buf = Buffer.allocUnsafe(2);
 
-                  buf.writeUInt8(0x8F, 0)
-                  buf.writeUInt8(0x02, 1)
-                  cb(buf)
-                  return
+                  buf.writeUInt8(0x8F, 0);
+                  buf.writeUInt8(0x02, 1);
+                  cb(buf);
+                  return;
                 }
 
-                var response = Buffer.allocUnsafe(5)
+                var response = Buffer.allocUnsafe(5);
 
-                response.writeUInt8(0x0F, 0)
-                response.writeUInt16BE(start, 1)
-                response.writeUInt16BE(quantity, 3)
+                response.writeUInt8(0x0F, 0);
+                response.writeUInt16BE(start, 1);
+                response.writeUInt16BE(quantity, 3);
 
                 var oldValue, newValue, current = pdu.readUInt8(6 + 0), j = 0;
 
-                for (var i = start; i < start + quantity; i += 1 ) {
+                for (var i = start; i < start + quantity; i += 1) {
 
                     // reading old value from the coils register
                     oldValue = mem.readUInt8(Math.floor(i / 8));
