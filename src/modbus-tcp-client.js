@@ -10,6 +10,7 @@ module.exports = stampit()
             currentRequestId    = reqId,
             closedOnPurpose     = false,
             reconnect           = false,
+            buffer              = new Buffer(0),
             trashRequestId, 
             socket;
     
@@ -92,41 +93,40 @@ module.exports = stampit()
  
             this.log.debug('received data');
 
-            var cnt = 0;
+            buffer = Buffer.concat([buffer, data]);
 
-            while (cnt < data.length) {
+            while (buffer.length > 8) {
 
                 // 1. extract mbap
 
-                var mbap    = data.slice(cnt, cnt + 7),
-                    id      = mbap.readUInt16BE(0),
-                    len     = mbap.readUInt16BE(4);
-
-                if (id === trashRequestId) {
-                
-                    this.log.debug('current mbap contains trashed request id.');
-
-                    return;
-
-                }
-
-                cnt += 7;
+                var id  = buffer.readUInt16BE(0),
+                    len = buffer.readUInt16BE(4);
 
                 this.log.debug('MBAP extracted');
 
                 // 2. extract pdu
+                if (buffer.length < 7 + len - 1) {
+                    break;
+                }
 
-                var pdu = data.slice(cnt, cnt + len - 1);
-
-                cnt += pdu.length;
+                var pdu = buffer.slice(7, 7 + len - 1);
 
                 this.log.debug('PDU extracted');
 
-                // emit data event and let the 
-                // listener handle the pdu
+                if (id === trashRequestId) {
 
-                this.emit('data', pdu);
+                    this.log.debug('current mbap contains trashed request id.');
 
+                } else {
+
+                    // emit data event and let the
+                    // listener handle the pdu
+                    this.emit('data', pdu);
+
+                }
+
+                buffer = buffer.slice(pdu.length + 7, buffer.length);
+          
             }
         
         }.bind(this);
@@ -146,14 +146,14 @@ module.exports = stampit()
 
             reqId += 1;
 
-            var head = Buffer.allocUnsafe(7)
+            var head = Buffer.allocUnsafe(7);
 
-            head.writeUInt16BE(reqId, 0)
-            head.writeUInt16BE(this.protocolVersion, 2)
-            head.writeUInt16BE(pdu.length + 1, 4)
-            head.writeUInt8(this.unitId, 6)
+            head.writeUInt16BE(reqId, 0);
+            head.writeUInt16BE(this.protocolVersion, 2);
+            head.writeUInt16BE(pdu.length + 1, 4);
+            head.writeUInt8(this.unitId, 6);
 
-            var pkt = Buffer.concat([head, pdu])
+            var pkt = Buffer.concat([head, pdu]);
 
             currentRequestId = reqId;
 
