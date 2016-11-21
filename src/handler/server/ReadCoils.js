@@ -26,13 +26,13 @@ module.exports = stampit()
                 
                   var buf = Buffer.allocUnsafe(2)
 
-                  buf.writeUInt8(0x81, 0)
-                  buf.writeUInt8(0x02, 1)
-                  cb(buf)
-                  return
+                  buf.writeUInt8(0x81, 0);
+                  buf.writeUInt8(0x02, 1);
+                  cb(buf);
+                  return;
                 }
 
-                var fc          = pdu.readUInt8(0),
+                var //fc          = pdu.readUInt8(0), // unused
                     start       = pdu.readUInt16BE(1),
                     quantity    = pdu.readUInt16BE(3);
 
@@ -42,11 +42,11 @@ module.exports = stampit()
 
                 if (start > mem.length * 8 || start + quantity > mem.length * 8) {
                 
-                  var buf = Buffer.allocUnsafe(2)
-                  buf.writeUInt8(0x81, 0)
-                  buf.writeUInt8(0x02, 1)
-                  cb(buf)
-                  return
+                  var buf = Buffer.allocUnsafe(2);
+                  buf.writeUInt8(0x81, 0);
+                  buf.writeUInt8(0x02, 1);
+                  cb(buf);
+                  return;
                 }
 
                 var val = 0, 
@@ -55,24 +55,24 @@ module.exports = stampit()
                     byteCount = Math.ceil(quantity / 8),
                     response = Buffer.allocUnsafe(2 + byteCount)
 
-                response.writeUInt8(0x01, 0)
+                response.writeUInt8(0x01, 0);
                 response.writeUInt8(byteCount, 1);
 
                 for (var totalBitCount = start; totalBitCount < start + quantity; totalBitCount += 1) {
      
-                    var buf = mem.readUInt8(Math.floor(totalBitCount / 8))
-                    var mask = 1 << (totalBitCount % 8)
+                    var buf = mem.readUInt8(Math.floor(totalBitCount / 8));
+                    var mask = 1 << (totalBitCount % 8);
 
-                    if(buf & mask) {
-                      val += 1 << (thisByteBitCount % 8)
+                    if (buf & mask) {
+                      val += 1 << (thisByteBitCount % 8);
                     }
                
                     thisByteBitCount += 1;
 
                     if (thisByteBitCount % 8 === 0 || totalBitCount === (start + quantity) - 1) {
                    
-                        response.writeUInt8(val, byteIdx)
-                        val = 0; byteIdx = byteIdx + 1
+                        response.writeUInt8(val, byteIdx);
+                        val = 0; byteIdx = byteIdx + 1;
                     }
                 }
 
