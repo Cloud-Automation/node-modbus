@@ -147,7 +147,7 @@ module.exports = stampit()
         var onSocketError = function (socket, socketCount) {
         
             return function (e) {
-            
+                this.emit('error', e);
                 this.logError('Socker error', e);
             
             }.bind(this);
