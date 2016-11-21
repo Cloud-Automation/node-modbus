@@ -6,7 +6,7 @@ var stampit         = require('stampit'),
     .compose(EventBus, Log)
     .init(function () {
    
-        var coils, holding, input, handler = { };
+        var coils, holding, input, discrete, handler = { };
 
         var init = function () {
 
@@ -27,14 +27,20 @@ var stampit         = require('stampit'),
             } else {
                 input = this.input;
             }
+            
+            if (!this.discrete) {
+                discrete = new Buffer(1024);
+            } else {
+                discrete = this.discrete;
+            }
         
         }.bind(this);
 
         this.onData = function (pdu, callback) {
 
              // get fc and byteCount in advance
-            var fc          = pdu.readUInt8(0),
-                byteCount   = pdu.readUInt8(1);
+            var fc          = pdu.readUInt8(0);
+                //byteCount   = pdu.readUInt8(1); // unused
 
             // get the pdu handler
             var reqHandler  = handler[fc];
@@ -47,11 +53,11 @@ var stampit         = require('stampit'),
           
                 this.log.debug('no handler for fc', fc);
 
-                var buf = Buffer.alloc(2)
-                buf.writeUInt8(fc + 0x80, 0)
-                buf.writeUInt8(0x01, 1)
+                var buf = Buffer.alloc(2);
+                buf.writeUInt8(fc + 0x80, 0);
+                buf.writeUInt8(0x01, 1);
 
-                callback(buf)
+                callback(buf);
 
                 return;
             
@@ -93,7 +99,13 @@ var stampit         = require('stampit'),
             return holding;
         
         };
+        
+        this.getDiscrete = function () {
 
+            return discrete;
+
+        };
+ 
         init();
     
     });
