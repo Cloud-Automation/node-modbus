@@ -34,7 +34,10 @@ module.exports = stampit()
             if (!this.parity) {
                 this.parity = 'none';
             }
-
+            
+            if (!this.unitId) { 
+                this.unitId = 0; 
+            }
             // TODO: flowControl - ['xon', 'xoff', 'xany', 'rtscts']
 
             // TODO: settings - ['brk', 'cts', 'dtr', 'dts', 'rts']
