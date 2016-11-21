@@ -1,6 +1,4 @@
-var stampit     = require('stampit'),
-    Put         = require('put');
-
+var stampit     = require('stampit')
 
 module.exports = stampit()
     .init(function () {
@@ -25,9 +23,12 @@ module.exports = stampit()
 
                 if (pdu.length < 3) {
                 
-                    cb(Put().word8(0x8F).word8(0x02).buffer());
-                    return;
+                  var buf = Buffer.allocUnsafe(2)
 
+                  buf.writeUInt8(0x8F, 0)
+                  buf.writeUInt8(0x02, 1)
+                  cb(buf)
+                  return
                 }
 
                 var fc          = pdu.readUInt8(0),
@@ -42,13 +43,21 @@ module.exports = stampit()
                 // error response
                 if (start > mem.length * 8 || start + quantity > mem.length * 8) {
                 
-                    cb(Put().word8(0x8F).word8(0x02).buffer());
-                    return;
+                  var buf = Buffer.allocUnsafe(2)
 
+                  buf.writeUInt8(0x8F, 0)
+                  buf.writeUInt8(0x02, 1)
+                  cb(buf)
+                  return
                 }
 
-                var response = Put().word8(0x0F).word16be(start).word16be(quantity).buffer(),
-                    oldValue, newValue, current = pdu.readUInt8(6 + 0), j = 0;
+                var response = Buffer.allocUnsafe(5)
+
+                response.writeUInt8(0x0F, 0)
+                response.writeUInt16BE(start, 1)
+                response.writeUInt16BE(quantity, 3)
+
+                var oldValue, newValue, current = pdu.readUInt8(6 + 0), j = 0;
 
                 for (var i = start; i < start + quantity; i += 1 ) {
 
@@ -72,9 +81,7 @@ module.exports = stampit()
                     if (j % 8 === 0 && j < quantity) {
 
                         current = pdu.readUInt8(6 +  Math.floor(j / 8));
-                    
                     }
-
                 }
 
                 this.emit('postWriteMultipleCoilsRequest', start, quantity, byteCount);

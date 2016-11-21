@@ -1,7 +1,5 @@
 var Stampit = require('stampit'),
-    Q       = require('q'),
-    Put     = require('put');
-
+    Promise = require('bluebird')
 
 module.exports = Stampit()
     .init(function () {
@@ -47,8 +45,12 @@ module.exports = Stampit()
            this.log.debug('Starting read holding registers request.'); 
 
             var fc      = 3,
-                defer   = Q.defer(),
-                pdu     = Put().word8be(3).word16be(start).word16be(quantity).buffer();
+                defer   = Promise.defer(),
+                pdu     = Buffer.allocUnsafe(5)
+
+            pdu.writeUInt8(fc)
+            pdu.writeUInt16BE(start,1)
+            pdu.writeUInt16BE(quantity,3)
 
             this.queueRequest(fc, pdu, defer);
 

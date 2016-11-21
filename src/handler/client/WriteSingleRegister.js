@@ -1,7 +1,5 @@
 var Stampit = require('stampit'),
-    Q       = require('q'),
-    Put     = require('put');
-
+    Promise = require('bluebird')
 
 module.exports = Stampit()
     .init(function () {
@@ -40,9 +38,13 @@ module.exports = Stampit()
         this.writeSingleRegister = function (address, value) {
  
             var fc      = 6,
-                defer   = Q.defer(),
-                payload = (value instanceof Buffer) ? value : Put().word16be(value).buffer(),
-                pdu     = Put().word8be(6).word16be(address).put(payload).buffer();
+                defer   = Promise.defer(),
+                payload = (value instanceof Buffer) ? value.readUInt16BE(0) : value,
+                pdu     = Buffer.allocUnsafe(5)
+
+            pdu.writeUInt8(fc, 0)
+            pdu.writeUInt16BE(address, 1)
+            pdu.writeUInt16BE(payload, 3)
 
             this.queueRequest(fc, pdu, defer);
 
