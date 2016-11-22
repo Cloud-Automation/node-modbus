@@ -267,8 +267,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read input registers request just fine.', function (done) {
 
             var core        = Core(),
-                request     = Buffer.from([0x04,0x00,0,0x00,5]),
-                exResponse  = Buffer.from([0x04,10,0x00,5,0x00,4,0x00,3,0x00,2,0x00,1]);          
+                request     = Buffer.from([0x04,0x00,0x01,0x00,0x04]),
+                exResponse  = Buffer.from([0x04,0x08,0x00,4,0x00,3,0x00,2,0x00,1]);          
             core.getInput().writeUInt16BE(0x05, 0); 
             core.getInput().writeUInt16BE(0x04, 2); 
             core.getInput().writeUInt16BE(0x03, 4); 

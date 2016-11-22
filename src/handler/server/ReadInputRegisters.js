@@ -55,8 +55,7 @@ module.exports = stampit()
                 head.writeUInt8(0x04, 0);
                 head.writeUInt8(quantity * 2, 1);
 
-                var response = Buffer.concat([head, mem.slice(byteStart * 2, byteStart * 2 + quantity * 2)]);
-
+                var response = Buffer.concat([head, mem.slice(byteStart, byteStart + quantity * 2)]);
 
                 cb(response);
 
