@@ -195,6 +195,10 @@ Server example
     server.getHolding().writeUInt16BE(123, 1);
 ````
 
+## Developer
+
+Please apply the JavaScript Standard Style to your code. You can find additional information [her](https://npmjs.com/package/standard). There is a .vimrc file in the main folder if you prefere vim.
+
 ## License
 
 Copyright (C) 2016 Stefan Poeter (Stefan.Poeter[at]cloud-automation.de)
