@@ -10,7 +10,7 @@ module.exports = stampit()
             currentRequestId    = reqId,
             closedOnPurpose     = false,
             reconnect           = false,
-            buffer              = new Buffer(0),
+            buffer              = Buffer.alloc(0),
             trashRequestId, 
             socket;
     
