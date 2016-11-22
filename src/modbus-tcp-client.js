@@ -10,6 +10,7 @@ module.exports = stampit()
             currentRequestId    = reqId,
             closedOnPurpose     = false,
             reconnect           = false,
+            buffer              = new Buffer(0),
             trashRequestId, 
             socket;
     
@@ -92,40 +93,47 @@ module.exports = stampit()
  
             this.log.debug('received data');
 
-            var cnt = 0;
+            buffer = Buffer.concat([buffer, data]);
 
-            while (cnt < data.length) {
+            while (buffer.length > 8) {
 
                 // 1. extract mbap
 
-                var mbap    = data.slice(cnt, cnt + 7),
-                    id      = mbap.readUInt16BE(0),
-                    len     = mbap.readUInt16BE(4);
+                var id      = buffer.readUInt16BE(0),
+                    len     = buffer.readUInt16BE(4);
+
+                this.log.debug('MBAP extracted');
+
+                /* 2. extract pdu
+                 * the modbus packet is not complete.
+                 * wait for more data! */
+
+                if (buffer.length < 7 + len - 1) {
+                    break;
+                }
+
+                var pdu = buffer.slice(7, 7 + len - 1);
+
+                this.log.debug('PDU extracted');
+
+                /* the response belongst to a trashed
+                 * request. So we trash the responsre as well. */
 
                 if (id === trashRequestId) {
                 
                     this.log.debug('current mbap contains trashed request id.');
 
-                    return;
+                } else {
 
+
+                    // emit data event and let the 
+                    // listener handle the pdu
+
+                    this.emit('data', pdu);
+                
                 }
 
-                cnt += 7;
-
-                this.log.debug('MBAP extracted');
-
-                // 2. extract pdu
-
-                var pdu = data.slice(cnt, cnt + len - 1);
-
-                cnt += pdu.length;
-
-                this.log.debug('PDU extracted');
-
-                // emit data event and let the 
-                // listener handle the pdu
-
-                this.emit('data', pdu);
+                buffer = buffer.slice(pdu.length + 7 ,buffer.length);
 
             }
         
@@ -146,14 +154,14 @@ module.exports = stampit()
 
             reqId += 1;
 
-            var head = Buffer.allocUnsafe(7)
+            var head = Buffer.allocUnsafe(7);
 
-            head.writeUInt16BE(reqId, 0)
-            head.writeUInt16BE(this.protocolVersion, 2)
-            head.writeUInt16BE(pdu.length + 1, 4)
-            head.writeUInt8(this.unitId, 6)
+            head.writeUInt16BE(reqId, 0);
+            head.writeUInt16BE(this.protocolVersion, 2);
+            head.writeUInt16BE(pdu.length + 1, 4);
+            head.writeUInt8(this.unitId, 6);
 
-            var pkt = Buffer.concat([head, pdu])
+            var pkt = Buffer.concat([head, pdu]);
 
             currentRequestId = reqId;
 

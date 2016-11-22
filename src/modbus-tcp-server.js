@@ -8,8 +8,11 @@ module.exports = stampit()
     .compose(StateMachine)
     .init(function () {
     
-        var server, socketCount = 0, fifo = [];
-        var clients = []
+        var server, 
+            socketCount = 0, 
+            fifo = [],
+            clients = [],
+            buffer = new Buffer(0);
 
         var init = function () {
        
@@ -27,7 +30,7 @@ module.exports = stampit()
 
                 this.log.debug('new connection', s.address());
  
-                clients.push(s)
+                clients.push(s);
                 initiateSocket(s);
            
             }.bind(this));
@@ -55,7 +58,8 @@ module.exports = stampit()
         var onSocketEnd = function (socket, socketId) {
         
             return function () {
-            
+           
+                this.emit('close'); 
                 this.log.debug('connection closed, socket', socketId);
             
             }.bind(this);
@@ -68,27 +72,43 @@ module.exports = stampit()
 
                 this.log.debug('received data socket',socketId, data.byteLength);
 
-                // 1. extract mbap
+                buffer = Buffer.concat([buffer, data]);
 
-                var mbap    = data.slice(0, 0 + 7),
-                    len     = mbap.readUInt16BE(4);
-                    request = { 
-                        trans_id: mbap.readUInt16BE(0),
-                        protocol_ver: mbap.readUInt16BE(2),
-                        unit_id: mbap.readUInt8(6) 
-                    }; 
+                while (buffer.length > 8) {
 
-                // 2. extract pdu
+                    // 1. extract mbap
 
-                var pdu = data.slice(7, 7 + len - 1);
+                    var len = buffer.readUInt16BE(4);
+                        request = { 
+                            trans_id: buffer.readUInt16BE(0),
+                            protocol_ver: buffer.readUInt16BE(2),
+                            unit_id: buffer.readUrInt8(6) 
+                        }; 
 
-                // emit data event and let the 
-                // listener handle the pdu
+                    // 2. extract pdu
 
-                fifo.push({ request : request, pdu : pdu, socket : socket });
+                    /* arrived data is not complete yet.
+                     * break loop and wait for more data. */
 
-                flush();
-           
+                    if (buffer.length < 7 + len - 1) {
+                        break;
+                    }
+
+                    var pdu = buffer.slice(7, 7 + len - 1);
+
+                    // emit data event and let the 
+                    // listener handle the pdu
+
+                    this.log.debug('PDU extracted.');
+
+                    fifo.push({ request : request, pdu : pdu, socket : socket });
+
+                    flush();
+
+                    buffer = buffer.slice(pdu.length + 7, buffer.length);
+
+                }
+               
             }.bind(this);
         
         }.bind(this);
@@ -111,14 +131,14 @@ module.exports = stampit()
  
                 this.log.debug('sending tcp data');
 
-                var head = Buffer.allocUnsafe(7)
+                var head = Buffer.allocUnsafe(7);
 
-                head.writeUInt16BE(current.request.trans_id, 0)
-                head.writeUInt16BE(current.request.protocol_ver, 2)
-                head.writeUInt16BE(response.length + 1, 4)
-                head.writeUInt8(current.request.unit_id, 6)
+                head.writeUInt16BE(current.request.trans_id, 0);
+                head.writeUInt16BE(current.request.protocol_ver, 2);
+                head.writeUInt16BE(response.length + 1, 4);
+                head.writeUInt8(current.request.unit_id, 6);
 
-                var pkt = Buffer.concat([head, response])
+                var pkt = Buffer.concat([head, response]);
 
                 current.socket.write(pkt); 
            
@@ -152,12 +172,12 @@ module.exports = stampit()
         this.close = function (cb) {
         
           for(var c in clients) {
-            clients[c].destroy()
+            clients[c].destroy();
           }
 
           server.close(function() {
-            server.unref() 
-            if(cb) { cb() } 
+            server.unref();
+            if(cb) { cb(); } 
           });
         
         };
