@@ -1,75 +1,63 @@
-var stampit     = require('stampit')
+var stampit = require('stampit')
 
 module.exports = stampit()
-    .init(function () {
-    
-        var init = function () {
-       
-            this.log.debug('initiating read holding registers request handler.');
+  .init(function () {
+    var init = function () {
+      this.log.debug('initiating read holding registers request handler.')
 
-            if (!this.responseDelay) {
-                this.responseDelay = 0;
-            }
+      if (!this.responseDelay) {
+        this.responseDelay = 0
+      }
 
-            this.setRequestHandler(3, onRequest);
-        
-        }.bind(this);
-    
-        var onRequest = function (pdu, cb) {
+      this.setRequestHandler(3, onRequest)
+    }.bind(this)
 
-            setTimeout(function () {
+    var onRequest = function (pdu, cb) {
+      setTimeout(function () {
+        this.log.debug('handling read holding registers request.')
 
-                this.log.debug('handling read holding registers request.');
+        if (pdu.length !== 5) {
+          this.log.debug('wrong pdu length.')
 
-                if (pdu.length !== 5) {
+          let buf = Buffer.allocUnsafe(2)
 
-                  this.log.debug('wrong pdu length.');
+          buf.writeUInt8(0x83, 0)
+          buf.writeUInt8(0x02, 1)
+          cb(buf)
 
-                  var buf = Buffer.allocUnsafe(2);
+          return
+        }
 
-                  buf.writeUInt8(0x83, 0);
-                  buf.writeUInt8(0x02, 1);
-                  cb(buf);
+        var start = pdu.readUInt16BE(1)
+        var byteStart = start * 2
+        var quantity = pdu.readUInt16BE(3)
 
-                  return;
-                }
+        this.emit('readHoldingRegistersRequest', byteStart, quantity)
 
-                var //fc          = pdu.readUInt8(0), //unused
-                    start       = pdu.readUInt16BE(1),
-                    byteStart   = start * 2,
-                    quantity    = pdu.readUInt16BE(3);
+        var mem = this.getHolding()
 
-                this.emit('readHoldingRegistersRequest', byteStart, quantity);
+        if (byteStart > mem.length || byteStart + (quantity * 2) > mem.length) {
+          this.log.debug('request outside register boundaries.')
+          let buf = Buffer.allocUnsafe(2)
 
-                var mem = this.getHolding();
+          buf.writeUInt8(0x83, 0)
+          buf.writeUInt8(0x02, 1)
+          cb(buf)
+          return
+        }
 
-                if (byteStart > mem.length || byteStart + (quantity * 2) > mem.length) {
+        var head = Buffer.allocUnsafe(2)
 
-                  this.log.debug('request outside register boundaries.');                
-                  var buf = Buffer.allocUnsafe(2);
+        head.writeUInt8(0x03, 0)
+        head.writeUInt8(quantity * 2, 1)
 
-                  buf.writeUInt8(0x83, 0);
-                  buf.writeUInt8(0x02, 1);
-                  cb(buf);
-                  return;
-                }
+        var response = Buffer.concat([head, mem.slice(byteStart * 2, byteStart * 2 + quantity * 2)])
 
-                var head = Buffer.allocUnsafe(2);
-                 
-                head.writeUInt8(0x03, 0);
-                head.writeUInt8(quantity * 2, 1);
+        this.log.debug('finished read holding register request.')
 
-                var response = Buffer.concat([head, mem.slice(byteStart * 2, byteStart * 2 + quantity * 2)]);
+        cb(response)
+      }.bind(this), this.responseDelay)
+    }.bind(this)
 
-                this.log.debug('finished read holding register request.');
-
-                cb(response);
-
-            }.bind(this), this.responseDelay);
-        
-        }.bind(this);
-    
-
-        init();
-    
-    });
+    init()
+  })

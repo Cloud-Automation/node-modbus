@@ -1,63 +1,54 @@
-var Stampit = require('stampit'),
-    Promise = require('bluebird')
+var Stampit = require('stampit')
+var Promise = require('bluebird')
 
 module.exports = Stampit()
-    .init(function () {
-    
-        var init = function () {
-        
-            this.addResponseHandler(3, onResponse);
-        
-        }.bind(this);
-    
-        var onResponse = function (pdu, request) {
- 
-            this.log.debug("handling read holding registers response.");
+  .init(function () {
+    var init = function () {
+      this.addResponseHandler(3, onResponse)
+    }.bind(this)
 
-            var fc          = pdu.readUInt8(0),
-                byteCount   = pdu.readUInt8(1);
+    var onResponse = function (pdu, request) {
+      this.log.debug('handling read holding registers response.')
 
-            var resp = {
-                fc          : fc,
-                byteCount   : byteCount,
-                payload     : pdu.slice(2),
-                register    : [ ]
-            };
+      var fc = pdu.readUInt8(0)
+      var byteCount = pdu.readUInt8(1)
 
-            if (fc !== 3) {
-                request.defer.reject();
-                return;
-            }
+      var resp = {
+        fc: fc,
+        byteCount: byteCount,
+        payload: pdu.slice(2),
+        register: []
+      }
 
-            var registerCount = byteCount / 2;
+      if (fc !== 3) {
+        request.defer.reject()
+        return
+      }
 
-            for (var i = 0; i < registerCount; i += 1) {
-                resp.register.push(pdu.readUInt16BE(2 + (i * 2)));
-            }
+      var registerCount = byteCount / 2
 
-            request.defer.resolve(resp);
- 
-       
-        }.bind(this);
+      for (var i = 0; i < registerCount; i += 1) {
+        resp.register.push(pdu.readUInt16BE(2 + (i * 2)))
+      }
 
-        this.readHoldingRegisters = function (start, quantity) {
-      
-           this.log.debug('Starting read holding registers request.'); 
+      request.defer.resolve(resp)
+    }.bind(this)
 
-            var fc      = 3,
-                defer   = Promise.defer(),
-                pdu     = Buffer.allocUnsafe(5)
+    this.readHoldingRegisters = function (start, quantity) {
+      this.log.debug('Starting read holding registers request.')
 
-            pdu.writeUInt8(fc)
-            pdu.writeUInt16BE(start,1)
-            pdu.writeUInt16BE(quantity,3)
+      var fc = 3
+      var defer = Promise.defer()
+      var pdu = Buffer.allocUnsafe(5)
 
-            this.queueRequest(fc, pdu, defer);
+      pdu.writeUInt8(fc)
+      pdu.writeUInt16BE(start, 1)
+      pdu.writeUInt16BE(quantity, 3)
 
-            return defer.promise;
+      this.queueRequest(fc, pdu, defer)
 
-        };
+      return defer.promise
+    }
 
-        init();
-    
-    });
+    init()
+  })
