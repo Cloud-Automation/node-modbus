@@ -197,6 +197,8 @@ Server example
 
 ## Developer
 
+[![Standard - JavaScript Style Guide](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
+
 Please apply the JavaScript Standard Style to your code. You can find additional information [her](https://npmjs.com/package/standard). There is a .vimrc file in the main folder if you prefere vim.
 
 ## License
