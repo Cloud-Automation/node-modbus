@@ -320,7 +320,9 @@ describe("Modbus Serial Client", function () {
            
                 assert.equal(resp.fc, 6);
                 assert.equal(resp.registerAddress, 3);
+                assert.deepEqual(resp.registerAddressRaw, Buffer.from([0x00,0x03]));
                 assert.equal(resp.registerValue, 123);
+                assert.deepEqual(resp.registerValueRaw, Buffer.from([0x00,0x7b]));
 
                 done();
 
@@ -349,6 +351,8 @@ describe("Modbus Serial Client", function () {
                 assert.equal(resp.fc, 6);
                 assert.equal(resp.registerAddress, 3);
                 assert.equal(resp.registerValue, 123);
+                assert.deepEqual(resp.registerAddressRaw, Buffer.from([0x00,0x03]));
+                assert.deepEqual(resp.registerValueRaw, Buffer.from([0x00,0x7b]));
 
                 done();
             
