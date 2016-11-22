@@ -156,8 +156,8 @@ describe('Modbus Server Core Tests.', function () {
 
     it('should handle a read holding registers request just fine.', function (done) {
       var core = Core()
-      var request = Buffer.from([0x03, 0x00, 0, 0x00, 5])
-      var exResponse = Buffer.from([0x03, 10, 0x00, 1, 0x00, 2, 0x00, 3, 0x00, 4, 0x00, 5])
+      var request = Buffer.from([0x03, 0x00, 0x01, 0x00, 0x04])
+      var exResponse = Buffer.from([0x03, 0x08, 0x00, 0x02, 0x00, 0x03, 0x00, 0x04, 0x00, 0x05])
 
       core.getHolding().writeUInt16BE(0x01, 0)
       core.getHolding().writeUInt16BE(0x02, 2)
@@ -167,7 +167,6 @@ describe('Modbus Server Core Tests.', function () {
 
       var resp = function (response) {
         assert.equal(response.compare(exResponse), 0)
-
         done()
       }
 
@@ -181,7 +180,6 @@ describe('Modbus Server Core Tests.', function () {
 
       var resp = function (response) {
         assert.equal(response.compare(exResponse), 0)
-
         done()
       }
 
@@ -209,8 +207,8 @@ describe('Modbus Server Core Tests.', function () {
 
     it('should handle a read input registers request just fine.', function (done) {
       var core = Core()
-      var request = Buffer.from([0x04, 0x00, 0, 0x00, 5])
-      var exResponse = Buffer.from([0x04, 10, 0x00, 5, 0x00, 4, 0x00, 3, 0x00, 2, 0x00, 1])
+      var request = Buffer.from([0x04, 0x00, 0x01, 0x00, 0x04])
+      var exResponse = Buffer.from([0x04, 0x08, 0x00, 4, 0x00, 3, 0x00, 2, 0x00, 1])
 
       core.getInput().writeUInt16BE(0x05, 0)
       core.getInput().writeUInt16BE(0x04, 2)

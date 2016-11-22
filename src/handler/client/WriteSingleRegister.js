@@ -18,8 +18,8 @@ module.exports = Stampit()
         fc: fc,
         registerAddress: registerAddress,
         registerValue: registerValue,
-        registerAddressRaw: pdu.slice(1, 2),
-        registerValueRaw: pdu.slice(3, 2)
+        registerAddressRaw: pdu.slice(1, 3),
+        registerValueRaw: pdu.slice(3, 5)
       }
 
       if (fc !== 6) {
