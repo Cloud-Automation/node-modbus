@@ -179,11 +179,11 @@ module.exports = stampit()
         return socket
       }
       this.setCurrentRequestId = function (id) {
-          currentRequestId = id
+        currentRequestId = id
       }
       this.registerOnSend = function (_onSend) {
-          this.removeListener(onSend)
-          this.on('send', _onSend.bind(this))
+        this.removeListener(onSend)
+        this.on('send', _onSend.bind(this))
       }
     }
 
