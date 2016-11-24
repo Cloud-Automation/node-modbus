@@ -1,3 +1,5 @@
+'use strict'
+
 var modbus = require('../..')
 var client = modbus.client.tcp.complete({
   'host': process.argv[2],

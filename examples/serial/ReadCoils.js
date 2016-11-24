@@ -1,3 +1,5 @@
+'use strict'
+
 var modbus = require('../..')
 var client = modbus.client.serial.complete({ 'portName': process.argv[2], 'baudRate': process.argv[3] })
 

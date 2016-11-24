@@ -1,3 +1,5 @@
+'use strict'
+
 var ModbusClient = require('../..')
 var client = ModbusClient.createSerialClient('/dev/tty0', 9600)
 
