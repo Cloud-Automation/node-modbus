@@ -1,6 +1,8 @@
 A simple an easy to use Modbus TCP client/server implementation.
 
-Modbus
+[![JavaScript Style Guide](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
+
+Modbus [![Build Status](https://travis-ci.org/Cloud-Automation/node-modbus.png)](https://travis-ci.org/Cloud-Automation/node-modbus)
 ========
 
 Modbus is a simple Modbus TCP Client with a simple API.
