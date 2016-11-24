@@ -16,5 +16,5 @@ client.on('connect', function () {
     })
 })
 
-client.on('error', console.error) 
+client.on('error', console.error)
 client.connect()
