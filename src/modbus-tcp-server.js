@@ -82,7 +82,7 @@ module.exports = stampit()
                         request = { 
                             trans_id: buffer.readUInt16BE(0),
                             protocol_ver: buffer.readUInt16BE(2),
-                            unit_id: buffer.readUrInt8(6) 
+                            unit_id: buffer.readUInt8(6)
                         }; 
 
                     // 2. extract pdu
@@ -164,7 +164,7 @@ module.exports = stampit()
             socketCount += 1;
 
             socket.on('end', onSocketEnd(socket, socketCount));
-            socket.on('data', onSocketData(socket, socketCount));
+            socket.on('data', this.debugOnData ? this.debugOnData(socket, socketCount) : onSocketData(socket, socketCount));
             socket.on('error', onSocketError(socket, socketCount));
         
         }.bind(this);    
@@ -181,6 +181,17 @@ module.exports = stampit()
           });
         
         };
+
+        // following is required to test of stream processing
+        // and is only during test active
+        if (process.env.DEBUG) {
+          this.getQueue = function () {
+            return fifo
+          }
+          this.registerOnData = function (onData) {
+            this.debugOnData = onData;
+          }
+        }
 
         init();
     

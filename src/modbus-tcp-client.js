@@ -214,6 +214,20 @@ module.exports = stampit()
 
         };
 
+        // following is required to test of stream processing
+        // and is only during test active
+        if (process.env.DEBUG) {
+          this.getSocket = function () {
+            return socket
+          }
+          this.setCurrentRequestId = function (id) {
+            currentRequestId = id
+          }
+          this.registerOnSend = function (_onSend) {
+            this.removeListener(onSend)
+            this.on('send', _onSend.bind(this))
+          }
+        }
         init();
     
     });
