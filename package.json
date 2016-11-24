@@ -8,6 +8,9 @@
     "type": "git",
     "url": "https://github.com/Cloud-Automation/node-modbus"
   },
+  "engines" : {
+    "node" : ">=6.0.0"
+  },
   "dependencies": {
     "bluebird": "^3.4.6",
     "crc": "3.4.0",
