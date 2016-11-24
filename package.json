@@ -28,9 +28,6 @@
   "scripts": {
     "test": "standard && mocha test/*"
   },
-  "engine": {
-    "node": ">=0.6"
-  },
   "license": "MIT",
   "keywords": [
     "client",
