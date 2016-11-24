@@ -20,7 +20,7 @@ client.on('connect', function () {
 
   client.writeMultipleCoils(0, values).then(function (resp) {
     console.log(resp)
-  }, console.error).done(function () {
+  }, console.error).finally(function () {
     client.close()
   })
 })

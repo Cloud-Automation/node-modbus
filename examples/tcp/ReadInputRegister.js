@@ -9,11 +9,10 @@ var client = modbus.client.tcp.complete({
 client.on('connect', function () {
   client.readInputRegisters(process.argv[4], process.argv[5]).then(function (resp) {
     console.log(resp)
-  }, console.error).done(function () {
+  }, console.error).finally(function () {
     client.close()
   })
 })
 
 client.on('error', console.error)
-
 client.connect()

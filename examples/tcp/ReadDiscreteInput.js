@@ -1,4 +1,3 @@
-
 var modbus = require('../../')
 var client = modbus.client.tcp.complete({
   'host': process.argv[2],
@@ -7,7 +6,6 @@ var client = modbus.client.tcp.complete({
   'logLevel': 'debug',
   'logTimestamp': true
 })
-
 client.on('connect', function () {
   client.readDiscreteInputs(0, 12).then(function (resp) {
     console.log(resp)
@@ -18,5 +16,4 @@ client.on('connect', function () {
 })
 
 client.on('error', console.error)
-
 client.connect()

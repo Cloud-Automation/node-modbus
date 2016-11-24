@@ -1,72 +1,60 @@
-var stampit     = require('stampit');
+var stampit = require('stampit')
 
 module.exports = stampit()
-    .init(function () {
-    
-        var init = function () {
-       
-            this.log.debug('initiating write single register request handler.');
+  .init(function () {
+    var init = function () {
+      this.log.debug('initiating write single register request handler.')
 
-            if (!this.responseDelay) {
-                this.responseDelay = 0;
-            }
+      if (!this.responseDelay) {
+        this.responseDelay = 0
+      }
 
-            this.setRequestHandler(6, onRequest);
-        
-        }.bind(this);
-    
-        var onRequest = function (pdu, cb) {
+      this.setRequestHandler(6, onRequest)
+    }.bind(this)
 
-            setTimeout(function () {
+    var onRequest = function (pdu, cb) {
+      setTimeout(function () {
+        this.log.debug('handling write single register request.')
 
-                this.log.debug('handling write single register request.');
+        if (pdu.length !== 5) {
+          let buf = Buffer.allocUnsafe(2)
 
-                if (pdu.length !== 5) {
-                    
-                    var buf = Buffer.allocUnsafe(2);
-  
-                    buf.writeUInt8(0x86, 0);
-                    buf.writeUInt8(0x02, 1);
-                    cb(buf);
-                    return;
-                }
+          buf.writeUInt8(0x86, 0)
+          buf.writeUInt8(0x02, 1)
+          cb(buf)
+          return
+        }
 
-                var //fc          = pdu.readUInt8(0), // unused
-                    address     = pdu.readUInt16BE(1),
-                    byteAddress = address * 2,
-                    value       = pdu.readUInt16BE(3);
+        var address = pdu.readUInt16BE(1)
+        var byteAddress = address * 2
+        var value = pdu.readUInt16BE(3)
 
-                this.emit('preWriteSingleRegisterRequest', byteAddress, value);
+        this.emit('preWriteSingleRegisterRequest', byteAddress, value)
 
-                var mem = this.getHolding();
+        var mem = this.getHolding()
 
-                if (byteAddress > mem.length) {
-                
-                    var buf = Buffer.allocUnsafe(2);
-  
-                    buf.writeUInt8(0x86, 0);
-                    buf.writeUInt8(0x02, 1);
-                    cb(buf);
-                    return;
-                }
+        if (byteAddress > mem.length) {
+          let buf = Buffer.allocUnsafe(2)
 
-                var response = Buffer.allocUnsafe(5);
+          buf.writeUInt8(0x86, 0)
+          buf.writeUInt8(0x02, 1)
+          cb(buf)
+          return
+        }
 
-                response.writeUInt8(0x06);
-                response.writeUInt16BE(address, 1);
-                response.writeUInt16BE(value, 3);
+        var response = Buffer.allocUnsafe(5)
 
-                mem.writeUInt16BE(value, byteAddress); 
+        response.writeUInt8(0x06)
+        response.writeUInt16BE(address, 1)
+        response.writeUInt16BE(value, 3)
 
-                this.emit('postWriteSingleRegisterRequest', byteAddress, value);
+        mem.writeUInt16BE(value, byteAddress)
 
-                cb(response);
+        this.emit('postWriteSingleRegisterRequest', byteAddress, value)
 
-            }.bind(this), this.responseDelay);
-        
-        }.bind(this);
-    
+        cb(response)
+      }.bind(this), this.responseDelay)
+    }.bind(this)
 
-        init();
-    
-    });
+    init()
+  })

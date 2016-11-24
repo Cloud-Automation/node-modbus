@@ -1,101 +1,84 @@
-var stampit         = require('stampit'),
-    EventBus        = require('stampit-event-bus'),
-    Log             = require('stampit-log');
+var stampit = require('stampit')
+var EventBus = require('stampit-event-bus')
+var Log = require('stampit-log')
 
- var core = stampit()
-    .compose(EventBus, Log)
-    .init(function () {
-   
-        var coils, holding, input, handler = { };
+var core = stampit()
+  .compose(EventBus, Log)
+  .init(function () {
+    var coils
+    var holding
+    var input
+    var handler = { }
 
-        var init = function () {
+    var init = function () {
+      if (!this.coils) {
+        coils = new Buffer(1024)
+      } else {
+        coils = this.coils
+      }
 
-            if (!this.coils) {
-                coils = new Buffer(1024);
-            } else {
-                coils = this.coils;
-            }
+      if (!this.holding) {
+        holding = new Buffer(1024)
+      } else {
+        holding = this.holding
+      }
 
-            if (!this.holding) {
-                holding = new Buffer(1024);
-            } else {
-                holding = this.holding;
-            }
+      if (!this.input) {
+        input = new Buffer(1024)
+      } else {
+        input = this.input
+      }
+    }.bind(this)
 
-            if (!this.input) {
-                input = new Buffer(1024);
-            } else {
-                input = this.input;
-            }
-        
-        }.bind(this);
+    this.onData = function (pdu, callback) {
+      // get fc and byteCount in advance
+      var fc = pdu.readUInt8(0)
 
-        this.onData = function (pdu, callback) {
+      // get the pdu handler
+      var reqHandler = handler[fc]
 
-             // get fc and byteCount in advance
-            var fc          = pdu.readUInt8(0),
-                byteCount   = pdu.readUInt8(1);
+      if (!reqHandler) {
+        // write a error/exception pkt to the
+        // socket with error code fc + 0x80 and
+        // exception code 0x01 (Illegal Function)
 
-            // get the pdu handler
-            var reqHandler  = handler[fc];
+        this.log.debug('no handler for fc', fc)
 
-            if (!reqHandler) {
+        var buf = Buffer.alloc(2)
+        buf.writeUInt8(fc + 0x80, 0)
+        buf.writeUInt8(0x01, 1)
 
-                // write a error/exception pkt to the 
-                // socket with error code fc + 0x80 and
-                // exception code 0x01 (Illegal Function)
-          
-                this.log.debug('no handler for fc', fc);
+        callback(buf)
 
-                var buf = Buffer.alloc(2)
-                buf.writeUInt8(fc + 0x80, 0)
-                buf.writeUInt8(0x01, 1)
+        return
+      }
 
-                callback(buf)
+      reqHandler(pdu, function (response) {
+        callback(response)
+      })
+    }.bind(this)
 
-                return;
-            
-            }
+    this.setRequestHandler = function (fc, callback) {
+      this.log.debug('setting request handler', fc)
 
-            reqHandler(pdu, function (response) {
- 
-                callback(response);
-                   
-            }.bind(this));
+      handler[fc] = callback
 
-        
-        }.bind(this);
+      return this
+    }
 
-        this.setRequestHandler = function (fc, callback) {
-       
-            this.log.debug('setting request handler', fc);
+    this.getCoils = function () {
+      return coils
+    }
 
-            handler[fc] = callback;
+    this.getInput = function () {
+      return input
+    }
 
-            return this;
-        
-        };
+    this.getHolding = function () {
+      return holding
+    }
 
-        this.getCoils = function () {
-        
-            return coils;
-        
-        };
+    init()
+  })
 
-        this.getInput = function () {
-        
-            return input;
-        
-        };
-
-        this.getHolding = function () {
-        
-            return holding;
-        
-        };
-
-        init();
-    
-    });
-
- module.exports = core;
+module.exports = core

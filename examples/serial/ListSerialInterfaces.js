@@ -5,6 +5,7 @@ SerialPort.list(function (err, ports) {
     console.error(err)
     return
   }
+
   ports.forEach(function (port) {
     console.log(port.comName)
   })

@@ -10,7 +10,7 @@ var client = modbus.client.tcp.complete({
 client.on('connect', function () {
   client.writeSingleCoil(process.argv[4], process.argv[5] === '1').then(function (resp) {
     console.log(resp)
-  }, console.error).done(function () {
+  }, console.error).finally(function () {
     client.close()
   })
 })
