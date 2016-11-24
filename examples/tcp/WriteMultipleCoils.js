@@ -1,29 +1,29 @@
-var ModbusClient    = require('../..'),
-    client          = ModbusClient.createTcpClient('192.168.1.2', 502);
+var modbus = require('../..')
+var client = modbus.client.tcp.complete({
+  'host': process.argv[2],
+  'port': process.argv[3],
+  'logEnabled': true,
+  'logLevel': 'debug',
+  'logTimestamp': true
+})
 
 // override logger function
-client.on('connect', function () { 
-    
-    client.writeMultipleCoils(0, [1, 1, 1]).then(function (resp) {
+client.on('connect', function () {
+  var values = []
 
-        console.log(resp);
+  process.argv.forEach(function (v, i) {
+    if (i <= 3) {
+      return
+    }
+    values.push(parseInt(v))
+  })
 
-    }).fail(function (err) {
- 
-        console.log(err);
+  client.writeMultipleCoils(0, values).then(function (resp) {
+    console.log(resp)
+  }, console.error).done(function () {
+    client.close()
+  })
+})
 
-    }).done(function () {
-    
-        client.close();
-    
-    });
-
-});
-
-client.on('error', function (err) {
-
-    console.log(err);
-
-});
-
-
+client.on('error', console.error)
+client.connect()
