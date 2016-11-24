@@ -77,7 +77,7 @@ client.on('connect', function () {
 
     }, console.error);
 
-    client.writeSingleCoil(5, new Buffer(0x01)).then(function (resp) {
+    client.writeSingleCoil(5, Buffer.from([0x01])).then(function (resp) {
 
 	    // resp will look like { fc: 5, byteCount: 4, outputAddress: 5, outputValue: true }
 	    console.log(resp);
@@ -91,7 +91,7 @@ client.on('connect', function () {
 
     }, console.error);
 
-    client.writeSingleRegister(13, new Buffer([0x00 0x2A])).then(function (resp) {
+    client.writeSingleRegister(13, Buffer.from([0x00 0x2A])).then(function (resp) {
 
 	    // resp will look like { fc: 6, byteCount: 4, registerAddress: 13, registerValue: 42 }
 	    console.log(resp);
@@ -105,7 +105,7 @@ client.on('connect', function () {
 
     }, console.error);
 
-    client.writeMultipleCoils(3, new Buffer([0x2B]), 6).then(function (resp) {
+    client.writeMultipleCoils(3, Buffer.from([0x2B]), 6).then(function (resp) {
 
         // resp will look like { fc: 15, startAddress: 3, quantity: 6 }
         console.log(resp); 
@@ -119,7 +119,7 @@ client.on('connect', function () {
         
     }, console.error);
 
-    client.writeMultipleRegisters(4, new Buffer([0x00, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00, 0x04]).then(function (resp) {
+    client.writeMultipleRegisters(4, Buffer.from([0x00, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00, 0x04]).then(function (resp) {
         
         // resp will look like { fc : 16, startAddress: 4, quantity: 4 }
         console.log(resp);
