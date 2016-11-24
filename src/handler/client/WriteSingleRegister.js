@@ -1,57 +1,51 @@
-var Stampit = require('stampit'),
-    Promise = require('bluebird')
+'use strict'
+
+var Stampit = require('stampit')
+var Promise = require('bluebird')
 
 module.exports = Stampit()
-    .init(function () {
-    
-        var init = function () {
-        
-            this.addResponseHandler(6, onResponse);
-        
-        }.bind(this);
-    
-        var onResponse = function (pdu, request) {
- 
-            this.log.debug("handling write single register response.");
+  .init(function () {
+    var init = function () {
+      this.addResponseHandler(6, onResponse)
+    }.bind(this)
 
-            var fc              = pdu.readUInt8(0),
-        		registerAddress = pdu.readUInt16BE(1),
-		        registerValue   = pdu.readUInt16BE(3);
+    var onResponse = function (pdu, request) {
+      this.log.debug('handling write single register response.')
 
-            var resp = {
-                fc              : fc,
-                registerAddress : registerAddress,
-                registerValue   : registerValue,
-                registerAddressRaw: pdu.slice(1,2),
-                registerValueRaw: pdu.slice(3,2)
-            };
+      var fc = pdu.readUInt8(0)
+      var registerAddress = pdu.readUInt16BE(1)
+      var registerValue = pdu.readUInt16BE(3)
 
-            if (fc !== 6) {
-                request.defer.reject();
-                return;
-            }
+      var resp = {
+        fc: fc,
+        registerAddress: registerAddress,
+        registerValue: registerValue,
+        registerAddressRaw: pdu.slice(1, 3),
+        registerValueRaw: pdu.slice(3, 5)
+      }
 
-            request.defer.resolve(resp);
-       
-        }.bind(this);
+      if (fc !== 6) {
+        request.defer.reject()
+        return
+      }
 
-        this.writeSingleRegister = function (address, value) {
- 
-            var fc      = 6,
-                defer   = Promise.defer(),
-                payload = (value instanceof Buffer) ? value.readUInt16BE(0) : value,
-                pdu     = Buffer.allocUnsafe(5)
+      request.defer.resolve(resp)
+    }.bind(this)
 
-            pdu.writeUInt8(fc, 0)
-            pdu.writeUInt16BE(address, 1)
-            pdu.writeUInt16BE(payload, 3)
+    this.writeSingleRegister = function (address, value) {
+      var fc = 6
+      var defer = Promise.defer()
+      var payload = (value instanceof Buffer) ? value.readUInt16BE(0) : value
+      var pdu = Buffer.allocUnsafe(5)
 
-            this.queueRequest(fc, pdu, defer);
+      pdu.writeUInt8(fc, 0)
+      pdu.writeUInt16BE(address, 1)
+      pdu.writeUInt16BE(payload, 3)
 
-            return defer.promise;
-        
-        };
+      this.queueRequest(fc, pdu, defer)
 
-        init();
-    
-    });
+      return defer.promise
+    }
+
+    init()
+  })
