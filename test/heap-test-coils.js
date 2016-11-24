@@ -11,7 +11,7 @@ const client = modbus.client.tcp.complete({
 client.connect()
 
 client.on('connect', function () {
-  for (let i = 1; i < 1e5; i++) {
+  for (var i = 1; i < 1e5; i++) {
     client.readCoils(0, 13)
   }
 
