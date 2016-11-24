@@ -1,3 +1,5 @@
+'use strict'
+
 var Stampit = require('stampit')
 var Promise = require('bluebird')
 

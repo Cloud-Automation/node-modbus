@@ -1,3 +1,5 @@
+'use strict'
+
 const modbus = require('../')
 const v8 = require('v8')
 

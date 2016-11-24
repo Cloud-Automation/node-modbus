@@ -1,3 +1,5 @@
+'use strict'
+
 var stampit = require('stampit')
 var Log = require('stampit-log')
 var StateMachine = require('stampit-state-machine')

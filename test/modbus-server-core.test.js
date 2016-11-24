@@ -1,3 +1,5 @@
+'use strict'
+
 /* global describe, it */
 var stampit = require('stampit')
 var assert = require('assert')

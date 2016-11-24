@@ -1,3 +1,5 @@
+'use strict'
+
 var stampit = require('stampit')
 var EventBus = require('stampit-event-bus')
 var Log = require('stampit-log')

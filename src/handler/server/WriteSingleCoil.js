@@ -1,3 +1,5 @@
+'use strict'
+
 var stampit = require('stampit')
 
 module.exports = stampit()

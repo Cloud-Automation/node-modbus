@@ -1,3 +1,5 @@
+'use strict'
+
 var stampit = require('stampit')
 var Net = require('net')
 var ModbusCore = require('./modbus-client-core.js')

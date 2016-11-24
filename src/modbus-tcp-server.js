@@ -1,3 +1,5 @@
+'use strict'
+
 var stampit = require('stampit')
 var ModbusServerCore = require('./modbus-server-core.js')
 var StateMachine = require('stampit-state-machine')
