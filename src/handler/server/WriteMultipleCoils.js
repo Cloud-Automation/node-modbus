@@ -19,7 +19,7 @@ module.exports = stampit()
         this.log.debug('handling write multiple coils request.')
 
         if (pdu.length < 3) {
-          let buf = Buffer.allocUnsafe(2)
+          var buf = Buffer.allocUnsafe(2)
 
           buf.writeUInt8(0x8F, 0)
           buf.writeUInt8(0x02, 1)
@@ -37,7 +37,7 @@ module.exports = stampit()
 
         // error response
         if (start > mem.length * 8 || start + quantity > mem.length * 8) {
-          let buf = Buffer.allocUnsafe(2)
+          var buf = Buffer.allocUnsafe(2)
 
           buf.writeUInt8(0x8F, 0)
           buf.writeUInt8(0x02, 1)

@@ -27,10 +27,10 @@ module.exports = Stampit()
         return
       }
 
-      let cntr = 0
+      var cntr = 0
       for (var i = 0; i < byteCount; i += 1) {
-        let h = 1
-        let cur = pdu.readUInt8(2 + i)
+        var h = 1
+        var cur = pdu.readUInt8(2 + i)
         for (var j = 0; j < 8; j += 1) {
           resp.coils[cntr] = (cur & h) > 0
           h = h << 1
@@ -42,9 +42,9 @@ module.exports = Stampit()
     }.bind(this)
 
     this.readCoils = function (start, quantity) {
-      let fc = 1
-      let defer = Promise.defer()
-      let pdu = Buffer.allocUnsafe(5)
+      var fc = 1
+      var defer = Promise.defer()
+      var pdu = Buffer.allocUnsafe(5)
 
       pdu.writeUInt8(fc, 0)
       pdu.writeUInt16BE(start, 1)

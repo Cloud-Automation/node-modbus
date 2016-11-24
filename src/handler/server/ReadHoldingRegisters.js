@@ -21,7 +21,7 @@ module.exports = stampit()
         if (pdu.length !== 5) {
           this.log.debug('wrong pdu length.')
 
-          let buf = Buffer.allocUnsafe(2)
+          var buf = Buffer.allocUnsafe(2)
 
           buf.writeUInt8(0x83, 0)
           buf.writeUInt8(0x02, 1)
@@ -40,7 +40,7 @@ module.exports = stampit()
 
         if (byteStart > mem.length || byteStart + (quantity * 2) > mem.length) {
           this.log.debug('request outside register boundaries.')
-          let buf = Buffer.allocUnsafe(2)
+          var buf = Buffer.allocUnsafe(2)
 
           buf.writeUInt8(0x83, 0)
           buf.writeUInt8(0x02, 1)

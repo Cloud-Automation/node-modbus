@@ -83,8 +83,8 @@ module.exports = stampit()
         crc = (buf.readUInt8(i) + crc) % 0xFFFF
       }
 
-      let crc16 = crc.crc16modbus(buf)
-      let crcBuf = Buffer.allocUnsafe(2)
+      var crc16 = crc.crc16modbus(buf)
+      var crcBuf = Buffer.allocUnsafe(2)
 
       crcBuf.writeUInt16LE(crc16, 0)
 

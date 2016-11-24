@@ -19,7 +19,7 @@ module.exports = stampit()
         this.log.debug('handling write single coil request.')
 
         if (pdu.length !== 5) {
-          let buf = Buffer.allocUnsafe(2)
+          var buf = Buffer.allocUnsafe(2)
 
           buf.writeUInt8(0x85, 0)
           buf.writeUInt8(0x02, 1)
@@ -31,7 +31,7 @@ module.exports = stampit()
         var value = !(pdu.readUInt16BE(3) === 0x0000)
 
         if (pdu.readUInt16BE(3) !== 0x0000 && pdu.readUInt16BE(3) !== 0xFF00) {
-          let buf = Buffer.allocUnsafe(2)
+          var buf = Buffer.allocUnsafe(2)
 
           buf.writeUInt8(0x85, 0)
           buf.writeUInt8(0x03, 1)
@@ -44,7 +44,7 @@ module.exports = stampit()
         var mem = this.getCoils()
 
         if (address > mem.length * 8) {
-          let buf = Buffer.allocUnsafe(2)
+          var buf = Buffer.allocUnsafe(2)
 
           buf.writeUInt8(0x85, 0)
           buf.writeUInt8(0x02, 1)

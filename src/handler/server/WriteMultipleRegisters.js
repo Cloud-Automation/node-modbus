@@ -19,7 +19,7 @@ module.exports = stampit()
         this.log.debug('handling write multiple registers request.')
 
         if (pdu.length < 3) {
-          let buf = Buffer.allocUnsafe(2)
+          var buf = Buffer.allocUnsafe(2)
 
           buf.writeUInt8(0x90, 0)
           buf.writeUInt8(0x02, 1)
@@ -33,7 +33,7 @@ module.exports = stampit()
         var byteCount = pdu.readUInt8(5)
 
         if (quantity > 0x007b) {
-          let buf = Buffer.allocUnsafe(2)
+          var buf = Buffer.allocUnsafe(2)
 
           buf.writeUInt8(0x90, 0)
           buf.writeUInt8(0x03, 1)
