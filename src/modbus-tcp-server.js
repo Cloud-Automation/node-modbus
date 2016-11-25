@@ -1,20 +1,20 @@
 'use strict'
-
 var stampit = require('stampit')
 var ModbusServerCore = require('./modbus-server-core.js')
 var StateMachine = require('stampit-state-machine')
 var net = require('net')
+var ClientSocket = require('./modbus-tcp-server-client.js')
 
 module.exports = stampit()
   .compose(ModbusServerCore)
   .compose(StateMachine)
   .init(function () {
-    var server
-    var socketCount = 0
-    var fifo = []
-    var clients = []
+    let server
+    let socketList = []
+    let fifo = []
+    let clients = []
 
-    var init = function () {
+    let init = function () {
       if (!this.port) {
         this.port = 502
       }
@@ -45,39 +45,6 @@ module.exports = stampit()
       this.on('newState_ready', flush)
 
       this.setState('ready')
-    }.bind(this)
-
-    var onSocketEnd = function (socket, socketId) {
-      return function () {
-        this.log.debug('connection closed, socket', socketId)
-      }.bind(this)
-    }.bind(this)
-
-    var onSocketData = function (socket, socketId) {
-      return function (data) {
-        this.log.debug('received data socket', socketId, data.byteLength)
-
-        // 1. extract mbap
-
-        var mbap = data.slice(0, 0 + 7)
-        var len = mbap.readUInt16BE(4)
-        var request = {
-          trans_id: mbap.readUInt16BE(0),
-          protocol_ver: mbap.readUInt16BE(2),
-          unit_id: mbap.readUInt8(6)
-        }
-
-        // 2. extract pdu
-
-        var pdu = data.slice(7, 7 + len - 1)
-
-        // emit data event and let the
-        // listener handle the pdu
-
-        fifo.push({ request: request, pdu: pdu, socket: socket })
-
-        flush()
-      }.bind(this)
     }.bind(this)
 
     var flush = function () {
@@ -111,19 +78,37 @@ module.exports = stampit()
       }.bind(this))
     }.bind(this)
 
-    var onSocketError = function (socket, socketCount) {
-      return function (e) {
-        this.logError('Socker error', e)
-      }.bind(this)
-    }.bind(this)
-
     var initiateSocket = function (socket) {
-      socketCount += 1
+      let socketId = socketList.length
 
-      socket.on('end', onSocketEnd(socket, socketCount))
-      socket.on('data', onSocketData(socket, socketCount))
-      socket.on('error', onSocketError(socket, socketCount))
-    }
+      var requestHandler = function (req) {
+        fifo.push(req)
+        flush()
+      }
+
+      var removeHandler = function () {
+        socketList[socketId] = undefined
+        /* remove undefined on the end of the array */
+        for (let i = socketList.length - 1; i >= 0; i -= 1) {
+          let cur = socketList[i]
+          if (cur !== undefined) {
+            break
+          }
+
+          socketList.splice(i, 1)
+        }
+        this.log.debug('Client connection closed, remaining clients. ', socketList.length)
+      }.bind(this)
+
+      let clientSocket = ClientSocket({
+        socket: socket,
+        socketId: socketId,
+        onRequest: requestHandler,
+        onEnd: removeHandler
+      })
+
+      socketList.push(clientSocket)
+    }.bind(this)
 
     this.close = function (cb) {
       for (var c in clients) {

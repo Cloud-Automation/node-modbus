@@ -1,17 +1,15 @@
 'use strict'
 
 var stampit = require('stampit')
-var Net = require('net')
-var ModbusCore = require('./modbus-client-core.js')
 
 module.exports = stampit()
-  .compose(ModbusCore)
   .init(function () {
     var reqId = 0
     var currentRequestId = reqId
     var closedOnPurpose = false
     var reconnect = false
     var trashRequestId
+    var buffer = Buffer.alloc(0)
     var socket
 
     var init = function () {
@@ -35,8 +33,13 @@ module.exports = stampit()
       this.setState('connect')
 
       if (!socket) {
-        socket = new Net.Socket()
-
+        /* for testing you are able to inject a mocking object
+         * a simple event object should do the trick */
+        if (this.injectedSocket) {
+          socket = this.injectedSocket
+        } else {
+          socket = require('net').Socket()
+        }
         socket.on('connect', onSocketConnect)
         socket.on('close', onSocketClose)
         socket.on('error', onSocketError)
@@ -76,14 +79,13 @@ module.exports = stampit()
     var onSocketData = function (data) {
       this.log.debug('received data')
 
-      var cnt = 0
+      buffer = Buffer.concat([buffer, data])
 
-      while (cnt < data.length) {
+      while (buffer.length > 7) {
         // 1. extract mbap
 
-        var mbap = data.slice(cnt, cnt + 7)
-        var id = mbap.readUInt16BE(0)
-        var len = mbap.readUInt16BE(4)
+        var id = buffer.readUInt16BE(0)
+        var len = buffer.readUInt16BE(4)
 
         if (id === trashRequestId) {
           this.log.debug('current mbap contains trashed request id.')
@@ -91,15 +93,14 @@ module.exports = stampit()
           return
         }
 
-        cnt += 7
-
-        this.log.debug('MBAP extracted')
+        /* Not all data received yet. */
+        if (buffer.length < 7 + len - 1) {
+          break
+        }
 
         // 2. extract pdu
 
-        var pdu = data.slice(cnt, cnt + len - 1)
-
-        cnt += pdu.length
+        var pdu = buffer.slice(7, 7 + len - 1)
 
         this.log.debug('PDU extracted')
 
@@ -107,6 +108,8 @@ module.exports = stampit()
         // listener handle the pdu
 
         this.emit('data', pdu)
+
+        buffer = buffer.slice(pdu.length + 7, buffer.length)
       }
     }.bind(this)
 
