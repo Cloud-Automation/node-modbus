@@ -19,7 +19,7 @@ module.exports = stampit()
         this.log.debug('handling read coils request.')
 
         if (pdu.length !== 5) {
-          var buf = Buffer.allocUnsafe(2)
+          let buf = Buffer.allocUnsafe(2)
 
           buf.writeUInt8(0x81, 0)
           buf.writeUInt8(0x02, 1)
@@ -35,7 +35,7 @@ module.exports = stampit()
         var mem = this.getCoils()
 
         if (start > mem.length * 8 || start + quantity > mem.length * 8) {
-          var buf = Buffer.allocUnsafe(2)
+          let buf = Buffer.allocUnsafe(2)
           buf.writeUInt8(0x81, 0)
           buf.writeUInt8(0x02, 1)
           cb(buf)

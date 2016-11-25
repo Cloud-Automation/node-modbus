@@ -19,7 +19,7 @@ module.exports = stampit()
         this.log.debug('handling read input registers request.')
 
         if (pdu.length !== 5) {
-          var buf = Buffer.allocUnsafe(2)
+          let buf = Buffer.allocUnsafe(2)
 
           buf.writeUInt8(0x84, 0)
           buf.writeUInt8(0x02, 1)
@@ -36,7 +36,7 @@ module.exports = stampit()
         var mem = this.getInput()
 
         if (byteStart > mem.length || byteStart + (quantity * 2) > mem.length) {
-          var buf = Buffer.allocUnsafe(2)
+          let buf = Buffer.allocUnsafe(2)
 
           buf.writeUInt8(0x84, 0)
           buf.writeUInt8(0x02, 1)

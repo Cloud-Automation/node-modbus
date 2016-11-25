@@ -21,7 +21,7 @@ var handler = stampit()
         if (pdu.length !== 5) {
           this.log.debug('wrong pdu length.')
 
-          var buf = Buffer.allocUnsafe(2)
+          let buf = Buffer.allocUnsafe(2)
 
           buf.writeUInt8(0x82, 0)
           buf.writeUInt8(0x02, 1)
@@ -40,7 +40,7 @@ var handler = stampit()
         if (start > mem.length * 8 || start + quantity > mem.length * 8) {
           this.log.debug('wrong pdu length.')
 
-          var buf = Buffer.allocUnsafe(2)
+          let buf = Buffer.allocUnsafe(2)
 
           buf.writeUInt8(0x82, 0)
           buf.writeUInt8(0x02, 1)
