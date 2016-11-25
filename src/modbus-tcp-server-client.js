@@ -1,3 +1,4 @@
+'use strict'
 var stampit = require('stampit')
 var logger = require('stampit-log')
 
