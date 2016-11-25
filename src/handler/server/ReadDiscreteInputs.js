@@ -1,98 +1,84 @@
-var stampit     = require('stampit')
+'use strict'
+
+var stampit = require('stampit')
 
 var handler = stampit()
-    .init(function () {
-    
-        var init = function () {
-       
-            this.log.debug('initiating read discrete inputs request handler.');
+  .init(function () {
+    var init = function () {
+      this.log.debug('initiating read discrete inputs request handler.')
 
-            if (!this.responseDelay) {
-                this.responseDelay = 0;
-            }
+      if (!this.responseDelay) {
+        this.responseDelay = 0
+      }
 
+      this.setRequestHandler(2, onRequest)
+    }.bind(this)
 
-            this.setRequestHandler(2, onRequest);
-        
-        }.bind(this);
-    
-        var onRequest = function (pdu, cb) {
+    var onRequest = function (pdu, cb) {
+      setTimeout(function () {
+        this.log.debug('handling read discrete inputs request.')
 
-            setTimeout(function () {
+        if (pdu.length !== 5) {
+          this.log.debug('wrong pdu length.')
 
-                this.log.debug('handling read discrete inputs request.');
+          let buf = Buffer.allocUnsafe(2)
 
+          buf.writeUInt8(0x82, 0)
+          buf.writeUInt8(0x02, 1)
+          cb(buf)
 
-                if (pdu.length !== 5) {
-                
-                  this.log.debug('wrong pdu length.');
+          return
+        }
 
-                  var buf = Buffer.allocUnsafe(2)
+        var start = pdu.readUInt16BE(1)
+        var quantity = pdu.readUInt16BE(3)
 
-                  buf.writeUInt8(0x82, 0)
-                  buf.writeUInt8(0x02, 1)
-                  cb(buf)
+        this.emit('readDiscreteInputsRequest', start, quantity)
 
-                  return;
-                }
+        var mem = this.getInput()
 
-                var fc          = pdu.readUInt8(0),
-                    start       = pdu.readUInt16BE(1),
-                    quantity    = pdu.readUInt16BE(3);
+        if (start > mem.length * 8 || start + quantity > mem.length * 8) {
+          this.log.debug('wrong pdu length.')
 
-                this.emit('readDiscreteInputsRequest', start, quantity);
+          let buf = Buffer.allocUnsafe(2)
 
-                var mem = this.getInput();
+          buf.writeUInt8(0x82, 0)
+          buf.writeUInt8(0x02, 1)
+          cb(buf)
 
-                if (start > mem.length * 8 || start + quantity > mem.length * 8) {
-                
-                  this.log.debug('wrong pdu length.');
+          return
+        }
 
-                  var buf = Buffer.allocUnsafe(2)
+        var val = 0
+        var thisByteBitCount = 0
+        var byteIdx = 2
+        var byteCount = Math.ceil(quantity / 8)
+        var response = Buffer.allocUnsafe(2 + byteCount)
 
-                  buf.writeUInt8(0x82, 0)
-                  buf.writeUInt8(0x02, 1)
-                  cb(buf)
+        response.writeUInt8(0x02, 0)
+        response.writeUInt8(byteCount, 1)
 
-                  return
-                }
+        for (var totalBitCount = start; totalBitCount < start + quantity; totalBitCount += 1) {
+          var buf = mem.readUInt8(Math.floor(totalBitCount / 8))
+          var mask = 1 << (totalBitCount % 8)
 
-                var val = 0, 
-                    thisByteBitCount = 0,
-                    byteIdx = 2,
-                    byteCount = Math.ceil(quantity / 8),
-                    response = Buffer.allocUnsafe(2 + byteCount)
+          if (buf & mask) {
+            val += 1 << (thisByteBitCount % 8)
+          }
 
-                response.writeUInt8(0x02, 0)
-                response.writeUInt8(byteCount, 1);
+          thisByteBitCount += 1
 
-                for (var totalBitCount = start; totalBitCount < start + quantity; totalBitCount += 1) {
-     
-                    var buf = mem.readUInt8(Math.floor(totalBitCount / 8))
-                    var mask = 1 << (totalBitCount % 8)
+          if (thisByteBitCount % 8 === 0 || totalBitCount === (start + quantity) - 1) {
+            response.writeUInt8(val, byteIdx)
+            val = 0; byteIdx = byteIdx + 1
+          }
+        }
 
-                    if(buf & mask) {
-                      val += 1 << (thisByteBitCount % 8)
-                    }
-               
-                    thisByteBitCount += 1;
+        cb(response)
+      }.bind(this), this.responseDelay)
+    }.bind(this)
 
-                    if (thisByteBitCount % 8 === 0 || totalBitCount === (start + quantity) - 1) {
-                   
-                        response.writeUInt8(val, byteIdx)
-                        val = 0; byteIdx = byteIdx + 1
-                    }
-                }
+    init()
+  })
 
-                cb(response);
-
-            }.bind(this), this.responseDelay);
-            
-        }.bind(this);
-    
-
-        init();
-    
-    });
-
-module.exports = handler;
+module.exports = handler

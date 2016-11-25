@@ -1,88 +1,75 @@
-var stampit     = require('stampit')
+'use strict'
+
+var stampit = require('stampit')
 
 module.exports = stampit()
-    .init(function () {
-    
-        var init = function () {
-       
-            this.log.debug('initiating read coils request handler.');
+  .init(function () {
+    var init = function () {
+      this.log.debug('initiating read coils request handler.')
 
-            if (!this.responseDelay) {
-                this.responseDelay = 0;
-            }
+      if (!this.responseDelay) {
+        this.responseDelay = 0
+      }
 
-            this.setRequestHandler(1, onRequest);
-        
-        }.bind(this);
-    
-        var onRequest = function (pdu, cb) {
+      this.setRequestHandler(1, onRequest)
+    }.bind(this)
 
-            setTimeout(function () {
+    var onRequest = function (pdu, cb) {
+      setTimeout(function () {
+        this.log.debug('handling read coils request.')
 
-                this.log.debug('handling read coils request.');
+        if (pdu.length !== 5) {
+          let buf = Buffer.allocUnsafe(2)
 
+          buf.writeUInt8(0x81, 0)
+          buf.writeUInt8(0x02, 1)
+          cb(buf)
+          return
+        }
 
-                if (pdu.length !== 5) {
-                
-                  var buf = Buffer.allocUnsafe(2)
+        var start = pdu.readUInt16BE(1)
+        var quantity = pdu.readUInt16BE(3)
 
-                  buf.writeUInt8(0x81, 0);
-                  buf.writeUInt8(0x02, 1);
-                  cb(buf);
-                  return;
-                }
+        this.emit('readCoilsRequest', start, quantity)
 
-                var //fc          = pdu.readUInt8(0), // unused
-                    start       = pdu.readUInt16BE(1),
-                    quantity    = pdu.readUInt16BE(3);
+        var mem = this.getCoils()
 
-                this.emit('readCoilsRequest', start, quantity);
+        if (start > mem.length * 8 || start + quantity > mem.length * 8) {
+          let buf = Buffer.allocUnsafe(2)
+          buf.writeUInt8(0x81, 0)
+          buf.writeUInt8(0x02, 1)
+          cb(buf)
+          return
+        }
 
-                var mem = this.getCoils();
+        var val = 0
+        var thisByteBitCount = 0
+        var byteIdx = 2
+        var byteCount = Math.ceil(quantity / 8)
+        var response = Buffer.allocUnsafe(2 + byteCount)
 
-                if (start > mem.length * 8 || start + quantity > mem.length * 8) {
-                
-                  var buf = Buffer.allocUnsafe(2);
-                  buf.writeUInt8(0x81, 0);
-                  buf.writeUInt8(0x02, 1);
-                  cb(buf);
-                  return;
-                }
+        response.writeUInt8(0x01, 0)
+        response.writeUInt8(byteCount, 1)
 
-                var val = 0, 
-                    thisByteBitCount = 0,
-                    byteIdx = 2,
-                    byteCount = Math.ceil(quantity / 8),
-                    response = Buffer.allocUnsafe(2 + byteCount)
+        for (var totalBitCount = start; totalBitCount < start + quantity; totalBitCount += 1) {
+          var buf = mem.readUInt8(Math.floor(totalBitCount / 8))
+          var mask = 1 << (totalBitCount % 8)
 
-                response.writeUInt8(0x01, 0);
-                response.writeUInt8(byteCount, 1);
+          if (buf & mask) {
+            val += 1 << (thisByteBitCount % 8)
+          }
 
-                for (var totalBitCount = start; totalBitCount < start + quantity; totalBitCount += 1) {
-     
-                    var buf = mem.readUInt8(Math.floor(totalBitCount / 8));
-                    var mask = 1 << (totalBitCount % 8);
+          thisByteBitCount += 1
 
-                    if (buf & mask) {
-                      val += 1 << (thisByteBitCount % 8);
-                    }
-               
-                    thisByteBitCount += 1;
+          if (thisByteBitCount % 8 === 0 || totalBitCount === (start + quantity) - 1) {
+            response.writeUInt8(val, byteIdx)
+            val = 0; byteIdx = byteIdx + 1
+          }
+        }
 
-                    if (thisByteBitCount % 8 === 0 || totalBitCount === (start + quantity) - 1) {
-                   
-                        response.writeUInt8(val, byteIdx);
-                        val = 0; byteIdx = byteIdx + 1;
-                    }
-                }
+        cb(response)
+      }.bind(this), this.responseDelay)
+    }.bind(this)
 
-                cb(response);
-
-            }.bind(this), this.responseDelay);
-            
-        }.bind(this);
-    
-
-        init();
-    
-    });
+    init()
+  })
