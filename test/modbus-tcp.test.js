@@ -2,8 +2,8 @@
 var assert = require('assert')
 var EventEmitter = require('events')
 
-describe('Modbus Server TCP Tests.', function () {
-  describe('Chopped Data Tests.', function () {
+describe('Modbus TCP Tests.', function () {
+  describe('Chopped Data Tests (Server Side).', function () {
         /* We are using the read coils request for the chopped data tests. */
 
     let ClientSocket = require('../src/modbus-tcp-server-client.js')
