@@ -1,93 +1,82 @@
-var stampit = require('stampit'),
-    Promise = require('bluebird')
+'use strict'
+
+var stampit = require('stampit')
+var Promise = require('bluebird')
 
 module.exports = stampit()
-    .init(function () {
-    
-        var init = function () {
-        
-            this.addResponseHandler(15, onResponse);
-        
-        }.bind(this);
-    
-        var onResponse = function (pdu, request) {
- 
-            this.log.debug("handling multiple coils response.");
+  .init(function () {
+    var init = function () {
+      this.addResponseHandler(15, onResponse)
+    }.bind(this)
 
-            var fc              = pdu.readUInt8(0),
-                startAddress    = pdu.readUInt16BE(1),
-                quantity        = pdu.readUInt16BE(3);
-    
-            var resp = {
-                fc              : fc,
-                startAddress    : startAddress,
-                quantity        : quantity
-            };
+    var onResponse = function (pdu, request) {
+      this.log.debug('handling multiple coils response.')
 
-            if (fc !== 15) {
-                request.defer.reject();
-                return;
-            }
+      var fc = pdu.readUInt8(0)
+      var startAddress = pdu.readUInt16BE(1)
+      var quantity = pdu.readUInt16BE(3)
 
-            request.defer.resolve(resp);
+      var resp = {
+        fc: fc,
+        startAddress: startAddress,
+        quantity: quantity
+      }
 
-       
-        }.bind(this);
+      if (fc !== 15) {
+        request.defer.reject()
+        return
+      }
 
-        this.writeMultipleCoils = function (startAddress, coils, N) {
- 
-            var defer = Promise.defer();
-            var fc          = 15,
-                basePdu     = Buffer.allocUnsafe(6)
-            var pdu
+      request.defer.resolve(resp)
+    }.bind(this)
 
-            basePdu.writeUInt8(fc,0)
-            basePdu.writeUInt16BE(startAddress,1)
+    this.writeMultipleCoils = function (startAddress, coils, N) {
+      var defer = Promise.defer()
+      var fc = 15
+      var basePdu = Buffer.allocUnsafe(6)
+      var pdu
 
-            if (coils instanceof Buffer) {
+      basePdu.writeUInt8(fc, 0)
+      basePdu.writeUInt16BE(startAddress, 1)
 
-              basePdu.writeUInt16BE(N, 3)
-              basePdu.writeUInt8(coils.length, 5)
-              pdu = Buffer.concat([basePdu, coils])
+      if (coils instanceof Buffer) {
+        basePdu.writeUInt16BE(N, 3)
+        basePdu.writeUInt8(coils.length, 5)
+        pdu = Buffer.concat([basePdu, coils])
+      } else if (coils instanceof Array) {
+        if (coils.length > 1968) {
+          defer.reject()
+          return
+        }
 
-            } else if (coils instanceof Array) {
+        var byteCount = Math.ceil(coils.length / 8)
+        var curByte = 0
+        var curByteIdx = 0
+        var cntr = 0
+        var payloadPdu = Buffer.allocUnsafe(byteCount)
 
-              if (coils.length > 1968) {
-                defer.reject();
-                return;
-              }
+        basePdu.writeUInt16BE(coils.length, 3)
+        basePdu.writeUInt8(byteCount, 5)
 
-              var byteCount   = Math.ceil(coils.length / 8),
-                  curByte     = 0,
-                  curByteIdx  = 0,
-                  cntr        = 0
-              var payloadPdu = Buffer.allocUnsafe(byteCount)
+        for (var i = 0; i < coils.length; i += 1) {
+          curByte += coils[i] ? Math.pow(2, cntr) : 0
 
-              basePdu.writeUInt16BE(coils.length, 3)
-              basePdu.writeUInt8(byteCount, 5)
+          cntr = (cntr + 1) % 8
 
-              for (var i = 0; i < coils.length; i += 1) {
+          if (cntr === 0 || i === coils.length - 1) {
+            payloadPdu.writeUInt8(curByte, curByteIdx)
+            curByteIdx = curByteIdx + 1
+            curByte = 0
+          }
+        }
 
-                  curByte += coils[i]?Math.pow(2, cntr):0;
+        pdu = Buffer.concat([basePdu, payloadPdu])
+      }
 
-                  cntr = (cntr + 1) % 8;
+      this.queueRequest(fc, pdu, defer)
 
-                  if (cntr === 0 || i === coils.length - 1 ) {
-                      payloadPdu.writeUInt8(curByte, curByteIdx)
-                      curByteIdx = curByteIdx + 1
-                      curByte = 0
-                  }
-              }
+      return defer.promise
+    }
 
-              pdu = Buffer.concat([basePdu, payloadPdu])
-            }
-
-            this.queueRequest(fc, pdu, defer);
-
-            return defer.promise;
-
-        };
-
-        init();
-    
-    });
+    init()
+  })

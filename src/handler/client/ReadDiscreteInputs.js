@@ -1,69 +1,63 @@
-var Stampit = require('stampit'),
-    Promise = require('bluebird')
+'use strict'
+
+var Stampit = require('stampit')
+var Promise = require('bluebird')
 
 module.exports = Stampit()
-    .init(function () {
-    
-        var init = function () {
-        
-            this.addResponseHandler(2, onResponse);
-        
-        }.bind(this);
-    
-        var onResponse = function (pdu, request) {
- 
-            this.log.debug("handling read discrete inputs response.");
+  .init(function () {
+    var init = function () {
+      this.addResponseHandler(2, onResponse)
+    }.bind(this)
 
-            var fc          = pdu.readUInt8(0),
-                byteCount   = pdu.readUInt8(1),
-                cntr        = 0,
-                resp        = {
-                    fc          : fc,
-                    byteCount   : byteCount,
-                    payload     : pdu.slice(2),
-                    coils       : []
-                };
+    var onResponse = function (pdu, request) {
+      this.log.debug('handling read discrete inputs response.')
 
-            if (fc !== 2) {
-                request.defer.reject();
-                return;
-            }
+      var fc = pdu.readUInt8(0)
+      var byteCount = pdu.readUInt8(1)
+      var cntr = 0
+      var resp = {
+        fc: fc,
+        byteCount: byteCount,
+        payload: pdu.slice(2),
+        coils: []
+      }
 
-            for (var i = 0; i < byteCount; i += 1) {
-                var h = 1, cur = pdu.readUInt8(2 + i);
-                for (var j = 0; j < 8; j += 1) {
-                    resp.coils[cntr] = (cur & h) > 0 ;
-                    h = h << 1;
-                    cntr += 1;
-                } 
-            }
+      if (fc !== 2) {
+        request.defer.reject()
+        return
+      }
 
-            request.defer.resolve(resp);       
-        
-        }.bind(this);
+      for (var i = 0; i < byteCount; i += 1) {
+        var h = 1
+        var cur = pdu.readUInt8(2 + i)
+        for (var j = 0; j < 8; j += 1) {
+          resp.coils[cntr] = (cur & h) > 0
+          h = h << 1
+          cntr += 1
+        }
+      }
 
-        this.readDiscreteInputs = function (start, quantity) {
- 
-            var fc      = 2,
-                defer   = Promise.defer(),
-                pdu     = Buffer.allocUnsafe(5);
+      request.defer.resolve(resp)
+    }.bind(this)
 
-            pdu.writeUInt8(fc);
-            pdu.writeUInt16BE(start, 1);
-            pdu.writeUInt16BE(quantity, 3);
+    this.readDiscreteInputs = function (start, quantity) {
+      var fc = 2
+      var defer = Promise.defer()
+      var pdu = Buffer.allocUnsafe(5)
 
-            if (quantity > 2000) {    
+      pdu.writeUInt8(fc)
+      pdu.writeUInt16BE(start, 1)
+      pdu.writeUInt16BE(quantity, 3)
 
-                defer.reject(); 
-                return defer.promise; 
-            }
+      if (quantity > 2000) {
+        defer.reject()
+        return defer.promise
+      }
 
-            this.queueRequest(fc, pdu, defer);
-            
-            return defer.promise;
-             
-        };
+      this.queueRequest(fc, pdu, defer)
 
-        init();
-    
-    });
+      return defer.promise
+    }
+
+    init()
+  })

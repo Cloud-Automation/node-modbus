@@ -1,219 +1,191 @@
-var stampit         = require('stampit'),
-    Net             = require('net'),
-    ModbusCore      = require('./modbus-client-core.js');
+'use strict'
+
+var stampit = require('stampit')
+var Net = require('net')
+var ModbusCore = require('./modbus-client-core.js')
 
 module.exports = stampit()
-    .compose(ModbusCore)
-    .init(function () {
-    
-        var reqId               = 0,
-            currentRequestId    = reqId,
-            closedOnPurpose     = false,
-            reconnect           = false,
-            buffer              = Buffer.alloc(0),
-            trashRequestId, 
-            socket;
-    
-        var init = function () {
+  .compose(ModbusCore)
+  .init(function () {
+    var reqId = 0
+    var currentRequestId = reqId
+    var closedOnPurpose = false
+    var reconnect = false
+    var trashRequestId
+    var socket
 
-            this.setState('init');
+    var init = function () {
+      this.setState('init')
 
-            if (!this.unitId) { this.unitId = 0; }
-            if (!this.protocolVersion) { this.protocolVersion = 0; }
-            if (!this.port) { this.port = 502; }
-            if (!this.host) { this.host = 'localhost'; }
-            if (!this.autoReconnect) { this.autoReconnect = false; }
-            if (!this.reconnectTimeout) { this.reconnectTimeout = 0; }
+      if (!this.unitId) { this.unitId = 0 }
+      if (!this.protocolVersion) { this.protocolVersion = 0 }
+      if (!this.port) { this.port = 502 }
+      if (!this.host) { this.host = 'localhost' }
+      if (!this.autoReconnect) { this.autoReconnect = false }
+      if (!this.reconnectTimeout) { this.reconnectTimeout = 0 }
 
-            this.on('send', onSend);
-            this.on('newState_error', onError);
-            this.on('trashCurrentRequest', onTrashCurrentRequest); 
+      this.on('send', onSend)
+      this.on('newState_error', onError)
+      this.on('trashCurrentRequest', onTrashCurrentRequest)
 
-            this.on('stateChanged', this.log.debug);
+      this.on('stateChanged', this.log.debug)
+    }.bind(this)
 
-        }.bind(this);
+    var connect = function () {
+      this.setState('connect')
 
-        var connect = function () {
+      if (!socket) {
+        socket = new Net.Socket()
 
-            this.setState('connect');
+        socket.on('connect', onSocketConnect)
+        socket.on('close', onSocketClose)
+        socket.on('error', onSocketError)
+        socket.on('data', onSocketData)
+      }
 
-            if (!socket) {
+      socket.connect(this.port, this.host)
+    }.bind(this)
 
-                socket = new Net.Socket();
+    var onSocketConnect = function () {
+      this.emit('connect')
+      this.setState('ready')
+    }.bind(this)
 
-                socket.on('connect', onSocketConnect);
-                socket.on('close', onSocketClose);
-                socket.on('error', onSocketError);
-                socket.on('data', onSocketData);
- 
-            }
+    var onSocketClose = function (hadErrors) {
+      this.log.debug('Socket closed with error', hadErrors)
 
-            socket.connect(this.port, this.host);
-       
-        }.bind(this);
+      this.setState('closed')
+      this.emit('close')
 
-        var onSocketConnect = function ()  {
-      
-            this.emit('connect');
-            this.setState('ready');
-        
-        }.bind(this);
+      if (!closedOnPurpose && (this.autoReconnect || reconnect)) {
+        setTimeout(function () {
+          reconnect = false
 
-        var onSocketClose = function (hadErrors) {
+          connect()
+        }, this.reconnectTimeout || 0)
+      }
+    }.bind(this)
 
-            this.log.debug('Socket closed with error', hadErrors);
+    var onSocketError = function (err) {
+      this.logError('Socket Error', err)
 
+      this.setState('error')
+      this.emit('error', err)
+    }.bind(this)
 
-            this.setState('closed'); 
-            this.emit('close');
+    var onSocketData = function (data) {
+      this.log.debug('received data')
 
-            if (!closedOnPurpose && (this.autoReconnect || reconnect)) {
+      var cnt = 0
 
-                setTimeout(function () {
+      while (cnt < data.length) {
+        // 1. extract mbap
 
-                    reconnect = false;
-           
-                    connect();
-                }, this.reconnectTimeout || 0);
-            
-            } 
-       
-        }.bind(this);
+        var mbap = data.slice(cnt, cnt + 7)
+        var id = mbap.readUInt16BE(0)
+        var len = mbap.readUInt16BE(4)
 
-        var onSocketError = function (err) {
+        if (id === trashRequestId) {
+          this.log.debug('current mbap contains trashed request id.')
 
-            this.logError('Socket Error', err);
+          return
+        }
 
-            this.setState('error');
-            this.emit('error', err);
-        
-        }.bind(this);
+        cnt += 7
 
-        var onSocketData = function (data) {
- 
-            this.log.debug('received data');
+        this.log.debug('MBAP extracted')
 
-            buffer = Buffer.concat([buffer, data]);
+        // 2. extract pdu
 
-            while (buffer.length > 8) {
+        var pdu = data.slice(cnt, cnt + len - 1)
 
-                // 1. extract mbap
+        cnt += pdu.length
 
-                var id      = buffer.readUInt16BE(0),
-                    len     = buffer.readUInt16BE(4);
+        this.log.debug('PDU extracted')
 
-                this.log.debug('MBAP extracted');
+        // emit data event and let the
+        // listener handle the pdu
 
-                /* 2. extract pdu
-                 * the modbus packet is not complete.
-                 * wait for more data! */
+        this.emit('data', pdu)
+      }
+    }.bind(this)
 
-                if (buffer.length < 7 + len - 1) {
-                    break;
-                }
+    var onError = function () {
+      this.logError('Client in error state.')
 
-                var pdu = buffer.slice(7, 7 + len - 1);
+      socket.destroy()
+    }.bind(this)
 
-                this.log.debug('PDU extracted');
+    var onSend = function (pdu) {
+      this.log.debug('Sending pdu to the socket.')
 
-                /* the response belongst to a trashed
-                 * request. So we trash the responsre as well. */
+      reqId += 1
 
-                if (id === trashRequestId) {
-                
-                    this.log.debug('current mbap contains trashed request id.');
+      var head = Buffer.allocUnsafe(7)
 
-                } else {
+      head.writeUInt16BE(reqId, 0)
+      head.writeUInt16BE(this.protocolVersion, 2)
+      head.writeUInt16BE(pdu.length + 1, 4)
+      head.writeUInt8(this.unitId, 6)
 
+      var pkt = Buffer.concat([head, pdu])
 
-                    // emit data event and let the 
-                    // listener handle the pdu
+      currentRequestId = reqId
 
-                    this.emit('data', pdu);
-                
-                }
+      socket.write(pkt)
+    }.bind(this)
 
-                buffer = buffer.slice(pdu.length + 7 ,buffer.length);
+    var onTrashCurrentRequest = function () {
+      trashRequestId = currentRequestId
+    }
 
-            }
-        
-        }.bind(this);
+    this.connect = function () {
+      this.setState('connect')
 
-        var onError = function () {
+      connect()
 
-            this.logError('Client in error state.');
+      return this
+    }
 
-            socket.destroy();
+    this.reconnect = function () {
+      if (!this.inState('closed')) {
+        return this
+      }
 
-        }.bind(this);
+      closedOnPurpose = false
+      reconnect = true
 
+      this.log.debug('Reconnecting client.')
 
-        var onSend = function (pdu) {
+      socket.end()
 
-            this.log.debug('Sending pdu to the socket.');
+      return this
+    }
 
-            reqId += 1;
+    this.close = function () {
+      closedOnPurpose = true
 
-            var head = Buffer.allocUnsafe(7);
+      this.log.debug('Closing client on purpose.')
 
-            head.writeUInt16BE(reqId, 0);
-            head.writeUInt16BE(this.protocolVersion, 2);
-            head.writeUInt16BE(pdu.length + 1, 4);
-            head.writeUInt8(this.unitId, 6);
+      socket.end()
 
-            var pkt = Buffer.concat([head, pdu]);
+      return this
+    }
 
-            currentRequestId = reqId;
+    // following is required to test of stream processing
+    // and is only during test active
+    if (process.env.DEBUG) {
+      this.getSocket = function () {
+        return socket
+      }
+      this.setCurrentRequestId = function (id) {
+        currentRequestId = id
+      }
+      this.registerOnSend = function (_onSend) {
+        this.removeListener(onSend)
+        this.on('send', _onSend.bind(this))
+      }
+    }
 
-            socket.write(pkt);
-        
-        }.bind(this);
-
-        var onTrashCurrentRequest = function () {
-        
-            trashRequestId = currentRequestId;
-        
-        }.bind(this);
-
-        this.connect = function () {
-       
-            this.setState('connect');
-
-            connect();
-
-            return this;
-        
-        };
-
-        this.reconnect = function () {
-
-            if (!this.inState('closed')) {
-                return this;
-            }
-
-            closedOnPurpose = false;
-            reconnect       = true;
-
-            this.log.debug('Reconnecting client.');
-
-            socket.end();
-
-            return this;
-        
-        };
-
-        this.close = function () {
-
-            closedOnPurpose = true;
-
-            this.log.debug('Closing client on purpose.');
-
-            socket.end();
-
-            return this;
-
-        };
-
-        init();
-    
-    });
+    init()
+  })

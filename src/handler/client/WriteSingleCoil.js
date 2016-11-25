@@ -1,57 +1,49 @@
-var Stampit = require('stampit'),
-    Promise = require('bluebird')
+'use strict'
+
+var Stampit = require('stampit')
+var Promise = require('bluebird')
 
 module.exports = Stampit()
-    .init(function () {
-    
-        var init = function () {
-        
-            this.addResponseHandler(5, onResponse);
-        
-        }.bind(this);
+  .init(function () {
+    var init = function () {
+      this.addResponseHandler(5, onResponse)
+    }.bind(this)
 
-        var onResponse = function (pdu, request) {
-        
-            this.log.debug("handling write single coil response.");
+    var onResponse = function (pdu, request) {
+      this.log.debug('handling write single coil response.')
 
-            var fc              = pdu.readUInt8(0),
-                outputAddress   = pdu.readUInt16BE(1),
-                outputValue     = pdu.readUInt16BE(3);
+      var fc = pdu.readUInt8(0)
+      var outputAddress = pdu.readUInt16BE(1)
+      var outputValue = pdu.readUInt16BE(3)
 
-            var resp = {
-                fc              : fc,
-                outputAddress   : outputAddress,
-                outputValue     : outputValue === 0x0000?false:outputValue===0xFF00?true:undefined
-            };
+      var resp = {
+        fc: fc,
+        outputAddress: outputAddress,
+        outputValue: outputValue === 0x0000 ? false : outputValue === 0xFF00 ? true : undefined
+      }
 
-            if (fc !== 5) {
-                request.defer.reject();
-                return;
-            }
+      if (fc !== 5) {
+        request.defer.reject()
+        return
+      }
 
-            request.defer.resolve(resp);
-       
-        }.bind(this);
+      request.defer.resolve(resp)
+    }.bind(this)
 
-        this.writeSingleCoil = function (address, value) {
- 
-            var fc      = 5,
-                defer   = Promise.defer(), 
-                payload = (value instanceof Buffer) ? (value.readUInt8(0) > 0) : value,
-                pdu     = Buffer.allocUnsafe(5)
-            
-            pdu.writeUInt8(fc,0)
-            pdu.writeUInt16BE(address,1)
-            pdu.writeUInt16BE(payload ? 0xff00:0x0000,3)
+    this.writeSingleCoil = function (address, value) {
+      var fc = 5
+      var defer = Promise.defer()
+      var payload = (value instanceof Buffer) ? (value.readUInt8(0) > 0) : value
+      var pdu = Buffer.allocUnsafe(5)
 
-            this.queueRequest(fc, pdu, defer);
+      pdu.writeUInt8(fc, 0)
+      pdu.writeUInt16BE(address, 1)
+      pdu.writeUInt16BE(payload ? 0xff00 : 0x0000, 3)
 
-            return defer.promise;
-        
-        };
-    
-    
+      this.queueRequest(fc, pdu, defer)
 
-        init();
-    
-    });
+      return defer.promise
+    }
+
+    init()
+  })

@@ -1,89 +1,78 @@
-var stampit = require('stampit'),
-    Promise = require('bluebird')
+'use strict'
+
+var stampit = require('stampit')
+var Promise = require('bluebird')
 
 module.exports = stampit()
-    .init(function () {
-    
-        var init = function () {
-        
-            this.addResponseHandler(16, onResponse);
-        
-        }.bind(this);
-    
-        var onResponse = function (pdu, request) {
- 
-            this.log.debug("handling multiple registers response.");
+  .init(function () {
+    var init = function () {
+      this.addResponseHandler(16, onResponse)
+    }.bind(this)
 
-            var fc              = pdu.readUInt8(0),
-                startAddress    = pdu.readUInt16BE(1),
-                quantity        = pdu.readUInt16BE(3);
-    
-            var resp = {
-                fc              : fc,
-                startAddress    : startAddress,
-                quantity        : quantity
-            };
+    var onResponse = function (pdu, request) {
+      this.log.debug('handling multiple registers response.')
 
-            if (fc !== 16) {
-                request.defer.reject();
-                return;
-            }
+      var fc = pdu.readUInt8(0)
+      var startAddress = pdu.readUInt16BE(1)
+      var quantity = pdu.readUInt16BE(3)
 
-            request.defer.resolve(resp);
+      var resp = {
+        fc: fc,
+        startAddress: startAddress,
+        quantity: quantity
+      }
 
-       
-        }.bind(this);
+      if (fc !== 16) {
+        request.defer.reject()
+        return
+      }
 
-        this.writeMultipleRegisters = function (startAddress, register) {
- 
-            var defer = Promise.defer();
-            var fc          = 16,
-                basePdu     = Buffer.allocUnsafe(6),
-                pdu 
+      request.defer.resolve(resp)
+    }.bind(this)
 
-            basePdu.writeUInt8(fc)
-            basePdu.writeUInt16BE(startAddress, 1)
+    this.writeMultipleRegisters = function (startAddress, register) {
+      var defer = Promise.defer()
+      var fc = 16
+      var basePdu = Buffer.allocUnsafe(6)
+      var pdu
 
-            if(register instanceof Buffer) {
+      basePdu.writeUInt8(fc)
+      basePdu.writeUInt16BE(startAddress, 1)
 
-              if(register.length/2 > 0x007b) {
-                defer.reject();
-              }
+      if (register instanceof Buffer) {
+        if (register.length / 2 > 0x007b) {
+          defer.reject()
+        }
 
-              basePdu.writeUInt16BE(register.length/2,3)
-              basePdu.writeUInt8(register.length,5)
+        basePdu.writeUInt16BE(register.length / 2, 3)
+        basePdu.writeUInt8(register.length, 5)
 
-              pdu = Buffer.concat([basePdu, register])
-            }
-            else if(register instanceof Array) {
+        pdu = Buffer.concat([basePdu, register])
+      } else if (register instanceof Array) {
+        if (register.length > 0x007b) {
+          defer.reject()
+          return
+        }
 
-              if (register.length > 0x007b) {
-                  defer.reject();
-                  return;
-              }
+        var byteCount = Math.ceil(register.length * 2)
+        var payloadPdu = Buffer.allocUnsafe(byteCount)
 
-              var byteCount   = Math.ceil(register.length * 2),
-                  curByte     = 0
+        basePdu.writeUInt16BE(register.length, 3)
+        basePdu.writeUInt8(byteCount, 5)
 
-              var payloadPdu  = Buffer.allocUnsafe(byteCount)
+        for (var i = 0; i < register.length; i += 1) {
+          payloadPdu.writeUInt16BE(register[i], 2 * i)
+        }
 
-              basePdu.writeUInt16BE(register.length, 3)
-              basePdu.writeUInt8(byteCount, 5)
+        pdu = Buffer.concat([basePdu, payloadPdu])
+      } else {
+        defer.reject()
+      }
 
-              for (var i = 0; i < register.length; i += 1) {
-                  payloadPdu.writeUInt16BE(register[i],2*i)
-              }
+      this.queueRequest(fc, pdu, defer)
 
-              pdu = Buffer.concat([basePdu, payloadPdu])
-            } else {
-              defer.reject();
-            }
+      return defer.promise
+    }
 
-            this.queueRequest(fc, pdu, defer);
-
-            return defer.promise;
-        };
-
-        init();
-    
-    });
+    init()
+  })
