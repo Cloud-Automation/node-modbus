@@ -81,12 +81,12 @@ module.exports = stampit()
     var initiateSocket = function (socket) {
       let socketId = socketList.length
 
-      let requestHandler = function (req) {
+      var requestHandler = function (req) {
         fifo.push(req)
         flush()
       }
 
-      let removeHandler = function () {
+      var removeHandler = function () {
         socketList[socketId] = undefined
         /* remove undefined on the end of the array */
         for (let i = socketList.length - 1; i >= 0; i -= 1) {
@@ -97,8 +97,8 @@ module.exports = stampit()
 
           socketList.splice(i, 1)
         }
-        console.log(socketList)
-      }
+        this.log.debug('Client connection closed, remaining clients. ', socketList.length)
+      }.bind(this)
 
       let clientSocket = ClientSocket({
         socket: socket,
@@ -108,7 +108,7 @@ module.exports = stampit()
       })
 
       socketList.push(clientSocket)
-    }
+    }.bind(this)
 
     this.close = function (cb) {
       for (var c in clients) {
