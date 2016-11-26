@@ -64,7 +64,7 @@ module.exports = stampit()
 
     this.onSocketError = function (e) {
       this.logError('Socker error', e)
-    }
+    }.bind(this)
 
     init()
   })
