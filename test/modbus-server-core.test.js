@@ -1,5 +1,6 @@
 var stampit         = require('stampit'),
-    assert          = require('assert'),
+    assert          = require("assert"),
+    Put             = require('put'),
     sinon           = require('sinon'),
     util            = require('util'),
     eventEmitter    = require('events').EventEmitter;
@@ -13,13 +14,15 @@ describe("Modbus Server Core Tests.", function () {
         it('should answer with 0x8x status code due to missing handler.', function (done) {
         
             var core        = ModbusCore(),
-                request     = Buffer.from([0x01,0x00,0x00,0x00,0x0A]),
-                exResponse  = Buffer.from([0x81,0x01])
+                request     = Put().word8(1).word16be(0).word16be(10).buffer(),
+                exResponse  = Put().word8(0x81).word8(0x01).buffer();
 
             var resp = function (response) {
            
                 assert.equal(response.compare(exResponse), 0);
+
                 done();
+            
             };
 
             core.onData(request, resp); 
@@ -36,8 +39,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read coils request just fine.', function (done) {
 
             var core        = Core(),
-                request     = Buffer.from([0x01,0x00,0x00,0x00,0x05]),
-                exResponse  = Buffer.from([0x01,0x01,0x15]);
+                request     = Put().word8(0x01).word16be(0).word16be(5).buffer(),
+                exResponse  = Put().word8(0x01).word8(1).word8(0x15).buffer();         
 
             core.getCoils().writeUInt8(0x15, 0); 
 
@@ -56,8 +59,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read coils request with odd start address just fine.', function (done) {
 
             var core        = Core(),
-                request     = Buffer.from([0x01,0x00,0x02,0x00,0x05]),
-                exResponse  = Buffer.from([0x01,0x01,0x05]);         
+                request     = Put().word8(0x01).word16be(2).word16be(5).buffer(),
+                exResponse  = Put().word8(0x01).word8(1).word8(0x05).buffer();         
 
             core.getCoils().writeUInt8(0x15, 0); 
 
@@ -76,8 +79,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read coils request with a start address outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x01,0x20,0x01,0x00,10]),
-                exResponse  = Buffer.from([0x81,0x02]);
+                request     = Put().word8(0x01).word16be(1024 * 8 + 1).word16be(10).buffer(),
+                exResponse  = Put().word8(0x81).word8be(0x02).buffer();
 
             var resp = function (response) {
             
@@ -94,8 +97,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read coils request with a quantity value outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x01,0x1f,0xf8,0x00,9]),
-                exResponse  = Buffer.from([0x81,0x02]);
+                request     = Put().word8(0x01).word16be(1023 * 8).word16be(9).buffer(),
+                exResponse  = Put().word8(0x81).word8be(0x02).buffer();
 
             var resp = function (response) {
             
@@ -119,8 +122,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read discrete inputs request just fine.', function (done) {
 
             var core        = Core(),
-                request     = Buffer.from([0x02,0x00,0,0x00,5]),
-                exResponse  = Buffer.from([0x02,1,0x15]);         
+                request     = Put().word8(0x02).word16be(0).word16be(5).buffer(),
+                exResponse  = Put().word8(0x02).word8(1).word8(0x15).buffer();         
      
             core.getInput().writeUInt8(0x15, 0); 
 
@@ -139,8 +142,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read discrete inputs request with odd start address just fine.', function (done) {
 
             var core        = Core(),
-                request     = Buffer.from([0x02,0x00,2,0x00,5]),
-                exResponse  = Buffer.from([0x02,1,0x05]);         
+                request     = Put().word8(0x02).word16be(2).word16be(5).buffer(),
+                exResponse  = Put().word8(0x02).word8(1).word8(0x05).buffer();         
      
             core.getInput().writeUInt8(0x15, 0); 
 
@@ -159,8 +162,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read discrete inputs request with a start address outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x02,0x20,0x01,0x00,10]),
-                exResponse  = Buffer.from([0x82,0x02]);
+                request     = Put().word8(0x02).word16be(1024 * 8 + 1).word16be(10).buffer(),
+                exResponse  = Put().word8(0x82).word8be(0x02).buffer();
 
             var resp = function (response) {
             
@@ -177,8 +180,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read discrete inputs request with a quantity value outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x02,0x1F,0xF8,0x00,9]),
-                exResponse  = Buffer.from([0x82,0x02]);
+                request     = Put().word8(0x02).word16be(1023 * 8).word16be(9).buffer(),
+                exResponse  = Put().word8(0x82).word8be(0x02).buffer();
 
             var resp = function (response) {
             
@@ -202,8 +205,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read holding registers request just fine.', function (done) {
 
             var core        = Core(),
-                request     = Buffer.from([0x03,0x00,0x01,0x00,0x04]),
-                exResponse  = Buffer.from([0x03,0x08,0x00,0x02,0x00,0x03,0x00,0x04,0x00,0x05]);          
+                request     = Put().word8(0x03).word16be(0).word16be(5).buffer(),
+                exResponse  = Put().word8(0x03).word8(10).word16be(1).word16be(2).word16be(3).word16be(4).word16be(5).buffer();          
             core.getHolding().writeUInt16BE(0x01, 0); 
             core.getHolding().writeUInt16BE(0x02, 2); 
             core.getHolding().writeUInt16BE(0x03, 4); 
@@ -213,7 +216,9 @@ describe("Modbus Server Core Tests.", function () {
             var resp = function (response) {
            
                 assert.equal(response.compare(exResponse), 0);
+
                 done();
+
             };
 
             core.onData(request, resp);
@@ -223,8 +228,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read holding registers request with a start address outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x03,0x04,0x05,0x00,10]),
-                exResponse  = Buffer.from([0x83,0x02]);
+                request     = Put().word8(0x03).word16be(1024 + 1).word16be(10).buffer(),
+                exResponse  = Put().word8(0x83).word8be(0x02).buffer();
 
             var resp = function (response) {
             
@@ -241,8 +246,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read holding registers request with a quantity value outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x03,0x04,0x03,0x00,1]),
-                exResponse  = Buffer.from([0x83,0x02]);
+                request     = Put().word8(0x03).word16be(1023).word16be(1).buffer(),
+                exResponse  = Put().word8(0x83).word8be(0x02).buffer();
 
             var resp = function (response) {
             
@@ -267,8 +272,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read input registers request just fine.', function (done) {
 
             var core        = Core(),
-                request     = Buffer.from([0x04,0x00,0x01,0x00,0x04]),
-                exResponse  = Buffer.from([0x04,0x08,0x00,4,0x00,3,0x00,2,0x00,1]);          
+                request     = Put().word8(0x04).word16be(0).word16be(5).buffer(),
+                exResponse  = Put().word8(0x04).word8(10).word16be(5).word16be(4).word16be(3).word16be(2).word16be(1).buffer();          
             core.getInput().writeUInt16BE(0x05, 0); 
             core.getInput().writeUInt16BE(0x04, 2); 
             core.getInput().writeUInt16BE(0x03, 4); 
@@ -290,8 +295,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read input registers request with a start address outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x04,0x04,0x05,0x00,10]),
-                exResponse  = Buffer.from([0x84,0x02]);
+                request     = Put().word8(0x04).word16be(1024 +1).word16be(10).buffer(),
+                exResponse  = Put().word8(0x84).word8be(0x02).buffer();
 
             var resp = function (response) {
             
@@ -308,8 +313,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a read input registers request with a quantity value outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x04,0x04,0x03,0x00,1]),
-                exResponse  = Buffer.from([0x84,0x02]);
+                request     = Put().word8(0x04).word16be(1023).word16be(1).buffer(),
+                exResponse  = Put().word8(0x84).word8be(0x02).buffer();
 
             var resp = function (response) {
             
@@ -332,8 +337,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a write single coil request just fine.', function (done) {
 
             var core        = Core(),
-                request     = Buffer.from([0x05,0x00,8,0xff,0x00]),
-                exResponse  = Buffer.from([0x05,0x00,8,0xff,0x00]);
+                request     = Put().word8(0x05).word16be(8).word16be(0xff00).buffer(),
+                exResponse  = Put().word8(0x05).word16be(8).word16be(0xff00).buffer();
 
             core.getCoils().writeUInt8(0, 1);
 
@@ -353,8 +358,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a write single coil request with a start address outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x05,0x20,0x01,0x00,0xff00]),
-                exResponse  = Buffer.from([0x85,0x02]);
+                request     = Put().word8(0x05).word16be(1024 * 8 + 1).word16be(0xff00).buffer(),
+                exResponse  = Put().word8(0x85).word8be(0x02).buffer();
 
             var resp = function (response) {
             
@@ -371,8 +376,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a write single coil request with a another value than 0x0000 (false) and 0xff00 (true).', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x05,0x00,8,0xf3,0x00]),
-                exResponse  = Buffer.from([0x85,0x03]);
+                request     = Put().word8(0x05).word16be(8).word16be(0xf300).buffer(),
+                exResponse  = Put().word8(0x85).word8be(0x03).buffer();
 
             var resp = function (response) {
             
@@ -398,8 +403,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a write single register request just fine.', function (done) {
 
             var core        = Core(),
-                request     = Buffer.from([0x06,0x00,8,0x01,0x23]),
-                exResponse  = Buffer.from([0x06,0x00,8,0x01,0x23]);
+                request     = Put().word8(0x06).word16be(8).word16be(0x0123).buffer(),
+                exResponse  = Put().word8(0x06).word16be(8).word16be(0x0123).buffer();
 
             core.getHolding().writeUInt16BE(0x0123, 8);
 
@@ -419,8 +424,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a write single register request with a start address outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x06,0x04,0x05,0x01,0x23]),
-                exResponse  = Buffer.from([0x86,0x02]);
+                request     = Put().word8(0x06).word16be(1024 + 1).word16be(0x0123).buffer(),
+                exResponse  = Put().word8(0x86).word8be(0x02).buffer();
 
             var resp = function (response) {
             
@@ -444,8 +449,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a write multiple coils request just fine.', function (done) {
 
             var core        = Core(),
-                request     = Buffer.from([0x0F,0x00,12,0x00,4,1,0x0F]),
-                exResponse  = Buffer.from([0x0F,0x00,12,0x00,4]);
+                request     = Put().word8(0x0F).word16be(12).word16be(4).word8(1).word8(0x0F).buffer(),
+                exResponse  = Put().word8(0x0F).word16be(12).word16be(4).buffer();
 
             core.getCoils().writeUInt8(0x0F, 1);
 
@@ -465,8 +470,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a write multiple coils request with a start address outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x0F,0x20,0x01,0x00,0x04,0x01,0x0F]),
-                exResponse  = Buffer.from([0x8F,0x02]);
+                request     = Put().word8(0x0F).word16be(1024 * 8 + 1).word16be(4).word8(1).word8(0x0F).buffer(),
+                exResponse  = Put().word8(0x8F).word8be(0x02).buffer();
 
             var resp = function (response) {
             
@@ -483,8 +488,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a write multiple coils request with a start and quantity outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x0F,0x1F,0xFD,0x00,4,1,0x0F]),
-                exResponse  = Buffer.from([0x8F,0x02]);
+                request     = Put().word8(0x0F).word16be(1024 * 8 - 3).word16be(4).word8(1).word8(0x0F).buffer(),
+                exResponse  = Put().word8(0x8F).word8be(0x02).buffer();
 
             var resp = function (response) {
             
@@ -509,8 +514,20 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a write multiple registers request just fine.', function (done) {
 
             var core        = Core(),
-                request     = Buffer.from([0x10,0x00,0x05,0x00,0x03,0x06,0x00,0x01,0x00,0x02,0x00,0x03]),
-                exResponse  = Buffer.from([0x10,0x00,0x05,0x00,0x03])
+                request     = Put()
+                    .word8(0x10)
+                    .word16be(5)
+                    .word16be(3)
+                    .word8(6)
+                    .word16be(0x0001)
+                    .word16be(0x0002)
+                    .word16be(0x0003)
+                    .buffer(),
+                exResponse  = Put()
+                    .word8(0x10)
+                    .word16be(5)
+                    .word16be(3)
+                    .buffer();
 
             core.getHolding().writeUInt16BE(0x0000, 10);
             core.getHolding().writeUInt16BE(0x0000, 12);
@@ -534,8 +551,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a write multiple registers request with a start address outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x10,0x04,0x05,0x00,0x02,0x04,0x00,0x01,0x00,0x02]),
-                exResponse  = Buffer.from([0x90,0x02]);
+                request     = Put().word8(0x10).word16be(1025).word16be(2).word8(4).word16be(0x01).word16be(0x02).buffer(),
+                exResponse  = Put().word8(0x90).word8be(0x02).buffer();
 
             var resp = function (response) {
             
@@ -552,8 +569,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a write multiple registers request with a start and quantity outside the address space.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x10,0x04,0x02,0x00,0x02,0x04,0x00,0x01,0x00,0x02]),
-                exResponse  = Buffer.from([0x90,0x02]);
+                request     = Put().word8(0x10).word16be(1022).word16be(2).word8(4).word16be(0x01).word16be(0x02).buffer(),
+                exResponse  = Put().word8(0x90).word8be(0x02).buffer();
 
             var resp = function (response) {
             
@@ -570,8 +587,8 @@ describe("Modbus Server Core Tests.", function () {
         it('should handle a write multiple registers request with a quantity greater 0x007b.', function (done) {
         
             var core        = Core(),
-                request     = Buffer.from([0x10,0x00,0x00,0x00,0x7c,0xf8,0x00,0x01,0x00,0x02]),
-                exResponse  = Buffer.from([0x90,0x03]);
+                request     = Put().word8(0x10).word16be(0).word16be(0x007c).word8(0xf8).word16be(0x01).word16be(0x02).buffer(),
+                exResponse  = Put().word8(0x90).word8be(0x03).buffer();
 
             var resp = function (response) {
             

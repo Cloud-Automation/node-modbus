@@ -1,4 +1,5 @@
 var stampit         = require('stampit'),
+    Put             = require('put'),
     EventBus        = require('stampit-event-bus'),
     Log             = require('stampit-log');
 
@@ -47,11 +48,7 @@ var stampit         = require('stampit'),
           
                 this.log.debug('no handler for fc', fc);
 
-                var buf = Buffer.alloc(2)
-                buf.writeUInt8(fc + 0x80, 0)
-                buf.writeUInt8(0x01, 1)
-
-                callback(buf)
+                callback(Put().word8(fc + 0x80).word8(0x01).buffer());
 
                 return;
             

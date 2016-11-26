@@ -1,4 +1,5 @@
 var stampit         = require('stampit'),
+    Put             = require('put'),
     Net             = require('net'),
     ModbusCore      = require('./modbus-client-core.js');
 
@@ -146,14 +147,13 @@ module.exports = stampit()
 
             reqId += 1;
 
-            var head = Buffer.allocUnsafe(7)
-
-            head.writeUInt16BE(reqId, 0)
-            head.writeUInt16BE(this.protocolVersion, 2)
-            head.writeUInt16BE(pdu.length + 1, 4)
-            head.writeUInt8(this.unitId, 6)
-
-            var pkt = Buffer.concat([head, pdu])
+            var pkt = Put()
+                .word16be(reqId)                 // transaction id
+                .word16be(this.protocolVersion) // protocol version
+                .word16be(pdu.length + 1)        // pdu length
+                .word8(this.unitId)	             // unit id
+                .put(pdu)                        // the actual pdu
+                .buffer();
 
             currentRequestId = reqId;
 

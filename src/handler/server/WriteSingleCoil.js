@@ -1,4 +1,6 @@
-var stampit     = require('stampit');
+var stampit     = require('stampit'),
+    Put         = require('put');
+
 
 module.exports = stampit()
     .init(function () {
@@ -23,26 +25,20 @@ module.exports = stampit()
 
                 if (pdu.length !== 5) {
                 
-                  var buf = Buffer.allocUnsafe(2);
+                    cb(Put().word8(0x85).word8(0x02).buffer());
+                    return;
 
-                  buf.writeUInt8(0x85, 0);
-                  buf.writeUInt8(0x02, 1);
-                  cb(buf);
-                  return;
                 }
 
-                var //fc          = pdu.readUInt8(0), // unused
+                var fc          = pdu.readUInt8(0),
                     address     = pdu.readUInt16BE(1),
-                    value       = (pdu.readUInt16BE(3) === 0x0000) ? false : true;
+                    value       = pdu.readUInt16BE(3) === 0x0000?false:true;
 
                 if (pdu.readUInt16BE(3) !== 0x0000 && pdu.readUInt16BE(3) !== 0xFF00) {
                 
-                    var buf = Buffer.allocUnsafe(2);
-  
-                    buf.writeUInt8(0x85, 0);
-                    buf.writeUInt8(0x03, 1);
-                    cb(buf);
-                    return;
+                    cb(Put().word8(0x85).word8(0x03).buffer());
+                    return; 
+                 
                 }
 
                 this.emit('preWriteSingleCoilRequest', address, value);
@@ -51,21 +47,13 @@ module.exports = stampit()
 
                 if (address > mem.length * 8) {
                 
-                    var buf = Buffer.allocUnsafe(2);
-  
-                    buf.writeUInt8(0x85, 0);
-                    buf.writeUInt8(0x02, 1);
-                    cb(buf);
+                    cb(Put().word8(0x85).word8(0x02).buffer());
                     return;
+
                 }
 
-                var response = Buffer.allocUnsafe(5);
-
-                response.writeUInt8(5, 0);
-                response.writeUInt16BE(address, 1);
-                response.writeUInt16BE(value ? 0xFF00 : 0x0000, 3);
-
-                var oldValue = mem.readUInt8(Math.floor(address / 8)),
+                var response = Put().word8(0x05).word16be(address).word16be(value?0xFF00:0x0000),
+                    oldValue = mem.readUInt8(Math.floor(address / 8)),
                     newValue;
                   
                 if (value) {
@@ -78,7 +66,7 @@ module.exports = stampit()
 
                 this.emit('postWriteSingleCoilRequest', address, value);
 
-                cb(response);
+                cb(response.buffer());
 
             }.bind(this), this.responseDelay);
         

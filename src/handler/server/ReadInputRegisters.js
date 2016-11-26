@@ -1,4 +1,6 @@
-var stampit     = require('stampit')
+var stampit     = require('stampit'),
+    Put         = require('put');
+
 
 module.exports = stampit()
     .init(function () {
@@ -23,15 +25,12 @@ module.exports = stampit()
 
                 if (pdu.length !== 5) {
                 
-                    var buf = Buffer.allocUnsafe(2);
-  
-                    buf.writeUInt8(0x84, 0);
-                    buf.writeUInt8(0x02, 1);
-                    cb(buf);
+                    cb(Put().word8(0x84).word8(0x02).buffer());
                     return;
+
                 }
 
-                var //fc          = pdu.readUInt8(0), //unused
+                var fc          = pdu.readUInt8(0),
                     start       = pdu.readUInt16BE(1),
                     byteStart   = start * 2,
                     quantity    = pdu.readUInt16BE(3);
@@ -42,22 +41,20 @@ module.exports = stampit()
 
                 if (byteStart > mem.length || byteStart + (quantity * 2) > mem.length) {
                 
-                  var buf = Buffer.allocUnsafe(2);
+                    cb(Put().word8(0x84).word8(0x02).buffer());
+                    return;
 
-                  buf.writeUInt8(0x84, 0);
-                  buf.writeUInt8(0x02, 1);
-                  cb(buf);
-                  return;
                 }
 
-                var head = Buffer.allocUnsafe(2);
-                 
-                head.writeUInt8(0x04, 0);
-                head.writeUInt8(quantity * 2, 1);
+                var response = Put().word8(0x04).word8(quantity * 2);
 
-                var response = Buffer.concat([head, mem.slice(byteStart, byteStart + quantity * 2)]);
+                for (var i = byteStart; i < byteStart + (quantity * 2); i += 2) {
+         
+                    response.word16be(mem.readUInt16BE(i));
 
-                cb(response);
+                }
+
+                cb(response.buffer());
 
             }.bind(this), this.responseDelay);
         

@@ -1,4 +1,6 @@
-var stampit     = require('stampit')
+var stampit     = require('stampit'),
+    Put         = require('put');
+
 
 module.exports = stampit()
     .init(function () {
@@ -23,15 +25,12 @@ module.exports = stampit()
 
                 if (pdu.length < 3) {
                 
-                  var buf = Buffer.allocUnsafe(2);
+                    cb(Put().word8(0x8F).word8(0x02).buffer());
+                    return;
 
-                  buf.writeUInt8(0x8F, 0);
-                  buf.writeUInt8(0x02, 1);
-                  cb(buf);
-                  return;
                 }
 
-                var //fc          = pdu.readUInt8(0), // unused
+                var fc          = pdu.readUInt8(0),
                     start       = pdu.readUInt16BE(1),
                     quantity    = pdu.readUInt16BE(3),
                     byteCount   = pdu.readUInt8(5);
@@ -43,23 +42,15 @@ module.exports = stampit()
                 // error response
                 if (start > mem.length * 8 || start + quantity > mem.length * 8) {
                 
-                  var buf = Buffer.allocUnsafe(2);
+                    cb(Put().word8(0x8F).word8(0x02).buffer());
+                    return;
 
-                  buf.writeUInt8(0x8F, 0);
-                  buf.writeUInt8(0x02, 1);
-                  cb(buf);
-                  return;
                 }
 
-                var response = Buffer.allocUnsafe(5);
+                var response = Put().word8(0x0F).word16be(start).word16be(quantity).buffer(),
+                    oldValue, newValue, current = pdu.readUInt8(6 + 0), j = 0;
 
-                response.writeUInt8(0x0F, 0);
-                response.writeUInt16BE(start, 1);
-                response.writeUInt16BE(quantity, 3);
-
-                var oldValue, newValue, current = pdu.readUInt8(6 + 0), j = 0;
-
-                for (var i = start; i < start + quantity; i += 1) {
+                for (var i = start; i < start + quantity; i += 1 ) {
 
                     // reading old value from the coils register
                     oldValue = mem.readUInt8(Math.floor(i / 8));
@@ -81,7 +72,9 @@ module.exports = stampit()
                     if (j % 8 === 0 && j < quantity) {
 
                         current = pdu.readUInt8(6 +  Math.floor(j / 8));
+                    
                     }
+
                 }
 
                 this.emit('postWriteMultipleCoilsRequest', start, quantity, byteCount);

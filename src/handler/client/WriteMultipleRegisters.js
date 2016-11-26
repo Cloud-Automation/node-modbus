@@ -1,5 +1,7 @@
 var stampit = require('stampit'),
-    Promise = require('bluebird')
+    Q       = require('q'),
+    Put     = require('put');
+
 
 module.exports = stampit()
     .init(function () {
@@ -36,13 +38,11 @@ module.exports = stampit()
 
         this.writeMultipleRegisters = function (startAddress, register) {
  
-            var defer = Promise.defer();
+            var defer = Q.defer();
             var fc          = 16,
-                basePdu     = Buffer.allocUnsafe(6),
-                pdu 
-
-            basePdu.writeUInt8(fc)
-            basePdu.writeUInt16BE(startAddress, 1)
+                pdu         = Put()
+                                .word8(fc)
+                                .word16be(startAddress)
 
             if(register instanceof Buffer) {
 
@@ -50,10 +50,9 @@ module.exports = stampit()
                 defer.reject();
               }
 
-              basePdu.writeUInt16BE(register.length/2,3)
-              basePdu.writeUInt8(register.length,5)
-
-              pdu = Buffer.concat([basePdu, register])
+              pdu.word16be(register.length/2)
+                 .word8(register.length)
+                 .put(register)
             }
             else if(register instanceof Array) {
 
@@ -65,19 +64,17 @@ module.exports = stampit()
               var byteCount   = Math.ceil(register.length * 2),
                   curByte     = 0
 
-              var payloadPdu  = Buffer.allocUnsafe(byteCount)
-
-              basePdu.writeUInt16BE(register.length, 3)
-              basePdu.writeUInt8(byteCount, 5)
+              pdu.word16be(register.length)
+                 .word8(byteCount)
 
               for (var i = 0; i < register.length; i += 1) {
-                  payloadPdu.writeUInt16BE(register[i],2*i)
+                  pdu.word16be(register[i]);
               }
-
-              pdu = Buffer.concat([basePdu, payloadPdu])
             } else {
               defer.reject();
             }
+
+            pdu = pdu.buffer();
 
             this.queueRequest(fc, pdu, defer);
 

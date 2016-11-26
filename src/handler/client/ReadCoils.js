@@ -1,5 +1,7 @@
 var Stampit = require('stampit'),
-    Promise = require('bluebird')
+    Q       = require('q'),
+    Put     = require('put');
+
 
 module.exports = Stampit()
     .init(function () {
@@ -12,10 +14,11 @@ module.exports = Stampit()
     
         var onResponse = function (pdu, request) {
  
-            this.log.debug("handling read coils response.");
+            this.log.debug("handeling read coils response.");
 
             var fc          = pdu.readUInt8(0),
-                byteCount   = pdu.readUInt8(1);
+                byteCount   = pdu.readUInt8(1),
+                bitCount    = byteCount * 8;
 
             var resp = {
                     fc          : fc,
@@ -47,12 +50,8 @@ module.exports = Stampit()
         this.readCoils = function (start, quantity) {
  
             var fc      = 1,
-                defer   = Promise.defer(),
-                pdu     = Buffer.allocUnsafe(5)
-
-            pdu.writeUInt8(fc,0)
-            pdu.writeUInt16BE(start,1)
-            pdu.writeUInt16BE(quantity,3)
+                defer   = Q.defer(),
+                pdu     = Put().word8(fc).word16be(start).word16be(quantity).buffer();
 
             this.queueRequest(fc, pdu, defer);
             

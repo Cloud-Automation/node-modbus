@@ -1,6 +1,7 @@
 var stampit             = require('stampit'),
     ModbusServerCore    = require('./modbus-server-core.js'),
     StateMachine        = require('stampit-state-machine'),
+    Put                 = require('put'),
     net                 = require('net');
 
 module.exports = stampit()
@@ -111,14 +112,13 @@ module.exports = stampit()
  
                 this.log.debug('sending tcp data');
 
-                var head = Buffer.allocUnsafe(7)
-
-                head.writeUInt16BE(current.request.trans_id, 0)
-                head.writeUInt16BE(current.request.protocol_ver, 2)
-                head.writeUInt16BE(response.length + 1, 4)
-                head.writeUInt8(current.request.unit_id, 6)
-
-                var pkt = Buffer.concat([head, response])
+                 var pkt = Put()
+                    .word16be(current.request.trans_id)         // transaction id
+                    .word16be(current.request.protocol_ver)     // protocol version
+                    .word16be(response.length + 1)      // pdu length
+                    .word8(current.request.unit_id)             // unit id
+                    .put(response)                      // the actual pdu
+                    .buffer();
 
                 current.socket.write(pkt); 
            
