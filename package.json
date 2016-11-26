@@ -8,12 +8,11 @@
     "type": "git",
     "url": "https://github.com/Cloud-Automation/node-modbus"
   },
-  "engines" : {
-    "node" : ">=4.5.0"
+  "engines": {
+    "node": ">=4.5.0"
   },
   "dependencies": {
-    "put": "0.0.6",
-    "q": "1.0.1",
+    "bluebird": "^3.4.6",
     "crc": "3.4.0",
     "serialport": "^4.0.1",
     "stampit": "^2.1.2",
