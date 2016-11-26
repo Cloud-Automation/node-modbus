@@ -12,21 +12,17 @@ const client = modbus.client.tcp.complete({
 client.connect()
 
 client.on('connect', function () {
-
-  let p = Promise.resolve() 
+  let p = Promise.resolve()
 
   for (let i = 1; i < 1e5; i++) {
     p = p.then(client.readCoils(0, 13))
   }
 
   p.then(function () {
-
-    let usedHeapSize = Math.floor(v8.getHeapStatistics().used_heap_size / 1e6);
+    let usedHeapSize = Math.floor(v8.getHeapStatistics().used_heap_size / 1e6)
 
     console.log('Heap:', usedHeapSize, 'MB')
- 
+
     client.close()
-
   })
-
 })
