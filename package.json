@@ -12,7 +12,8 @@
     "node" : ">=4.5.0"
   },
   "dependencies": {
-    "bluebird": "^3.4.6",
+    "put": "0.0.6",
+    "q": "1.0.1",
     "crc": "3.4.0",
     "serialport": "^4.0.1",
     "stampit": "^2.1.2",
