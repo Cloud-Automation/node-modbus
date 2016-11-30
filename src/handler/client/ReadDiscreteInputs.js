@@ -41,22 +41,21 @@ module.exports = Stampit()
     }.bind(this)
 
     this.readDiscreteInputs = function (start, quantity) {
-      var fc = 2
-      var defer = Promise.defer()
-      var pdu = Buffer.allocUnsafe(5)
+      return new Promise(function (resolve, reject) {
+        var fc = 2
+        var pdu = Buffer.allocUnsafe(5)
 
-      pdu.writeUInt8(fc)
-      pdu.writeUInt16BE(start, 1)
-      pdu.writeUInt16BE(quantity, 3)
+        pdu.writeUInt8(fc)
+        pdu.writeUInt16BE(start, 1)
+        pdu.writeUInt16BE(quantity, 3)
 
-      if (quantity > 2000) {
-        defer.reject()
-        return defer.promise
-      }
+        if (quantity > 2000) {
+          reject()
+          return
+        }
 
-      this.queueRequest(fc, pdu, defer)
-
-      return defer.promise
+        this.queueRequest(fc, pdu, { resolve: resolve, reject: reject })
+      }.bind(this))
     }
 
     init()
