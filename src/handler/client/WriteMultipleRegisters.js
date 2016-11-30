@@ -31,47 +31,47 @@ module.exports = stampit()
     }.bind(this)
 
     this.writeMultipleRegisters = function (startAddress, register) {
-      var defer = Promise.defer()
-      var fc = 16
-      var basePdu = Buffer.allocUnsafe(6)
-      var pdu
+      return new Promise(function (resolve, reject) {
+        var fc = 16
+        var basePdu = Buffer.allocUnsafe(6)
+        var pdu
 
-      basePdu.writeUInt8(fc)
-      basePdu.writeUInt16BE(startAddress, 1)
+        basePdu.writeUInt8(fc)
+        basePdu.writeUInt16BE(startAddress, 1)
 
-      if (register instanceof Buffer) {
-        if (register.length / 2 > 0x007b) {
-          defer.reject()
-        }
+        if (register instanceof Buffer) {
+          if (register.length / 2 > 0x007b) {
+            reject()
+          }
 
-        basePdu.writeUInt16BE(register.length / 2, 3)
-        basePdu.writeUInt8(register.length, 5)
+          basePdu.writeUInt16BE(register.length / 2, 3)
+          basePdu.writeUInt8(register.length, 5)
 
-        pdu = Buffer.concat([basePdu, register])
-      } else if (register instanceof Array) {
-        if (register.length > 0x007b) {
-          defer.reject()
+          pdu = Buffer.concat([basePdu, register])
+        } else if (register instanceof Array) {
+          if (register.length > 0x007b) {
+            reject()
+            return
+          }
+
+          var byteCount = Math.ceil(register.length * 2)
+          var payloadPdu = Buffer.allocUnsafe(byteCount)
+
+          basePdu.writeUInt16BE(register.length, 3)
+          basePdu.writeUInt8(byteCount, 5)
+
+          for (var i = 0; i < register.length; i += 1) {
+            payloadPdu.writeUInt16BE(register[i], 2 * i)
+          }
+
+          pdu = Buffer.concat([basePdu, payloadPdu])
+        } else {
+          reject()
           return
         }
 
-        var byteCount = Math.ceil(register.length * 2)
-        var payloadPdu = Buffer.allocUnsafe(byteCount)
-
-        basePdu.writeUInt16BE(register.length, 3)
-        basePdu.writeUInt8(byteCount, 5)
-
-        for (var i = 0; i < register.length; i += 1) {
-          payloadPdu.writeUInt16BE(register[i], 2 * i)
-        }
-
-        pdu = Buffer.concat([basePdu, payloadPdu])
-      } else {
-        defer.reject()
-      }
-
-      this.queueRequest(fc, pdu, defer)
-
-      return defer.promise
+        this.queueRequest(fc, pdu, { resolve: resolve, reject: reject })
+      }.bind(this))
     }
 
     init()
