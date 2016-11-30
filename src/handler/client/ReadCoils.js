@@ -42,17 +42,16 @@ module.exports = Stampit()
     }.bind(this)
 
     this.readCoils = function (start, quantity) {
-      var fc = 1
-      var defer = Promise.defer()
-      var pdu = Buffer.allocUnsafe(5)
+      return new Promise(function (resolve, reject) {
+        var fc = 1
+        var pdu = Buffer.allocUnsafe(5)
 
-      pdu.writeUInt8(fc, 0)
-      pdu.writeUInt16BE(start, 1)
-      pdu.writeUInt16BE(quantity, 3)
+        pdu.writeUInt8(fc, 0)
+        pdu.writeUInt16BE(start, 1)
+        pdu.writeUInt16BE(quantity, 3)
 
-      this.queueRequest(fc, pdu, defer)
-
-      return defer.promise
+        this.queueRequest(fc, pdu, { resolve: resolve, reject: reject })
+      }.bind(this))
     }
 
     init()
