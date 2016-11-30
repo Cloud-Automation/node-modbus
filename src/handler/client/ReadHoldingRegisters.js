@@ -37,19 +37,18 @@ module.exports = Stampit()
     }.bind(this)
 
     this.readHoldingRegisters = function (start, quantity) {
-      this.log.debug('Starting read holding registers request.')
+      return new Promise(function (resolve, reject) {
+        this.log.debug('Starting read holding registers request.')
 
-      var fc = 3
-      var defer = Promise.defer()
-      var pdu = Buffer.allocUnsafe(5)
+        var fc = 3
+        var pdu = Buffer.allocUnsafe(5)
 
-      pdu.writeUInt8(fc)
-      pdu.writeUInt16BE(start, 1)
-      pdu.writeUInt16BE(quantity, 3)
+        pdu.writeUInt8(fc)
+        pdu.writeUInt16BE(start, 1)
+        pdu.writeUInt16BE(quantity, 3)
 
-      this.queueRequest(fc, pdu, defer)
-
-      return defer.promise
+        this.queueRequest(fc, pdu, { resolve: resolve, reject: reject })
+      }.bind(this))
     }
 
     init()
