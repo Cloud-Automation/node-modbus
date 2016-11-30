@@ -31,18 +31,17 @@ module.exports = Stampit()
     }.bind(this)
 
     this.writeSingleCoil = function (address, value) {
-      var fc = 5
-      var defer = Promise.defer()
-      var payload = (value instanceof Buffer) ? (value.readUInt8(0) > 0) : value
-      var pdu = Buffer.allocUnsafe(5)
+      return new Promise(function (resolve, reject) {
+        var fc = 5
+        var payload = (value instanceof Buffer) ? (value.readUInt8(0) > 0) : value
+        var pdu = Buffer.allocUnsafe(5)
 
-      pdu.writeUInt8(fc, 0)
-      pdu.writeUInt16BE(address, 1)
-      pdu.writeUInt16BE(payload ? 0xff00 : 0x0000, 3)
+        pdu.writeUInt8(fc, 0)
+        pdu.writeUInt16BE(address, 1)
+        pdu.writeUInt16BE(payload ? 0xff00 : 0x0000, 3)
 
-      this.queueRequest(fc, pdu, defer)
-
-      return defer.promise
+        this.queueRequest(fc, pdu, { resolve: resolve, reject: reject })
+      }.bind(this))
     }
 
     init()
