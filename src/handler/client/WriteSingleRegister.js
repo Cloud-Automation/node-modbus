@@ -33,18 +33,17 @@ module.exports = Stampit()
     }.bind(this)
 
     this.writeSingleRegister = function (address, value) {
-      var fc = 6
-      var defer = Promise.defer()
-      var payload = (value instanceof Buffer) ? value.readUInt16BE(0) : value
-      var pdu = Buffer.allocUnsafe(5)
+      return new Promise(function (resolve, reject) {
+        var fc = 6
+        var payload = (value instanceof Buffer) ? value.readUInt16BE(0) : value
+        var pdu = Buffer.allocUnsafe(5)
 
-      pdu.writeUInt8(fc, 0)
-      pdu.writeUInt16BE(address, 1)
-      pdu.writeUInt16BE(payload, 3)
+        pdu.writeUInt8(fc, 0)
+        pdu.writeUInt16BE(address, 1)
+        pdu.writeUInt16BE(payload, 3)
 
-      this.queueRequest(fc, pdu, defer)
-
-      return defer.promise
+        this.queueRequest(fc, pdu, { resolve: resolve, reject: reject })
+      }.bind(this))
     }
 
     init()
