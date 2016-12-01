@@ -14,19 +14,19 @@ var core = stampit()
 
     var init = function () {
       if (!this.coils) {
-        coils = new Buffer(1024)
+        coils = Buffer.alloc(1024, 0)
       } else {
         coils = this.coils
       }
 
       if (!this.holding) {
-        holding = new Buffer(1024)
+        holding = Buffer.alloc(1024, 0)
       } else {
         holding = this.holding
       }
 
       if (!this.input) {
-        input = new Buffer(1024)
+        input = Buffer.alloc(1024, 0)
       } else {
         input = this.input
       }

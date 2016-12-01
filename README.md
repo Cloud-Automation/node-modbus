@@ -151,9 +151,9 @@ Server example
             'responseDelay'     : 10, // so we do not fry anything when someone is polling this server
 
             // specify coils, holding and input register here as buffer or leave it for them to be new Buffer(1024)
-            coils               : new Buffer(1024),
-            holding             : new Buffer(1024),
-            input               : new Buffer(1024)
+            coils               : Buffer.alloc(1024, 0),
+            holding             : Buffer.alloc(1024, 0),
+            input               : Buffer.alloc(1024, 0)
         })
         .compose(modbus.server.tcp.complete)
         .init(function () {
