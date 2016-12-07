@@ -9,6 +9,10 @@ module.exports = stampit()
   .init(function () {
     var SerialPort = require('serialport')
     var serialport
+    
+    var rxbuf = Buffer.alloc(256) // reserve space for incoming data
+    var rxlen // number of received bytes
+    var rxexplen // number of bytes expected
 
     var init = function () {
       this.setState('init')
@@ -62,9 +66,28 @@ module.exports = stampit()
     }.bind(this)
 
     var onData = function (pdu) {
-      this.log.debug('received data')
-      if (crc.crc16modbus(pdu) === 0) { /* PDU is valid if CRC across whole PDU equals 0, else ignore and do nothing */
-        this.emit('data', pdu.slice(1))
+      if(pdu.length !== 0) { // at least one byte has been received
+        this.log.debug('received data')
+                
+        if( (pdu.length + rxlen) <= rxbuf.length) { // check if data received is longer than the buffer, if then ignore
+          pdu.copy(rxbuf,rxlen,0) // write received data into buffer first 
+          rxlen += pdu.length // adjust the length accordingly to know where we are
+
+          if( rxlen >= 5 ) { // check if at least data of the size of an exception message or more has been received
+              if( rxlen === 5 ) { // it is exactly the size of an exception message
+
+                  if( rxbuf[1] >= 128 && crc.crc16modbus(rxbuf.slice(0,rxlen)) === 0) { // >128 classifies an exception message
+                       this.emit('data', rxbuf.slice(1,rxlen-1))
+                  }
+
+              } else { // received more bytes, can't be exception
+                if(rxlen === rxexplen) { // check if number of bytes received matches the expected number
+                    if( crc.crc16modbus(rxbuf.slice(0,rxlen)) === 0) {
+                      this.emit('data', rxbuf.slice(1,rxlen-1))
+                    }
+                }
+              }
+          }
       }
     }.bind(this)
 
@@ -90,6 +113,32 @@ module.exports = stampit()
 
       var pkt = Buffer.concat([buf, crcBuf])
 
+      rxlen = 0;
+
+      switch(pdu[0]) { // check for the function code that is requested
+          case 1:
+          case 2:
+              rxexplen = 5 + (Math.floor(pdu.readInt16BE(3)/8))+1; // expected response length is crc + adr +fc + len + (number of coils/8)+1 
+          break;
+
+          case 3:
+          case 4: 
+              rxexplen = 5 + pdu.readInt16BE(3)*2; // expected response length is crc + adr +fc + len + number of words
+          break; 
+
+          case 5:
+          case 6:
+          case 15:
+          case 16:
+              rxexplen = 8; // expected response length is fix 8
+          break;
+
+
+          default:
+
+          break;
+      }
+      
       serialport.write(pkt, function (err) {
         if (err) {
           this.emit('error', err)
