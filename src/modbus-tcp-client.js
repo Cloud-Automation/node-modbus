@@ -122,7 +122,7 @@ module.exports = stampit()
     var onSend = function (pdu) {
       this.log.debug('Sending pdu to the socket.')
 
-      reqId += 1
+      reqId = (reqId + 1) % 0xffff
 
       var head = Buffer.allocUnsafe(7)
 

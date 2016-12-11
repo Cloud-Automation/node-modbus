@@ -88,5 +88,27 @@ describe('Modbus TCP Tests.', function () {
       /* emitting a read coils request (start = 0, count = 10) */
       injectedSocket.emit('data', Buffer.from([0x01, 0x02, 0x55, 0x01]))
     })
+
+    it('should send more than 2^16 msgs just fine', function () {
+      var ModbusTcpClient = require('../src/modbus-tcp-client.js')
+      var injectedSocket = {
+        write: function () {},
+        connect: function () {},
+        on: function () {}
+      }
+
+      var client = stampit()
+        .compose(StateMachine)
+        .compose(Logger)
+        .compose(ModbusTcpClient)({
+          injectedSocket: injectedSocket
+        })
+
+      client.connect()
+
+      for (let i = 0; i < 0x10000; i++) {
+        client.emit('send', Buffer.allocUnsafe(5))
+      }
+    })
   })
 })
