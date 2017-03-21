@@ -149,6 +149,7 @@ Server example
             'logEnabled'        : true,
             'port'              : 8888,
             'responseDelay'     : 10, // so we do not fry anything when someone is polling this server
+            'whiteListIPs'      : null, // filter connection only from these IPs (ex. ['127.0.0.1', '192.168.0.1'])
 
             // specify coils, holding and input register here as buffer or leave it for them to be new Buffer(1024)
             coils               : Buffer.alloc(1024, 0),
@@ -195,6 +196,10 @@ Server example
     // and interact with the register via the getCoils(), getHolding() and getInput() calls
 
     server.getHolding().writeUInt16BE(123, 1);
+
+    // you can filter only certain IP addresses to connect
+
+    var server = modbus.server.tcp.complete({ port : 8888, whiteListIPs: ['127.0.0.1', '192.168.0.1'] });
 ````
 
 ## License

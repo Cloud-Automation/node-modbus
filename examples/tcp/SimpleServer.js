@@ -12,7 +12,7 @@ var server = stampit()
       'coils': new Buffer(100000),
       'holding': new Buffer(100000),
       'whiteListIPs': [
-          '127.0.0.1'
+        '127.0.0.1'
       ]
     }).compose(modbus.server.tcp.complete)
     .init(function () {

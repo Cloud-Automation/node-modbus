@@ -29,9 +29,9 @@ module.exports = stampit()
         let node = s.address()
         this.log.debug('new connection', node)
 
-        if (this.whiteListIPs.indexOf(node.address) < 0) {
-            this.log.debug('client connection REJECTED', node);
-            return false;
+        if (this.whiteListIPs && this.whiteListIPs.indexOf(node.address) < 0) {
+          this.log.debug('client connection REJECTED', node)
+          return false
         }
 
         clients.push(s)
