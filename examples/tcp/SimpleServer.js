@@ -10,7 +10,10 @@ var server = stampit()
       'port': 8888,
       'responseDelay': 100,
       'coils': new Buffer(100000),
-      'holding': new Buffer(100000)
+      'holding': new Buffer(100000),
+      'whiteListIPs': [
+        '127.0.0.1'
+      ]
     }).compose(modbus.server.tcp.complete)
     .init(function () {
       var init = function () {

@@ -26,7 +26,14 @@ module.exports = stampit()
       server = net.createServer()
 
       server.on('connection', function (s) {
-        this.log.debug('new connection', s.address())
+        let node = s.address()
+        this.log.debug('new connection', node)
+
+        if (this.whiteListIPs && this.whiteListIPs.indexOf(node.address) < 0) {
+          this.log.debug('client connection REJECTED', node)
+          s.end()
+          return false
+        }
 
         clients.push(s)
         initiateSocket(s)
