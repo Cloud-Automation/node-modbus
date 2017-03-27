@@ -2,7 +2,6 @@
 var stampit = require('stampit')
 var ModbusServerCore = require('./modbus-server-core.js')
 var StateMachine = require('stampit-state-machine')
-var net = require('net')
 var ClientSocket = require('./modbus-tcp-server-client.js')
 
 module.exports = stampit()
@@ -22,6 +21,9 @@ module.exports = stampit()
       if (!this.hostname) {
         this.hostname = '0.0.0.0'
       }
+
+      /* dependency injection for the net module */
+      let net = this.injNet || require('net')
 
       server = net.createServer()
 
