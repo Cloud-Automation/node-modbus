@@ -5,7 +5,7 @@ A simple an easy to use Modbus TCP client/server implementation.
 Modbus [![Build Status](https://travis-ci.org/Cloud-Automation/node-modbus.png)](https://travis-ci.org/Cloud-Automation/node-modbus)
 ========
 
-Modbus is a simple Modbus TCP Client with a simple API.
+Modbus is a simple Modbus TCP/RTU Client with a simple API.
 
 Installation
 ------------
@@ -21,26 +21,57 @@ Simply `npm install -g mocha` and `npm install -g sinon`. To run the tests type 
 
 Please feel free to fork and add your own tests.
 
-TCP Client example
+New in Version 3.0.0
+--------------------
+
+We got rid of all the dependencies like stampit and serialport and make extensive use of es6 features like promisses. This way we, the developer do not have any restrictions on how to use this module. Unfortunatly this way the module probably won't work for nodejs versions lower than 6.0. 
+
+For modbus rtu we recommend the serialport npm module, for tcp the net.Socket interface is needed. When you need to keep a connection alive with some reconnect logic, use the node-net-reconnect module from our github page https://github.com/cloud-automation/node-net-reconnect.
+
+Debugging
+---------
+If you want to see some debugging information, since Version 3 we use the debug module. You can filter the debug output by defining the DEBUG environment variable like so `export DEBUG=*`
+
+TCP Client Example
 --------------
 ```javascript
 var modbus = require('jsmodbus');
 
-// create a modbus client
-var client = modbus.client.tcp.complete({ 
-        'host'              : host, 
-        'port'              : port,
-        'autoReconnect'     : true,
-        'reconnectTimeout'  : 1000,
-        'timeout'           : 5000,
-        'unitId'            : 0
-    });
+// create a tcp modbus client
+let Modbus = require('jsmodbus')
+let net = require('net')
+let socket = new new.Socket()
+let client = new Modbus.client.TCP(socket, unitId)
+let options = {
+  'host' : host
+  'port' : port
+}
 
-client.connect();
+```
 
-// reconnect with client.reconnect()
+Serial Client Example
+---------------------
+```javascript
 
-client.on('connect', function () {
+var modbus = require('jsmodbus');
+
+// create a tcp modbus client
+let Modbus = require('jsmodbus')
+let SerialPort = require('serialport')
+let options = "/dev/tty-usbserial1", {
+  baudRate: 57600
+}
+let socket = new SerialPort(options)
+let client = new Modbus.client.Serial(socket)
+```
+
+Client API Example
+------------------
+```javascript
+// for reconnecting see node-net-reconnect npm module
+
+// use socket.on('open', ...) when using serialport
+socket.on('connect', function () {
 
     // make some calls
 
@@ -130,11 +161,49 @@ client.on('connect', function () {
 
 });
 
-client.on('error', function (err) {
+socket.on('error', function (err) {
 
     console.log(err);
     
 })
+
+socket.connect(options)
+
+```
+
+TCP Client Reconnect Example
+----------------------------
+
+```javascript
+
+    let socket = net require('net').Socket()
+    let options = { 
+      'host' : 'somehost', 
+      'port' : someport,
+      'retryTime' : 1000, // 1s for every retry
+      'retryAlways' : true // retry even if the connection was closed on purpose
+    }
+    let Reconnect = require('node-net-reconnect')
+    let recon = new Reconnect(socket, options)
+    let client = new require('jsmodbus').tcp.Client(socket)
+
+    socket.connect(options)
+
+    socket.on('connect', function () {
+
+      client.readCoils(...)
+        .then(...)
+        .catch(...)
+
+      /* if you enabled retryAlways, a call to 
+         socket.end() will reconnect the client.
+         In that case you need to close the connection
+         through the recon.end() method. */
+      setTimeout(function () {
+        recon.end()
+      }, 10000)
+
+    })
 ```
 
 Server example

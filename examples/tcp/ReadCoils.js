@@ -1,22 +1,24 @@
 'use strict'
 
-var modbus = require('../../')
-var client = modbus.client.tcp.complete({
+let modbus = require('../../')
+let net = require('net')
+let socket = new net.Socket()
+let options = {
   'host': process.argv[2],
-  'port': process.argv[3],
-  'logEnabled': true,
-  'logLevel': 'debug',
-  'logTimestamp': true
-})
+  'port': process.argv[3]
+}
+let client = new modbus.client.TCP(socket)
 
-client.on('connect', function () {
-  client.readCoils(process.argv[4], process.argv[5]).then(function (resp) {
-    console.log(resp)
-  }, console.error)
-    .finally(function () {
-      client.close()
+socket.on('connect', function () {
+  client.readCoils(process.argv[4], process.argv[5])
+    .then(function (resp) {
+      console.log(resp)
+      socket.end()
+    }).catch(function () {
+      console.error(arguments)
+      socket.end()
     })
 })
 
-client.on('error', console.error)
-client.connect()
+socket.on('error', console.error)
+socket.connect(options)

@@ -9,9 +9,8 @@ let options = {
 }
 let client = new modbus.client.TCP(socket)
 
-// override logger function
 socket.on('connect', function () {
-  client.writeSingleCoil(process.argv[4], process.argv[5] === '1')
+  client.readInputRegisters(process.argv[4], process.argv[5])
     .then(function (resp) {
       console.log(resp)
       socket.end()

@@ -1,6 +1,6 @@
 'use strict'
 
-let modbus = require('../..')
+let modbus = require('../../')
 let net = require('net')
 let socket = new net.Socket()
 let options = {
@@ -8,10 +8,8 @@ let options = {
   'port': process.argv[3]
 }
 let client = new modbus.client.TCP(socket)
-
-// override logger function
 socket.on('connect', function () {
-  client.writeSingleCoil(process.argv[4], process.argv[5] === '1')
+  client.readDiscreteInputs(0, 12)
     .then(function (resp) {
       console.log(resp)
       socket.end()

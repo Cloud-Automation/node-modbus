@@ -1,16 +1,16 @@
 'use strict'
 
-var modbus = require('../..')
-var client = modbus.client.tcp.complete({
+let modbus = require('../..')
+let net = require('net')
+let socket = new net.Socket()
+let options = {
   'host': process.argv[2],
-  'port': process.argv[3],
-  'logEnabled': true,
-  'logLevel': 'debug',
-  'logTimestamp': true
-})
+  'port': process.argv[3]
+}
+let client = new modbus.client.TCP(socket)
 
 // override logger function
-client.on('connect', function () {
+socket.on('connect', function () {
   var values = []
 
   process.argv.forEach(function (v, i) {
@@ -20,12 +20,15 @@ client.on('connect', function () {
     values.push(parseInt(v))
   })
 
-  client.writeMultipleCoils(0, values).then(function (resp) {
-    console.log(resp)
-  }, console.error).finally(function () {
-    client.close()
-  })
+  client.writeMultipleCoils(0, values)
+    .then(function (resp) {
+      console.log(resp)
+      socket.end()
+    }).catch(function () {
+      console.error(arguments)
+      socket.end()
+    })
 })
 
-client.on('error', console.error)
-client.connect()
+socket.on('error', console.error)
+socket.connect(options)

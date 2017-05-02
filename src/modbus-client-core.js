@@ -1,10 +1,152 @@
 'use strict'
 
-var stampit = require('stampit')
-var Log = require('stampit-log')
-var StateMachine = require('stampit-state-machine')
+let debug = require('debug')('modbus-core-client')
+let EventEmitter = require('events')
 
-var ExceptionMessage = {
+class ModbusClientCore {
+
+  constructor (socket, options) {
+    this._socket = socket
+    this._responseHandler = { }
+    this._currentRequest = null
+    this._options = options
+    this._events = new EventEmitter()
+    this._currentState = 'offline'
+
+    this._reqFifo = []
+
+    if (!options) {
+      options = {}
+    }
+
+    if (!options.timeout) {
+      options.timeout = 5 * 1000 // 5s
+    }
+
+    this._socket.on('data', this._onData.bind(this))
+  }
+
+  flush () {
+    debug('Trying to flush data.')
+
+    if (this._reqFifo.length === 0) {
+      debug('Nothing in request pipe.')
+      return
+    }
+
+    this._currentRequest = this._reqFifo.shift()
+
+    this._currentRequest.timeout = setTimeout(function () {
+      this._currentRequest.reject({ err: 'timeout' })
+      this._socket.trash()
+
+      debug('Request timed out.')
+
+      this._currentState = 'error'
+    }.bind(this), this._options.timeout)
+
+    this._currentState = 'waiting'
+
+    this._socket.write(this._currentRequest.pdu)
+//    this.emit('send', currentRequest.pdu)
+
+    debug('Data flushed.')
+  }
+
+  _onClosed () {
+    if (this._currentRequest) {
+      debug('Clearing timeout of the current request.')
+      clearTimeout(this._currentRequest.timeout)
+    }
+
+    debug('Cleaning up request fifo.')
+    this._reqFifo = []
+  }
+
+  _handleErrorPDU (pdu) {
+    var errorCode = pdu.readUInt8(0)
+
+      // if error code is smaller than 0x80
+      // ths pdu describes no error
+
+    if (errorCode < 0x80) {
+      return false
+    }
+
+      // pdu describes an error
+
+    let exceptionCode = pdu.readUInt8(1)
+    let message = ModbusClientCore.ExceptionMessage[exceptionCode]
+
+    let err = {
+      errorCode: errorCode,
+      exceptionCode: exceptionCode,
+      message: message
+    }
+
+      // call the desired deferred
+    this._currentRequest.reject(err)
+
+    return true
+  }
+
+    /**
+      *  Handle the incoming data, cut out the mbap
+      *  packet and send the pdu to the listener
+      */
+  _onData (pdu) {
+    debug('received data')
+
+    if (!this._currentRequest) {
+      debug('No current request.')
+      return
+    }
+
+    clearTimeout(this._currentRequest.timeout)
+
+      // check pdu for error
+    if (this._handleErrorPDU(pdu)) {
+      debug('Received pdu describes an error.')
+      this._currentRequest = null
+      this._currentState = 'ready'
+      return
+    }
+
+      // handle pdu
+
+    var handler = this._responseHandler[this._currentRequest.fc]
+    if (!handler) {
+      debug('Found not handler for fc', this._currentRequest.fc)
+      throw new Error('No handler implemented for fc ' + this._currentRequest.fc)
+    }
+
+    handler(pdu, this._currentRequest)
+
+    this._currentState = 'ready'
+  }
+
+  addResponseHandler (fc, handler) {
+    this._responseHandler[fc] = handler
+
+    return this
+  }
+
+  _queueRequest (fc, pdu, defer) {
+    let req = {
+      fc: fc,
+      defer: defer,
+      pdu: pdu
+    }
+
+    this._reqFifo.push(req)
+
+    if (this._currentState === 'ready') {
+      this._flush()
+    }
+  }
+}
+
+ModbusClientCore.ExceptionMessage = {
   0x01: 'ILLEGAL FUNCTION',
   0x02: 'ILLEGAL DATA ADDRESS',
   0x03: 'ILLEGAL DATA VALUE',
@@ -17,142 +159,4 @@ var ExceptionMessage = {
 
 }
 
-module.exports = stampit()
-  .compose(StateMachine)
-  .compose(Log)
-  .init(function () {
-    var responseHandler = { }
-    var currentRequest = null
-
-    this.reqFifo = []
-
-    var init = function () {
-      if (!this.timeout) {
-        this.timeout = 5 * 1000 // 5s
-      }
-
-      this.on('data', onData)
-      this.on('newState_ready', flush)
-      this.on('newState_closed', onClosed)
-    }.bind(this)
-
-    var flush = function () {
-      this.log.debug('Trying to flush data.')
-
-      if (this.reqFifo.length === 0) {
-        this.log.debug('Nothing in request pipe.')
-        return
-      }
-
-      currentRequest = this.reqFifo.shift()
-
-      currentRequest.timeout = setTimeout(function () {
-        currentRequest.defer.reject({ err: 'timeout' })
-        this.emit('trashCurrentRequest')
-
-        this.logError('Request timed out.')
-
-        this.setState('error')
-      //                this.setState('ready')
-      }.bind(this), this.timeout)
-
-      this.setState('waiting')
-      this.emit('send', currentRequest.pdu)
-
-      this.log.debug('Data flushed.')
-    }.bind(this)
-
-    var onClosed = function () {
-      if (currentRequest) {
-        this.log.debug('Clearing timeout of the current request.')
-        clearTimeout(currentRequest.timeout)
-      }
-
-      this.log.debug('Cleaning up request fifo.')
-      this.reqFifo = []
-    }.bind(this)
-
-    var handleErrorPDU = function (pdu) {
-      var errorCode = pdu.readUInt8(0)
-
-      // if error code is smaller than 0x80
-      // ths pdu describes no error
-
-      if (errorCode < 0x80) {
-        return false
-      }
-
-      // pdu describes an error
-
-      var exceptionCode = pdu.readUInt8(1)
-      var message = ExceptionMessage[exceptionCode]
-
-      var err = {
-        errorCode: errorCode,
-        exceptionCode: exceptionCode,
-        message: message
-      }
-
-      // call the desired deferred
-      currentRequest.defer.reject(err)
-
-      return true
-    }
-
-    /**
-      *  Handle the incoming data, cut out the mbap
-      *  packet and send the pdu to the listener
-      */
-    var onData = function (pdu) {
-      this.log.debug('received data')
-
-      if (!currentRequest) {
-        this.log.debug('No current request.')
-        return
-      }
-
-      clearTimeout(currentRequest.timeout)
-
-      // check pdu for error
-      if (handleErrorPDU(pdu)) {
-        this.log.debug('Received pdu describes an error.')
-        currentRequest = null
-        this.setState('ready')
-        return
-      }
-
-      // handle pdu
-
-      var handler = responseHandler[currentRequest.fc]
-      if (!handler) {
-        this.log.debug('Found not handler for fc', currentRequest.fc)
-        throw new Error('No handler implemented for fc ' + currentRequest.fc)
-      }
-
-      handler(pdu, currentRequest)
-
-      this.setState('ready')
-    }.bind(this)
-
-    this.addResponseHandler = function (fc, handler) {
-      responseHandler[fc] = handler
-
-      return this
-    }.bind(this)
-
-    this.queueRequest = function (fc, pdu, defer) {
-      var req = {
-        fc: fc,
-        defer: defer,
-        pdu: pdu
-      }
-
-      this.reqFifo.push(req)
-
-      if (this.inState('ready')) {
-        flush()
-      }
-    }
-
-    init()
-  })
+module.exports = ModbusClientCore
