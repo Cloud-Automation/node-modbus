@@ -7,7 +7,7 @@ class WriteMultipleCoils {
     return new WriteMultipleCoils(start, quantity)
   }
 
-  constructur (start, quantity) {
+  constructor (start, quantity) {
     this._start = start
     this._quantity = quantity
   }

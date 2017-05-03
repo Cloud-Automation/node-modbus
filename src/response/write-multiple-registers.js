@@ -7,13 +7,13 @@ class WriteMultipleRegisters {
     return new WriteMultipleRegisters(start, quantity)
   }
 
-  constructur (start, quantity) {
+  constructor (start, quantity) {
     this._start = start
     this._quantity = quantity
   }
 
   get fc () {
-    return 0x0F
+    return 0x10
   }
 
   get start () {

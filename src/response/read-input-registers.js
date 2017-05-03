@@ -2,14 +2,19 @@ class ReadInputRegistersResponseBody {
 
   static fromBuffer (buffer) {
     let byteCount = buffer.readUInt8(0)
-    let values = buffer.slice(1)
+    let payload = buffer.slice(1)
+    let values = []
+    for (let i = 0; i < byteCount; i += 2) {
+      values.push(payload.readUInt16BE(i))
+    }
 
-    return new ReadInputRegistersResponseBody(byteCount, values)
+    return new ReadInputRegistersResponseBody(byteCount, values, payload)
   }
 
-  constructor (byteCount, values) {
+  constructor (byteCount, values, payload) {
     this._byteCount = byteCount
     this._values = values
+    this._payload = payload
   }
 
   get fc () {
@@ -22,6 +27,10 @@ class ReadInputRegistersResponseBody {
 
   get values () {
     return this._values
+  }
+
+  get payload () {
+    return this._payload
   }
 
 }

@@ -2,8 +2,11 @@ class ReadHoldingRegistersResponseBody {
 
   static fromBuffer (buffer) {
     let byteCount = buffer.readUInt8(0)
-    let values = buffer.slice(1)
     let payload = buffer.slice(1)
+    let values = []
+    for (let i = 0; i < byteCount; i += 2) {
+      values.push(payload.readUInt16BE(i))
+    }
 
     return new ReadHoldingRegistersResponseBody(byteCount, values, payload)
   }
