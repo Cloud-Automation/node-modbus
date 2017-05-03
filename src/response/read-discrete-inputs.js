@@ -5,6 +5,7 @@ class ReadDiscreteInputsResponseBody {
   static fromBuffer (buffer) {
     let byteCount = buffer.readUInt8(0)
     let coilStatus = buffer.slice(1, 1 + byteCount)
+    let payload = buffer.slice(1, 1 + byteCount)
 
     debug('read coils byteCount', byteCount, 'coilStatus', coilStatus)
 
@@ -24,12 +25,13 @@ class ReadDiscreteInputsResponseBody {
       }
     }
 
-    return new ReadDiscreteInputsResponseBody(coils, buffer.length + 1)
+    return new ReadDiscreteInputsResponseBody(coils, buffer.length + 1, payload)
   }
 
-  constructor (coils, length) {
+  constructor (coils, length, payload) {
     this._coils = coils
     this._length = length
+    this._payload = payload
   }
 
   get fc () {
@@ -38,6 +40,10 @@ class ReadDiscreteInputsResponseBody {
 
   get coils () {
     return this._coils
+  }
+
+  get payload () {
+    return this._payload
   }
 
   get length () {

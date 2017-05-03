@@ -3,13 +3,15 @@ class ReadHoldingRegistersResponseBody {
   static fromBuffer (buffer) {
     let byteCount = buffer.readUInt8(0)
     let values = buffer.slice(1)
+    let payload = buffer.slice(1)
 
-    return new ReadHoldingRegistersResponseBody(byteCount, values)
+    return new ReadHoldingRegistersResponseBody(byteCount, values, payload)
   }
 
-  constructor (byteCount, values) {
+  constructor (byteCount, values, payload) {
     this._byteCount = byteCount
     this._values = values
+    this._payload = payload
   }
 
   get fc () {
@@ -22,6 +24,10 @@ class ReadHoldingRegistersResponseBody {
 
   get values () {
     return this._values
+  }
+
+  get payload () {
+    return this._payload
   }
 
 }
