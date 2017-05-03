@@ -1,12 +1,13 @@
-let debug = require('debug')('serial-request-handler')
-let SerialRequest = require('./serial-request.js')
+let debug = require('debug')('rtu-request-handler')
+let RTURequest = require('./rtu-request.js')
 let ExceptionResponseBody = require('./response/exception.js')
 let CRC = require('crc')
 
-class SerialRequestHandler {
+class RTURequestHandler {
 
-  constructor (socket) {
+  constructor (socket, address) {
     this._socket = socket
+    this._address = address
     this._requests = []
     this._currentRequest = null
   }
@@ -21,7 +22,7 @@ class SerialRequestHandler {
   register (requestBody) {
     debug('registrating new request')
 
-    let request = new SerialRequest(requestBody)
+    let request = new RTURequest(this._address, requestBody)
 
     this._requests.push(request)
     this._flush()
@@ -111,4 +112,4 @@ class SerialRequestHandler {
 
 }
 
-module.exports = SerialRequestHandler
+module.exports = RTURequestHandler

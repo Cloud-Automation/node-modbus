@@ -1,6 +1,6 @@
 let CRC = require('crc')
 
-class SerialRequest {
+class RTURequest {
 
   constructor (address, body) {
     this._address = address
@@ -10,7 +10,7 @@ class SerialRequest {
 
     this._payload = Buffer.alloc(1 + this._body.payload.length + 2)
     this._payload.writeUInt8(this._address, 0) // address
-    this._body.copy(this._payload, 1) // copy body
+    this._body.payload.copy(this._payload, 1) // copy body
     this._payload.writeUInt16BE(this._crc, 1 + this._body.payload.length) // crc
 
     this._promise = new Promise(function (resolve, reject) {
@@ -45,4 +45,4 @@ class SerialRequest {
 
 }
 
-module.exports = SerialRequest
+module.exports = RTURequest

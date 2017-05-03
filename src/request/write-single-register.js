@@ -7,7 +7,7 @@ class WriteSingleRegisterRequestBody {
     this._payload = Buffer.alloc(5)
     this._payload.writeUInt8(0x06, 0) // function code
     this._payload.writeUInt16BE(address, 1) // output address
-    this._payload.writeUInt16BE(value) // output value
+    this._payload.writeUInt16BE(value, 3) // output value
   }
 
   get fc () {

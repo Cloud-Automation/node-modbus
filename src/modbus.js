@@ -2,7 +2,7 @@
 
 exports.client = {
   TCP: require('./modbus-tcp-client.js'),
-  Serial: require('./modbus-serial-client.js')
+  RTU: require('./modbus-rtu-client.js')
 }
 
 /*

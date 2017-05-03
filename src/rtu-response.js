@@ -1,7 +1,7 @@
 let debug = require('debug')('serial-response')
 let CommonResponseBody = require('./common-response-body.js')
 
-class SerialResponse {
+class RTUResponse {
 
   static fromBuffer (buffer) {
     if (buffer.length < 1) {
@@ -12,7 +12,7 @@ class SerialResponse {
 
     debug('address', address, 'buffer', buffer)
 
-    let body = CommonResponseBody.fromBuffer(-1, buffer.slice(1))
+    let body = CommonResponseBody.fromBuffer(buffer.slice(1))
 
     if (!body) {
       return null
@@ -26,7 +26,7 @@ class SerialResponse {
       return null
     }
 
-    return new SerialResponse(address, crc, body)
+    return new RTUResponse(address, crc, body)
   }
 
   constructor (address, crc, body) {
@@ -57,4 +57,4 @@ class SerialResponse {
 
 }
 
-module.exports = SerialResponse
+module.exports = RTUResponse

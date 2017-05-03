@@ -4,9 +4,10 @@ let ExceptionResponseBody = require('./response/exception.js')
 
 class TCPRequestHandler {
 
-  constructor (socket, unitId) {
-    this._unitId = unitId
+  constructor (socket, unitId, timeout) {
     this._socket = socket
+    this._unitId = unitId
+    this._timeout = timeout || 5000
     this._requests = []
     this._currentRequest = null
     this._requestId = 0
@@ -36,7 +37,7 @@ class TCPRequestHandler {
     this._requestId = (this._requestId + 1) % 0xFFFF
     debug('registrating new request', 'transaction id', this._requestId, 'unit id', this._unitId, 'length', requestBody.payload.length)
 
-    let tcpRequest = new TCPRequest(this._unitId, this._requestId, requestBody)
+    let tcpRequest = new TCPRequest(this._requestId, this._unitId, requestBody, this._timeout)
 
     this._requests.push(tcpRequest)
     this._flush()
@@ -51,7 +52,7 @@ class TCPRequestHandler {
 
     let request = this._currentRequest
 
-    if (!request) {
+    if (!request || request.timedOut) {
       debug('no current request, no idea where this came from')
       return
     }
@@ -64,6 +65,7 @@ class TCPRequestHandler {
         'err': 'outOfSync',
         'message': 'request fc and response fc does not match.'
       })
+      this._currentRequest.done()
       this._currentRequest = null
       this._clearAllRequests()
       return
@@ -77,6 +79,7 @@ class TCPRequestHandler {
         'err': 'outOfSync',
         'message': 'request fc and response fc does not match.'
       })
+      this._currentRequest.done()
       this._currentRequest = null
       this._clearAllRequests()
       return
@@ -89,6 +92,7 @@ class TCPRequestHandler {
         'code': response.body.code,
         'message': response.body.message
       })
+      this._currentRequest.done()
       this._currentRequest = null
       this._flush()
       return
@@ -97,6 +101,7 @@ class TCPRequestHandler {
     /* everything is fine, handle response */
     request.resolve({ 'response': response, 'request': request })
 
+    this._currentRequest.done()
     this._currentRequest = null
 
     /* start next request */
@@ -126,6 +131,8 @@ class TCPRequestHandler {
     }
 
     debug('flushing new request', this._currentRequest.payload)
+
+    this._currentRequest.start()
 
     this._socket.write(this._currentRequest.payload, function () {
       debug('request fully flushed')

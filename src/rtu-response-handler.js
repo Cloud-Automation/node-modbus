@@ -1,7 +1,7 @@
-let debug = require('debug')('serial-response-handler')
-let SerialResponse = require('./serial-response.js')
+let debug = require('debug')('rtu-response-handler')
+let RTUResponse = require('./rtu-response.js')
 
-class SerialResponseHandler {
+class RTUResponseHandler {
 
   constructor () {
     this._buffer = Buffer.alloc(0)
@@ -15,7 +15,7 @@ class SerialResponseHandler {
     debug('buffer', this._buffer)
 
     do {
-      let response = SerialResponse.fromBuffer(this._buffer)
+      let response = RTUResponse.fromBuffer(this._buffer)
 
       if (!response) {
         debug('not enough data available to parse')
@@ -39,4 +39,4 @@ class SerialResponseHandler {
 
 }
 
-module.exports = SerialResponseHandler
+module.exports = RTUResponseHandler

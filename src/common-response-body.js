@@ -12,17 +12,10 @@ let WriteMultipleRegistersBody = require('./response/write-multiple-registers.js
 
 class CommonResponseBody {
 
-  static fromBuffer (length, buffer) {
-    if (length === -1) {
-      debug('Unknown buffer size')
-    } else if (buffer.length < length) {
-      debug('not enough data', buffer.length, '<', length, buffer)
-      return null
-    }
-
+  static fromBuffer (buffer) {
     try {
       let fc = buffer.readUInt8(0)
-      let payload = buffer.slice(1, length)
+      let payload = buffer.slice(1)
 
       debug('fc', fc, 'payload', payload)
 
@@ -73,7 +66,7 @@ class CommonResponseBody {
 
       return new CommonResponseBody(fc, payload)
     } catch (e) {
-      debug('when NoSuchIndex Exception, the buffer does not contain a complete message, probably serial')
+      debug('when NoSuchIndex Exception, the buffer does not contain a complete message')
       debug(e)
       return null
     }

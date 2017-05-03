@@ -6,14 +6,14 @@ class WriteMultipleCoilsRequestBody {
     this._quantity = quantity || values.length
 
     if (this._values instanceof Buffer) {
-      this._byteCount = (this._quantitiy % 8) + ((this._quantity % 8) > 0 ? 1 : 0)
+      this._byteCount = Math.ceil(this._quantity / 8)
 
-      this._payload = Buffer.alloc(7 + this._byteCount)
+      this._payload = Buffer.alloc(6 + this._byteCount)
       this._payload.writeUInt8(0x0F, 0) // function code
       this._payload.writeUInt16BE(this._address, 1) // start address
       this._payload.writeUInt16BE(this._quantity, 3) // quantity of coils
       this._payload.writeUInt8(this._byteCount, 5) // byte count
-      this._values.copy(this._payload, 7, 0, this._byteCount) // values
+      this._values.copy(this._payload, 6, 0, this._byteCount) // values
     } else if (this._values instanceof Array) {
       let len = values.length
       if (values.length > 1968) {
@@ -26,7 +26,7 @@ class WriteMultipleCoilsRequestBody {
       let cntr = 0
       let bytes = Buffer.allocUnsafe(this._byteCount)
 
-      this._payload = Buffer.alloc(7 + this._byteCount)
+      this._payload = Buffer.alloc(6 + this._byteCount)
       this._payload.writeUInt8(0x0F, 0) // function code
       this._payload.writeUInt16BE(this._address, 1) // start address
       this._payload.writeUInt16BE(len, 3) // quantity of coils

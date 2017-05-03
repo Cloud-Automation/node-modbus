@@ -9,7 +9,7 @@ class TCPResponseHandler {
   }
 
   handleData (data) {
-    debug('receiving new data')
+    debug('receiving new data', data)
     this._buffer = Buffer.concat([this._buffer, data])
 
     debug('buffer', this._buffer)
@@ -26,10 +26,10 @@ class TCPResponseHandler {
 
       debug('reset buffer from', this._buffer.length, 'to', (this._buffer.length - response.length))
 
+      this._messages.push(response)
+
       /* reduce buffer */
       this._buffer = this._buffer.slice(response.length)
-
-      this._messages.push(response)
     } while (1)
   }
 

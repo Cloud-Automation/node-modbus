@@ -20,9 +20,10 @@ class TCPResponse {
     debug('tcp header complete, id', id, 'protocol', protocol, 'length', length, 'unitId', unitId)
     debug('buffer', buffer)
 
-    let body = CommonResponseBody.fromBuffer(length - 1, buffer.slice(7, 7 + length - 1))
+    let body = CommonResponseBody.fromBuffer(buffer.slice(7, 7 + length - 1))
 
     if (!body) {
+      debug('not enough data for a response body')
       return null
     }
 
