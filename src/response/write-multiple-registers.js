@@ -24,6 +24,10 @@ class WriteMultipleRegisters {
     return this._quantity
   }
 
+  get length () {
+    return 5
+  }
+
 }
 
 module.exports = WriteMultipleRegisters

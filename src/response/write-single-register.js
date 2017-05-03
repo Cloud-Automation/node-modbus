@@ -22,6 +22,10 @@ class WriteSingleRegister {
   get value () {
     return this._value
   }
+
+  get length () {
+    return 5
+  }
 }
 
 module.exports = WriteSingleRegister

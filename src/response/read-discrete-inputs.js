@@ -25,7 +25,7 @@ class ReadDiscreteInputsResponseBody {
       }
     }
 
-    return new ReadDiscreteInputsResponseBody(coils, buffer.length + 1, payload)
+    return new ReadDiscreteInputsResponseBody(coils, byteCount + 1, payload)
   }
 
   constructor (coils, length, payload) {

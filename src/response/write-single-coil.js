@@ -22,6 +22,10 @@ class WriteSingleCoil {
   get value () {
     return this._value
   }
+
+  get length () {
+    return 5
+  }
 }
 
 module.exports = WriteSingleCoil

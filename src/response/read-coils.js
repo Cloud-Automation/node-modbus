@@ -25,7 +25,7 @@ class ReadCoilsResponseBody {
       }
     }
 
-    return new ReadCoilsResponseBody(coils, buffer.length + 1, payload)
+    return new ReadCoilsResponseBody(coils, byteCount + 2, payload)
   }
 
   constructor (coils, length, payload) {

@@ -34,6 +34,10 @@ class ExceptionResponseBody {
     return Messages[this._code]
   }
 
+  get length () {
+    return 2
+  }
+
 }
 
 module.exports = ExceptionResponseBody

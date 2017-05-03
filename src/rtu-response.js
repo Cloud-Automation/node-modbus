@@ -20,7 +20,7 @@ class RTUResponse {
 
     let crc
     try {
-      crc = buffer.readUInt16BE(1 + body.payload.length)
+      crc = buffer.readUInt16BE(1 + body.length)
     } catch (e) {
       debug('If NoSuchIndexException, it is probably serial and not all data has arrived')
       return null
@@ -48,7 +48,7 @@ class RTUResponse {
   }
 
   get length () {
-    return this._length
+    return this._body.length + 3
   }
 
   get body () {

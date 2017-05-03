@@ -202,7 +202,6 @@ describe('TCP Modbus Request Tests', function () {
         assert.ok(false)
         done()
       }).catch(function () {
-        console.log(arguments)
         done()
       })
     })

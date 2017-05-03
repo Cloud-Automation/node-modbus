@@ -2,7 +2,7 @@ class ReadInputRegistersResponseBody {
 
   static fromBuffer (buffer) {
     let byteCount = buffer.readUInt8(0)
-    let payload = buffer.slice(1)
+    let payload = buffer.slice(1, 1 + byteCount)
     let values = []
     for (let i = 0; i < byteCount; i += 2) {
       values.push(payload.readUInt16BE(i))
@@ -31,6 +31,10 @@ class ReadInputRegistersResponseBody {
 
   get payload () {
     return this._payload
+  }
+
+  get length () {
+    return this._byteCount + 1
   }
 
 }
