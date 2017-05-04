@@ -50,7 +50,7 @@ describe('RTU Modbus Response Tests', function () {
 
       assert.ok(response !== undefined)
       assert.equal(0x01, response.address)
-      assert.equal(0x81, response.body.fc)
+      assert.equal(0x01, response.body.fc)
       assert.equal(0x01, response.body.code)
       assert.equal('ILLEGAL FUNCTION', response.body.message)
     })

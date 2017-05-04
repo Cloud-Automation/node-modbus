@@ -58,7 +58,7 @@ describe('TCP Modbus Response Tests', function () {
       assert.equal(0x03, response.bodyLength)
       assert.equal(0x09, response.length)
       assert.equal(0x03, response.unitId)
-      assert.equal(0x81, response.body.fc)
+      assert.equal(0x01, response.body.fc)
       assert.equal(0x01, response.body.code)
       assert.equal('ILLEGAL FUNCTION', response.body.message)
     })

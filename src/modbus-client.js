@@ -55,6 +55,7 @@ class ModbusClient {
   }
 
   readDiscreteInputs (start, count) {
+    debug('issuing new read discrete inputs request')
     let request
     try {
       request = new ReadDiscreteInputsRequestBody(start, count)
@@ -66,6 +67,7 @@ class ModbusClient {
   }
 
   readHoldingRegisters (start, count) {
+    debug('issuing new read holding registers request')
     let request
     try {
       request = new ReadHoldingRegistersRequestBody(start, count)
@@ -77,6 +79,8 @@ class ModbusClient {
   }
 
   readInputRegisters (start, count) {
+    debug('issuing new read input registers request')
+
     let request
     try {
       request = new ReadInputRegistersRequestBody(start, count)
@@ -88,6 +92,8 @@ class ModbusClient {
   }
 
   writeSingleCoil (address, value) {
+    debug('issuing new write single coil request')
+
     let request
     try {
       request = new WriteSingleCoilRequestBody(address, value)
@@ -99,6 +105,7 @@ class ModbusClient {
   }
 
   writeSingleRegister (address, value) {
+    debug('issuing new write single register request')
     let request
     try {
       request = new WriteSingleRegisterRequestBody(address, value)
@@ -110,6 +117,8 @@ class ModbusClient {
   }
 
   writeMultipleCoils (start, values, quantity) {
+    debug('issuing new write multiple coils request')
+
     let request
     try {
       request = new WriteMultipleCoilsRequestBody(start, values, quantity)
@@ -121,6 +130,8 @@ class ModbusClient {
   }
 
   writeMultipleRegisters (start, values) {
+    debug('issuing new write multiple registers request')
+
     let request
     try {
       request = new WriteMultipleRegistersRequestBody(start, values)

@@ -12,7 +12,7 @@ class WriteMultipleCoilsRequestBody {
     if (values instanceof Buffer && values.length > 0x07b0) {
       throw new Error('InvalidBufferSize')
     }
-    if (values instanceof Buffer && values.length < quantity) {
+    if (values instanceof Buffer && (values.length * 8) < quantity) {
       throw new Error('InvalidBufferSize')
     }
 

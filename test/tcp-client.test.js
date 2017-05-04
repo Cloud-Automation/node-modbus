@@ -747,7 +747,7 @@ describe('Modbus Client Tests.', function () {
     })
     it('should handle a invalid request (inconsistent buffer size)', function (done) {
       let client = new Modbus.client.TCP(socket)
-      let buf = Buffer.alloc(0x07a0)
+      let buf = Buffer.alloc(0x07a0 / 8)
 
       socket.emit('connect')
       socketMock.expects('write').never()

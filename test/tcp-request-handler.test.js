@@ -21,8 +21,8 @@ describe('TCP Modbus Request Tests', function () {
     let ReadCoilsRequest = require('../src/request/read-coils.js')
     it('should write a tcp request.', function () {
       let handler = new TCPRequestHandler(socket, 3)
-      let readCoilsRequest = new ReadCoilsRequest(0xa0fa, 0x1234)
-      let requestBuffer = Buffer.from([0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x03, 0x01, 0xa0, 0xfa, 0x12, 0x34])
+      let readCoilsRequest = new ReadCoilsRequest(0xa0fa, 0x0120)
+      let requestBuffer = Buffer.from([0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x03, 0x01, 0xa0, 0xfa, 0x01, 0x20])
 
       socket.emit('connect')
 
@@ -39,8 +39,8 @@ describe('TCP Modbus Request Tests', function () {
     let ReadDiscreteInputsRequest = require('../src/request/read-discrete-inputs.js')
     it('should write a tcp request.', function () {
       let handler = new TCPRequestHandler(socket, 3)
-      let request = new ReadDiscreteInputsRequest(0xa0fa, 0x1234)
-      let requestBuffer = Buffer.from([0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x03, 0x02, 0xa0, 0xfa, 0x12, 0x34])
+      let request = new ReadDiscreteInputsRequest(0xa0fa, 0x0120)
+      let requestBuffer = Buffer.from([0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x03, 0x02, 0xa0, 0xfa, 0x01, 0x20])
 
       socket.emit('connect')
 
@@ -57,8 +57,8 @@ describe('TCP Modbus Request Tests', function () {
     let ReadHoldingRegistersRequest = require('../src/request/read-holding-registers.js')
     it('should write a tcp request.', function () {
       let handler = new TCPRequestHandler(socket, 3)
-      let request = new ReadHoldingRegistersRequest(0xa0fa, 0x1234)
-      let requestBuffer = Buffer.from([0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x03, 0x03, 0xa0, 0xfa, 0x12, 0x34])
+      let request = new ReadHoldingRegistersRequest(0xa0fa, 0x0120)
+      let requestBuffer = Buffer.from([0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x03, 0x03, 0xa0, 0xfa, 0x01, 0x20])
 
       socket.emit('connect')
 
@@ -75,8 +75,8 @@ describe('TCP Modbus Request Tests', function () {
     let ReadInputRegistersRequest = require('../src/request/read-input-registers.js')
     it('should write a tcp request.', function () {
       let handler = new TCPRequestHandler(socket, 3)
-      let request = new ReadInputRegistersRequest(0xa0fa, 0x1234)
-      let requestBuffer = Buffer.from([0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x03, 0x04, 0xa0, 0xfa, 0x12, 0x34])
+      let request = new ReadInputRegistersRequest(0xa0fa, 0x0120)
+      let requestBuffer = Buffer.from([0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x03, 0x04, 0xa0, 0xfa, 0x01, 0x20])
 
       socket.emit('connect')
 

@@ -20,8 +20,8 @@ describe('RTU Modbus Request Tests', function () {
     let ReadCoilsRequest = require('../src/request/read-coils.js')
     it('should write a rtu request', function () {
       let handler = new RTURequestHandler(socket, 4)
-      let readCoilsRequest = new ReadCoilsRequest(0x4321, 0x1234)
-      let requestBuffer = Buffer.from([0x04, 0x01, 0x43, 0x21, 0x12, 0x34, 0x39, 0x51])
+      let readCoilsRequest = new ReadCoilsRequest(0x4321, 0x0120)
+      let requestBuffer = Buffer.from([0x04, 0x01, 0x43, 0x21, 0x01, 0x20, 0x06, 0x5c])
 
       socketMock.expects('write').once().withArgs(requestBuffer)
 
@@ -35,8 +35,8 @@ describe('RTU Modbus Request Tests', function () {
     let ReadDiscreteInputsRequest = require('../src/request/read-discrete-inputs.js')
     it('should write a rtu request', function () {
       let handler = new RTURequestHandler(socket, 4)
-      let request = new ReadDiscreteInputsRequest(0x4321, 0x1234)
-      let requestBuffer = Buffer.from([0x04, 0x02, 0x43, 0x21, 0x12, 0x34, 0x39, 0x15])
+      let request = new ReadDiscreteInputsRequest(0x4321, 0x0120)
+      let requestBuffer = Buffer.from([0x04, 0x02, 0x43, 0x21, 0x01, 0x20, 0x06, 0x18])
 
       socketMock.expects('write').once().withArgs(requestBuffer)
 
@@ -50,8 +50,8 @@ describe('RTU Modbus Request Tests', function () {
     let ReadHoldingRegistersRequest = require('../src/request/read-holding-registers.js')
     it('should write a rtu request', function () {
       let handler = new RTURequestHandler(socket, 4)
-      let request = new ReadHoldingRegistersRequest(0x4321, 0x1234)
-      let requestBuffer = Buffer.from([0x04, 0x03, 0x43, 0x21, 0x12, 0x34, 0xf9, 0x28])
+      let request = new ReadHoldingRegistersRequest(0x4321, 0x0120)
+      let requestBuffer = Buffer.from([0x04, 0x03, 0x43, 0x21, 0x01, 0x20, 0xc6, 0x25])
 
       socketMock.expects('write').once().withArgs(requestBuffer)
 
@@ -65,8 +65,8 @@ describe('RTU Modbus Request Tests', function () {
     let ReadInputRegistersRequest = require('../src/request/read-input-registers.js')
     it('should write a rtu request', function () {
       let handler = new RTURequestHandler(socket, 4)
-      let request = new ReadInputRegistersRequest(0x4321, 0x1234)
-      let requestBuffer = Buffer.from([0x04, 0x04, 0x43, 0x21, 0x12, 0x34, 0x39, 0x9d])
+      let request = new ReadInputRegistersRequest(0x4321, 0x0120)
+      let requestBuffer = Buffer.from([0x04, 0x04, 0x43, 0x21, 0x01, 0x20, 0x06, 0x90])
 
       socketMock.expects('write').once().withArgs(requestBuffer)
 
