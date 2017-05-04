@@ -14,7 +14,7 @@ class ExceptionResponseBody {
 
   static fromBuffer (fc, payload) {
     let code = payload.readUInt8(0)
-    return new ExceptionResponseBody(fc, code)
+    return new ExceptionResponseBody(fc - 0x80, code)
   }
 
   constructor (fc, code) {

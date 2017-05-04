@@ -42,49 +42,91 @@ class ModbusClient {
   }
 
   readCoils (start, count) {
-    let request = new ReadCoilsRequestBody(start, count)
+    debug('issuing new read coils request')
+    let request
+
+    try {
+      request = new ReadCoilsRequestBody(start, count)
+    } catch (e) {
+      return Promise.reject({err: e.message})
+    }
 
     return this._requestHandler.register(request)
   }
 
   readDiscreteInputs (start, count) {
-    let request = new ReadDiscreteInputsRequestBody(start, count)
+    let request
+    try {
+      request = new ReadDiscreteInputsRequestBody(start, count)
+    } catch (e) {
+      return Promise.reject({err: e.message})
+    }
 
     return this._requestHandler.register(request)
   }
 
   readHoldingRegisters (start, count) {
-    let request = new ReadHoldingRegistersRequestBody(start, count)
+    let request
+    try {
+      request = new ReadHoldingRegistersRequestBody(start, count)
+    } catch (e) {
+      return Promise.reject({err: e.message})
+    }
 
     return this._requestHandler.register(request)
   }
 
   readInputRegisters (start, count) {
-    let request = new ReadInputRegistersRequestBody(start, count)
+    let request
+    try {
+      request = new ReadInputRegistersRequestBody(start, count)
+    } catch (e) {
+      return Promise.reject({err: e.message})
+    }
 
     return this._requestHandler.register(request)
   }
 
   writeSingleCoil (address, value) {
-    let request = new WriteSingleCoilRequestBody(address, value)
+    let request
+    try {
+      request = new WriteSingleCoilRequestBody(address, value)
+    } catch (e) {
+      return Promise.reject({err: e.message})
+    }
 
     return this._requestHandler.register(request)
   }
 
   writeSingleRegister (address, value) {
-    let request = new WriteSingleRegisterRequestBody(address, value)
+    let request
+    try {
+      request = new WriteSingleRegisterRequestBody(address, value)
+    } catch (e) {
+      return Promise.reject({err: e.message})
+    }
 
     return this._requestHandler.register(request)
   }
 
   writeMultipleCoils (start, values, quantity) {
-    let request = new WriteMultipleCoilsRequestBody(start, values, quantity)
+    let request
+    try {
+      request = new WriteMultipleCoilsRequestBody(start, values, quantity)
+    } catch (e) {
+      return Promise.reject({err: e.message})
+    }
 
     return this._requestHandler.register(request)
   }
 
   writeMultipleRegisters (start, values) {
-    let request = new WriteMultipleRegistersRequestBody(start, values)
+    let request
+    try {
+      request = new WriteMultipleRegistersRequestBody(start, values)
+    } catch (e) {
+      return Promise.reject({err: e.message})
+    }
 
     return this._requestHandler.register(request)
   }

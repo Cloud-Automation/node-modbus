@@ -13,10 +13,6 @@ class TCPResponse {
     let length = buffer.readUInt16BE(4)
     let unitId = buffer.readUInt8(6)
 
-    if (protocol !== 0) {
-      return null
-    }
-
     debug('tcp header complete, id', id, 'protocol', protocol, 'length', length, 'unitId', unitId)
     debug('buffer', buffer)
 

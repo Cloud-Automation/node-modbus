@@ -1,6 +1,14 @@
 class ReadDiscreteInputs {
 
   constructor (start, count) {
+    if (start > 0xFFFF) {
+      throw new Error('InvalidStartAddress')
+    }
+
+    if (count > 0x7D0) {
+      throw new Error('InvalidQuantity')
+    }
+
     this._start = start
     this._count = count
 

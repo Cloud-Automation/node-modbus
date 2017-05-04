@@ -1,6 +1,13 @@
+'use strict'
+
 let debug = require('debug')('tcp-request-handler')
 let TCPRequest = require('./tcp-request.js')
 let ExceptionResponseBody = require('./response/exception.js')
+
+const OUT_OF_SYNC = 'OutOfSync'
+const OFFLINE = 'Offline'
+const MODBUS_EXCEPTION = 'ModbusException'
+const PROTOCOL = 'Protocol'
 
 class TCPRequestHandler {
 
@@ -20,7 +27,10 @@ class TCPRequestHandler {
   _clearAllRequests () {
     while (this._requests.length > 0) {
       let req = this._requests.shift()
-      req.reject()
+      req.reject({
+        'err': OUT_OF_SYNC,
+        'message': 'rejecting because of earlier OutOfSync error'
+      })
     }
   }
 
@@ -62,7 +72,7 @@ class TCPRequestHandler {
       debug('something weird is going on, response transition id does not equal request transition id')
       /* clear all request, client must be reset */
       request.reject({
-        'err': 'outOfSync',
+        'err': OUT_OF_SYNC,
         'message': 'request fc and response fc does not match.'
       })
       this._currentRequest.done()
@@ -71,12 +81,25 @@ class TCPRequestHandler {
       return
     }
 
+    /* check if protocol version of response is 0x00 */
+    if (response.protocol !== 0x00) {
+      debug('server responds with wrong protocol version')
+      request.reject({
+        'err': PROTOCOL,
+        'message': 'Unknown protocol version ' + response.protocol
+      })
+      this._currentRequest.done()
+      this._currentRequest = null
+      this._clearAllRequests()
+      return
+    }
+
     /* check that response fc equals request id */
-    if (response.body.fc !== request.body.fc) {
+    if (response.body.fc < 0x80 && response.body.fc !== request.body.fc) {
       debug('something is weird, request fc and response fc do not match.')
       /* clear all request, client must be reset */
       request.reject({
-        'err': 'outOfSync',
+        'err': OUT_OF_SYNC,
         'message': 'request fc and response fc does not match.'
       })
       this._currentRequest.done()
@@ -87,10 +110,10 @@ class TCPRequestHandler {
 
     /* check if response is an exception */
     if (response.body instanceof ExceptionResponseBody) {
+      debug('response is a exception')
       request.reject({
-        'err': 'modbus',
-        'code': response.body.code,
-        'message': response.body.message
+        'err': MODBUS_EXCEPTION,
+        'response': response
       })
       this._currentRequest.done()
       this._currentRequest = null
@@ -110,6 +133,7 @@ class TCPRequestHandler {
 
     /* execute next request */
   _flush () {
+    debug('flushing')
     if (this._currentRequest !== null) {
       debug('executing another request, come back later')
       return
@@ -125,9 +149,14 @@ class TCPRequestHandler {
     if (this._state === 'offline') {
       debug('rejecting request immediatly, client offline')
       this._currentRequest.reject({
-        'err': 'offline',
+        'err': OFFLINE,
         'message': 'no connection to modbus server'
       })
+      this._currentRequest.done()
+      this._currentRequest = null
+      /* start next request */
+      setTimeout(this._flush.bind(this), 0)
+      return
     }
 
     debug('flushing new request', this._currentRequest.payload)

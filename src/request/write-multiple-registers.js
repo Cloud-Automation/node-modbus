@@ -1,6 +1,15 @@
 class WriteMultipleRegistersRequestBody {
 
   constructor (start, values) {
+    if (start > 0xFFFF) {
+      throw new Error('InvalidStartAddress')
+    }
+    if (Array.isArray(values) && values.length > 0x7b) {
+      throw new Error('InvalidArraySize')
+    }
+    if (values instanceof Buffer && values.length > 0x7b * 2) {
+      throw new Error('InvalidBufferSize')
+    }
     this._start = start
     this._values = values
 

@@ -1,6 +1,21 @@
 class WriteMultipleCoilsRequestBody {
 
   constructor (address, values, quantity) {
+    if (address > 0xFFFF) {
+      throw new Error('InvalidStartAddress')
+    }
+
+    if (Array.isArray(values) && values.length > 0x07b0 * 8) {
+      throw new Error('InvalidArraySize')
+    }
+
+    if (values instanceof Buffer && values.length > 0x07b0) {
+      throw new Error('InvalidBufferSize')
+    }
+    if (values instanceof Buffer && values.length < quantity) {
+      throw new Error('InvalidBufferSize')
+    }
+
     this._address = address
     this._values = values
     this._quantity = quantity || values.length

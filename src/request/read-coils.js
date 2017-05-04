@@ -4,6 +4,14 @@ class ReadCoilsRequestBody {
     this._start = start
     this._count = count
 
+    if (this._start > 0xFFFF) {
+      throw new Error('InvalidStartAddress')
+    }
+
+    if (this._count > 0x7D0) {
+      throw new Error('InvalidQuantity')
+    }
+
     this._payload = Buffer.alloc(5)
 
     this._payload.writeUInt8(0x01, 0) // function code

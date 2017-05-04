@@ -26,7 +26,7 @@ class TCPRequest {
   start () {
     this._timer = setTimeout(function () {
       debug('request timed out, rejecting')
-      this._reject({'err': 'timeout'})
+      this._reject({'err': 'Timeout'})
       this._timedOut = true
     }.bind(this), this._timeout)
   }

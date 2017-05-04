@@ -1,6 +1,9 @@
 class WriteSingleCoilRequestBody {
 
   constructor (address, value) {
+    if (address > 0xFFFF) {
+      throw new Error('InvalidStartAddress')
+    }
     this._address = address
     this._value = value
 

@@ -1,6 +1,12 @@
 class WriteSingleRegisterRequestBody {
 
   constructor (address, value) {
+    if (address > 0xFFFF) {
+      throw new Error('InvalidStartAddress')
+    }
+    if (!Number.isInteger(value) || value < 0 || value > 0xFFFF) {
+      throw new Error('InvalidValue')
+    }
     this._address = address
     this._value = value
 
