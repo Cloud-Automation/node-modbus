@@ -1,55 +1,36 @@
 'use strict'
 
-var stampit = require('stampit')
-var modbus = require('../..')
+let net = require('net')
+let modbus = require('../..')
+let netServer = new net.Server()
+let server = new modbus.server.TCP(netServer, {
+  'coils': Buffer.alloc(1024),
+  'discrete': Buffer.alloc(1024),
+  'holding': Buffer.alloc(1024),
+  'input': Buffer.alloc(1024)
+})
 
-var server = stampit()
-    .refs({
-      'logEnabled': true,
-      'logLevel': 'debug',
-      'port': 8888,
-      'responseDelay': 100,
-      'coils': new Buffer(100000),
-      'holding': new Buffer(100000),
-      'whiteListIPs': [
-        '127.0.0.1'
-      ]
-    }).compose(modbus.server.tcp.complete)
-    .init(function () {
-      var init = function () {
-        this.getCoils().writeUInt8(0)
+server.on('readCoils', function (request, response, send) {
+  /* Implement your own */
 
-        this.on('readCoilsRequest', function (start, quantity) {
-          console.log('readCoilsRequest', start, quantity)
+  response.body.coils[0] = true
+  response.body.coils[1] = false
 
-/*
-                var oldValue = this.getCoils().readUInt8(start);
+  send(response)
+})
 
-                oldValue = (oldValue + 1) % 255;
+server.on('readHoldingRegisters', function (request, response, send) {
 
-                this.getCoils().writeUInt8(oldValue, start);
-*/
-        })
+  /* Implement your own */
 
-        this.on('readHoldingRegistersRequest', function (start, quantity) {
-          console.log('readHoldingRegisters', start, quantity)
-        })
+})
 
-        this.on('writeSingleCoilRequest', function (adr, value) {
-          console.log('writeSingleCoil', adr, value)
-        })
+server.on('connection', function (client) {
 
-        this.getHolding().writeUInt16BE(1, 0)
-        this.getHolding().writeUInt16BE(2, 2)
-        this.getHolding().writeUInt16BE(3, 4)
-        this.getHolding().writeUInt16BE(4, 6)
-        this.getHolding().writeUInt16BE(5, 8)
-        this.getHolding().writeUInt16BE(6, 10)
-        this.getHolding().writeUInt16BE(7, 12)
-        this.getHolding().writeUInt16BE(8, 14)
-      }.bind(this)
+  /* work with the modbus tcp client */
 
-      init()
-    })
+})
 
-server()
+server.coils.writeUInt16BE(0x1234, 0)
+
+netServer.listen(502)

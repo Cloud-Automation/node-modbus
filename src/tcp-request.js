@@ -1,76 +1,94 @@
 let debug = require('debug')('tcp-request')
+let CommonRequestBody = require('./request/request-body.js')
 
-class TCPRequest {
+/** Class representing a Modbus TCP Request */
+class ModbusTCPRequest {
 
-  constructor (id, unitId, body, timeout) {
+  /** Convert a buffer into a new Modbus TCP Request. Returns null if the buffer
+   * does not contain enough data.
+   * @param {Buffer} buffer
+   * @return {ModbusTCPRequest} A new Modbus TCP Request or Null.
+  */
+  static fromBuffer (buffer) {
+    try {
+      let id = buffer.readUInt16BE(0)
+      let protocol = buffer.readUInt16BE(2)
+      let length = buffer.readUInt16BE(4)
+      let unitId = buffer.readUInt8(6)
+
+      debug('tcp header complete, id', id, 'protocol', protocol, 'length', length, 'unitId', unitId)
+      debug('buffer', buffer)
+
+      let body = CommonRequestBody.fromBuffer(buffer.slice(7, 7 + length - 1))
+
+      return new ModbusTCPRequest(id, protocol, length, unitId, body)
+    } catch (e) {
+      debug('not enough data to create a tcp request')
+      return null
+    }
+  }
+
+  /** Creates a new Modbus TCP Request
+   * @param {Number} Transaction ID
+   * @param {Number} Protocol Type
+   * @param {Number} Byte count of the following data (inc. unitId)
+   * @param {Number} Unit ID
+   * @param {CommonRequestBody} Actual modbus request containing function code and parameters.
+   */
+  constructor (id, protocol, length, unitId, body) {
     this._id = id
+    this._protocol = protocol
+    this._length = length
     this._unitId = unitId
     this._body = body
-    this._timeout = timeout || 5000
-    this._timedOut = false
-    this._payload = Buffer.alloc(7 + body.payload.length)
-
-    this._payload.writeUInt16BE(this._id, 0) // transaction id
-    this._payload.writeUInt16BE(0x0000, 2) // protocol version
-    this._payload.writeUInt16BE(body.payload.length + 1, 4) // length
-    this._payload.writeUInt8(unitId, 6) // unit id
-
-    this._body.payload.copy(this._payload, 7)
-
-    this._promise = new Promise(function (resolve, reject) {
-      this._resolve = resolve
-      this._reject = reject
-    }.bind(this))
   }
 
-  start () {
-    this._timer = setTimeout(function () {
-      debug('request timed out, rejecting')
-      this._reject({'err': 'Timeout'})
-      this._timedOut = true
-    }.bind(this), this._timeout)
-  }
-
-  done () {
-    clearTimeout(this._timer)
-  }
-
+  /** The Transaction ID */
   get id () {
     return this._id
   }
 
+  /** The protocol version */
+  get protocol () {
+    return this._protocol
+  }
+
+  /** The body length in bytes including the unit ID */
+  get length () {
+    return this.length
+  }
+
+  /** The unit ID */
   get unitId () {
     return this._unitId
   }
 
+  /** The actual modbus function code and parameters */
   get body () {
     return this._body
   }
 
-  get payload () {
-    return this._payload
+  /** Creates a buffer object representing the modbus tcp request.
+    * @returns {Buffer} */
+  createPayload () {
+    let body = this._body.createPayload()
+    let payload = Buffer.alloc(7 + this._body.byteCount)
+
+    payload.writeUInt16BE(this._id, 0) // transaction id
+    payload.writeUInt16BE(0x0000, 2) // protocol version
+    payload.writeUInt16BE(body.length + 1, 4) // length
+    payload.writeUInt8(this._unitId, 6) // unit id
+
+    body.copy(payload, 7)
+
+    return payload
   }
 
-  get length () {
-    return this._body.length
-  }
-
-  get timedOut () {
-    return this._timedOut
-  }
-
-  get promise () {
-    return this._promise
-  }
-
-  get reject () {
-    return this._reject
-  }
-
-  get resolve () {
-    return this._resolve
+  /** The calculated byte count of the byte representation */
+  get byteCount () {
+    return this._length + 6 + 1
   }
 
 }
 
-module.exports = TCPRequest
+module.exports = ModbusTCPRequest

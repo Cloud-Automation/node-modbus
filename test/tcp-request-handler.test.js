@@ -6,7 +6,7 @@ let sinon = require('sinon')
 let EventEmitter = require('events')
 
 describe('TCP Modbus Request Tests', function () {
-  let TCPRequestHandler = require('../src/tcp-request-handler.js')
+  let TCPRequestHandler = require('../src/tcp-client-request-handler.js')
   let socket
   let socketMock
 
@@ -17,7 +17,7 @@ describe('TCP Modbus Request Tests', function () {
     socketMock = sinon.mock(socket)
   })
 
-  describe('Read Coils Tests.', function () {
+  describe('Register Request.', function () {
     let ReadCoilsRequest = require('../src/request/read-coils.js')
     it('should write a tcp request.', function () {
       let handler = new TCPRequestHandler(socket, 3)
@@ -29,7 +29,9 @@ describe('TCP Modbus Request Tests', function () {
       socketMock.expects('write').once().withArgs(requestBuffer)
 
       /* should flush the request right away */
-      handler.register(readCoilsRequest)
+      let promise = handler.register(readCoilsRequest)
+
+      assert.ok(promise instanceof Promise)
 
       socketMock.verify()
     })

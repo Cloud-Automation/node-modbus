@@ -1,11 +1,19 @@
 let debug = require('debug')('read-coils-response')
+let ModbusResponseBody = require('./response-body.js')
 
-class ReadCoilsResponseBody {
+/** Read Coils Response Body
+ * @extends ModbusResponseBody
+ * @class
+ */
+class ReadCoilsResponseBody extends ModbusResponseBody {
 
+  /** Create ReadCoilsResponseBody from buffer.
+   * @param {Buffer} buffer
+   * @returns {ReadCoilsResponseBody} Returns Null of not enough data located in the buffer.
+   */
   static fromBuffer (buffer) {
     let byteCount = buffer.readUInt8(0)
     let coilStatus = buffer.slice(1, 1 + byteCount)
-    let payload = buffer.slice(1, 1 + byteCount)
 
     debug('read coils byteCount', byteCount, 'coilStatus', coilStatus)
 
@@ -25,29 +33,31 @@ class ReadCoilsResponseBody {
       }
     }
 
-    return new ReadCoilsResponseBody(coils, byteCount + 2, payload)
+    return new ReadCoilsResponseBody(coils, byteCount + 2)
   }
 
-  constructor (coils, length, payload) {
+  /** Create new ReadCoilsResponseBody
+   * @param [Array] coils Array of Boolean.
+   * @param [Number] length
+   */
+  constructor (coils, length) {
+    super(0x01)
     this._coils = coils
     this._length = length
-    this._payload = payload
   }
 
-  get fc () {
-    return 0x01
-  }
-
+  /** Coils */
   get coils () {
     return this._coils
   }
 
-  get payload () {
-    return this._payload
-  }
-
+  /** Length */
   get length () {
     return this._length
+  }
+
+  get byteCount () {
+    return Math.ceil(this._coils.length / 8) + 1
   }
 
 }

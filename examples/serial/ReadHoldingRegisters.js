@@ -1,6 +1,6 @@
 let modbus = require('../../')
 let SerialPort = require('serialport')
-let socket = new SerialPort('/dev/ttyUSB0', {
+let socket = new SerialPort('/dev/ttyUSB1', {
   baudRate: 115200,
   parity: 'even',
   stopBits: 1,

@@ -9,9 +9,20 @@ let WriteSingleRegisterRequestBody = require('./request/write-single-register.js
 let WriteMultipleCoilsRequestBody = require('./request/write-multiple-coils.js')
 let WriteMultipleRegistersRequestBody = require('./request/write-multiple-registers.js')
 
+/** Common Modbus Client
+ * @abstract
+ */
 class ModbusClient {
 
+  /** Creates a new Modbus client object.
+   * @param {Socket} socket A socket object
+   * @throws {NoSocketException}
+   */
   constructor (socket) {
+    if (new.target === ModbusClient) {
+      throw new TypeError('Cannot instantiate ModbusClient directly.')
+    }
+
     this._socket = socket
 
     if (!socket) {
@@ -41,6 +52,17 @@ class ModbusClient {
     } while (1)
   }
 
+  /** Execute ReadCoils Request (Function Code 0x01)
+   * @param {Number} start Start Address.
+   * @param {Number} count Coil Quantity.
+   * @returns {Promise}
+   * @example
+   * client.readCoils(0, 10).then(function (res) {
+   *   console.log(res.response, res.request)
+   * }).catch(function (err) {
+   *   ...
+   * })
+   */
   readCoils (start, count) {
     debug('issuing new read coils request')
     let request
@@ -54,6 +76,17 @@ class ModbusClient {
     return this._requestHandler.register(request)
   }
 
+  /** Execute ReadDiscreteInputs Request (Function Code 0x02)
+   * @param {Number} start Start Address.
+   * @param {Number} count Coil Quantity.
+   * @returns {Promise}
+   * @example
+   * client.readDiscreteInputs(0, 10).then(function (res) {
+   *   console.log(res.response, res.request)
+   * }).catch(function (err) {
+   *   ...
+   * })
+   */
   readDiscreteInputs (start, count) {
     debug('issuing new read discrete inputs request')
     let request
@@ -66,6 +99,17 @@ class ModbusClient {
     return this._requestHandler.register(request)
   }
 
+  /** Execute ReadHoldingRegisters Request (Function Code 0x03)
+   * @param {Number} start Start Address.
+   * @param {Number} count Coil Quantity.
+   * @returns {Promise}
+   * @example
+   * client.readHoldingRegisters(0, 10).then(function (res) {
+   *   console.log(res.response, res.request)
+   * }).catch(function (err) {
+   *   ...
+   * })
+   */
   readHoldingRegisters (start, count) {
     debug('issuing new read holding registers request')
     let request
@@ -78,6 +122,17 @@ class ModbusClient {
     return this._requestHandler.register(request)
   }
 
+  /** Execute ReadInputRegisters Request (Function Code 0x04)
+   * @param {Number} start Start Address.
+   * @param {Number} count Coil Quantity.
+   * @returns {Promise}
+   * @example
+   * client.readInputRegisters(0, 10).then(function (res) {
+   *   console.log(res.response, res.request)
+   * }).catch(function (err) {
+   *   ...
+   * })
+   */
   readInputRegisters (start, count) {
     debug('issuing new read input registers request')
 
@@ -91,6 +146,17 @@ class ModbusClient {
     return this._requestHandler.register(request)
   }
 
+  /** Execute WriteSingleCoil Request (Function Code 0x05)
+   * @param {Number} address Address.
+   * @param {Boolean} value Value.
+   * @returns {Promise}
+   * @example
+   * client.writeSingleCoil(10, true).then(function (res) {
+   *   console.log(res.response, res.request)
+   * }).catch(function (err) {
+   *   ...
+   * })
+   */
   writeSingleCoil (address, value) {
     debug('issuing new write single coil request')
 
@@ -104,6 +170,17 @@ class ModbusClient {
     return this._requestHandler.register(request)
   }
 
+  /** Execute WriteSingleRegister Request (Function Code 0x06)
+   * @param {Number} address Address.
+   * @param {Number} value Value.
+   * @returns {Promise}
+   * @example
+   * client.writeSingleRegister(10, 1234).then(function (res) {
+   *   console.log(res.response, res.request)
+   * }).catch(function (err) {
+   *   ...
+   * })
+   */
   writeSingleRegister (address, value) {
     debug('issuing new write single register request')
     let request
@@ -116,6 +193,25 @@ class ModbusClient {
     return this._requestHandler.register(request)
   }
 
+  /** Execute WriteMultipleCoils Request (Function Code 0x0F)
+   * @param {Number} address Address.
+   * @param {Array|Buffer} values Values either as an Array[Boolean] or a Buffer.
+   * @param {Number} quantity If you choose to use the Buffer for the values then you have to
+   *   specify the quantity of bytes.
+   * @returns {Promise}
+   * @example
+   * client.writeMultipleCoils(10, [true, false, true, false, true]).then(function (res) {
+   *   console.log(res.response, res.request)
+   * }).catch(function (err) {
+   *   ...
+   * })
+   * @example
+   * client.writeMultipleCoils(10, Buffer.from([0xdd]), 7).then(function (res) {
+   *   console.log(res.response, res.request)
+   * }).catch(function (err) {
+   *   ...
+   * })
+   */
   writeMultipleCoils (start, values, quantity) {
     debug('issuing new write multiple coils request')
 
@@ -129,6 +225,23 @@ class ModbusClient {
     return this._requestHandler.register(request)
   }
 
+  /** Execute WriteMultipleRegisters Request (Function Code 0x10)
+   * @param {Number} address Address.
+   * @param {Array|Buffer} values Values either as an Array[UInt16] or a Buffer.
+   * @returns {Promise}
+   * @example
+   * client.writeMultipleRegisters(10, [0x1234, 0x5678, 0x9ABC, 0xDEF0]).then(function (res) {
+   *   console.log(res.response, res.request)
+   * }).catch(function (err) {
+   *   ...
+   * })
+   * @example
+   * client.writeMultipleRegisters(10, Buffer.from([0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0])).then(function (res) {
+   *   console.log(res.response, res.request)
+   * }).catch(function (err) {
+   *   ...
+   * })
+   */
   writeMultipleRegisters (start, values) {
     debug('issuing new write multiple registers request')
 

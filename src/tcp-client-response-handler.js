@@ -1,9 +1,16 @@
 let debug = require('debug')('tcp-response-handler')
 let TCPResponse = require('./tcp-response.js')
+let ModbusClientResponseHandler = require('./client-response-handler.js')
 
-class TCPResponseHandler {
+/** Modbus/TCP Client Response Handler.
+ * @extends ModbusClientResponseHandler
+ * @class
+ */
+class ModbusTCPClientResponseHandler extends ModbusClientResponseHandler {
 
+  /** Create new Modbus/TCP Client Response Handler */
   constructor () {
+    super()
     this._buffer = Buffer.alloc(0)
     this._messages = []
   }
@@ -33,10 +40,6 @@ class TCPResponseHandler {
     } while (1)
   }
 
-  shift () {
-    return this._messages.shift()
-  }
-
 }
 
-module.exports = TCPResponseHandler
+module.exports = ModbusTCPClientResponseHandler

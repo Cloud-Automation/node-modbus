@@ -1,6 +1,17 @@
-class WriteSingleRegisterRequestBody {
+let ModbusRequestBody = require('./request-body.js')
 
+/** Write Single Register Request Body
+ * @extends ModbusRequestBody
+ */
+class WriteSingleRegisterRequestBody extends ModbusRequestBody {
+
+  /** Create a new Write Single Register Request Body.
+   * @param {Number} address Write address.
+   * @param {Number} value Value to be written.
+   * @throws {InvalidStartAddressException} When address is larger than 0xFFFF.
+   */
   constructor (address, value) {
+    super(0x06)
     if (address > 0xFFFF) {
       throw new Error('InvalidStartAddress')
     }
@@ -9,29 +20,28 @@ class WriteSingleRegisterRequestBody {
     }
     this._address = address
     this._value = value
-
-    this._payload = Buffer.alloc(5)
-    this._payload.writeUInt8(0x06, 0) // function code
-    this._payload.writeUInt16BE(address, 1) // output address
-    this._payload.writeUInt16BE(value, 3) // output value
   }
 
-  get fc () {
-    return 0x06
-  }
-
+  /** Address to be written. */
   get address () {
     return this._address
   }
 
+  /** Value to be written. */
   get value () {
     return this._value
   }
 
-  get payload () {
-    return this._payload
+  createPayload () {
+    let payload = Buffer.alloc(5)
+    payload.writeUInt8(this._fc, 0) // function code
+    payload.writeUInt16BE(this._address, 1) // output address
+    payload.writeUInt16BE(this._value, 3) // output value
   }
 
+  get byteCount () {
+    return 5
+  }
 }
 
 module.exports = WriteSingleRegisterRequestBody
