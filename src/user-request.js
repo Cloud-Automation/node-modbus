@@ -2,6 +2,11 @@
 
 let debug = require('debug')('user-request')
 
+/** Request created for the user. It contains the actual modbus request,
+ * the timeout handler and the promise delivered from the readCoils method
+ * in the client.
+ * @class
+ */
 class UserRequest {
 
   constructor (request, timeout) {

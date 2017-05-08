@@ -1,8 +1,8 @@
 'use strict'
 
-let debug = require('debug')('tcp-request-handler')
+let debug = require('debug')('tcp-client-request-handler')
 let TCPRequest = require('./tcp-request.js')
-let ModbusClientRequestHandler = require('./client-request-handler')
+let ModbusClientRequestHandler = require('./client-request-handler.js')
 
 const OUT_OF_SYNC = 'OutOfSync'
 const PROTOCOL = 'Protocol'
@@ -30,7 +30,7 @@ class ModbusTCPClientRequestHandler extends ModbusClientRequestHandler {
 
   register (requestBody) {
     this._requestId = (this._requestId + 1) % 0xFFFF
-    debug('registrating new request', 'transaction id', this._requestId, 'unit id', this._unitId, 'length', requestBody.length)
+    debug('registrating new request', 'transaction id', this._requestId, 'unit id', this._unitId, 'length', requestBody.byteCount)
 
     let tcpRequest = new TCPRequest(this._requestId, 0x00, requestBody.byteCount + 1, this._unitId, requestBody)
 
@@ -55,7 +55,7 @@ class ModbusTCPClientRequestHandler extends ModbusClientRequestHandler {
     if (response.id !== request.id) {
       debug('something weird is going on, response transition id does not equal request transition id', response.id, request.id)
       /* clear all request, client must be reset */
-      request.reject({
+      userRequest.reject({
         'err': OUT_OF_SYNC,
         'message': 'request fc and response fc does not match.'
       })
@@ -66,7 +66,7 @@ class ModbusTCPClientRequestHandler extends ModbusClientRequestHandler {
     /* check if protocol version of response is 0x00 */
     if (response.protocol !== 0x00) {
       debug('server responds with wrong protocol version')
-      request.reject({
+      userRequest.reject({
         'err': PROTOCOL,
         'message': 'Unknown protocol version ' + response.protocol
       })

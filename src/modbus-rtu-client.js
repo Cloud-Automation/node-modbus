@@ -1,8 +1,8 @@
 'use strict'
 
 let ModbusClient = require('./modbus-client.js')
-let RTURequestHandler = require('./rtu-request-handler.js')
-let RTUResponseHandler = require('./rtu-response-handler.js')
+let ModbusRTUClientRequestHandler = require('./rtu-client-request-handler.js')
+let ModbusRTUClientResponseHandler = require('./rtu-client-response-handler.js')
 
 /** This Client musst be initiated with a socket object that implements the event emitter
  * interface and fires a 'data' event with a buffer as a parameter. It also needs to
@@ -26,8 +26,8 @@ class ModbusRTUClient extends ModbusClient {
   constructor (socket, address) {
     super(socket)
 
-    this._requestHandler = new RTURequestHandler(this._socket, address)
-    this._responseHandler = new RTUResponseHandler()
+    this._requestHandler = new ModbusRTUClientRequestHandler(this._socket, address)
+    this._responseHandler = new ModbusRTUClientResponseHandler()
   }
 
 }

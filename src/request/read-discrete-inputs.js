@@ -42,6 +42,8 @@ class ReadDiscreteInputsRequestBody extends ModbusRequestBody {
     payload.writeUInt8(this._fc, 0) // function code
     payload.writeUInt16BE(this._start, 1) // start address
     payload.writeUInt16BE(this._count, 3) // quantitiy of coils
+
+    return payload
   }
 
   get byteCount () {

@@ -1,6 +1,7 @@
 'use strict'
 
 let debug = require('debug')('modbus tcp response handler')
+let ModbusTCPResponse = require('./tcp-response.js')
 
 class TCPResponseHandler {
 
@@ -10,7 +11,7 @@ class TCPResponseHandler {
   }
 
   _handleReadCoilsRequest (request, cb) {
-    cb(new TCPResponse())
+    cb(new ModbusTCPResponse())
   }
 
   handle (request, cb) {

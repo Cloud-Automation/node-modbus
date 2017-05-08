@@ -35,11 +35,11 @@ class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
     this._quantity = quantity || values.length
 
     if (this._values instanceof Buffer) {
-      this._byteCount = Math.ceil(this._quantity / 8)
+      this._byteCount = Math.ceil(this._quantity / 8) + 6
     }
 
     if (this._values instanceof Array) {
-      this._byteCount = Math.ceil(this._values.length / 8)
+      this._byteCount = Math.ceil(this._values.length / 8) + 6
     }
   }
 
@@ -64,13 +64,14 @@ class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
 
   createPayload () {
     if (this._values instanceof Buffer) {
-      this._byteCount = Math.ceil(this._quantity / 8)
-
+      let payload = Buffer.alloc(this._byteCount)
       payload.writeUInt8(this._fc, 0) // function code
       payload.writeUInt16BE(this._address, 1) // start address
       payload.writeUInt16BE(this._quantity, 3) // quantity of coils
       payload.writeUInt8(this._byteCount, 5) // byte count
       this._values.copy(payload, 6, 0, this._byteCount) // values
+
+      return payload
     } else if (this._values instanceof Array) {
       let len = this._values.length
       if (this._values.length > 1968) {
@@ -101,6 +102,8 @@ class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
       }
 
       bytes.copy(payload, 7) // values
+
+      return payload
     }
   }
 

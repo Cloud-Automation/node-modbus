@@ -10,32 +10,52 @@ let Messages = {
   0x0B: 'GATEWAY TARGET DEVICE FAILED TO RESPOND'
 }
 
-class ExceptionResponseBody {
+let ModbusResponseBody = require('./response-body.js')
 
-  static fromBuffer (fc, payload) {
-    let code = payload.readUInt8(0)
+/** Modbus Excepiton Response Body
+ * @extends ModbusResponseBody
+ * @class
+ */
+class ExceptionResponseBody extends ModbusResponseBody {
+
+  /** Create Exception Response from buffer.
+   * @param {Number} fc Function Code
+   * @param {Buffer} buffer Buffer
+   * @returns {ExceptionResponseBody}
+   */
+  static fromBuffer (fc, buffer) {
+    let code = buffer.readUInt8(0)
     return new ExceptionResponseBody(fc - 0x80, code)
   }
 
+  /** Create ExceptionResponseBody
+   * @param {Number} fc Function Code
+   * @param {Number} code Exception Code
+   */
   constructor (fc, code) {
-    this._fc = fc
+    super(fc)
     this._code = code
   }
 
-  get fc () {
-    return this._fc
-  }
-
+  /** Exception Code */
   get code () {
     return this._code
   }
 
+  /** Exception message */
   get message () {
     return Messages[this._code]
   }
 
-  get length () {
+  get byteCount () {
     return 2
+  }
+
+  createPayload () {
+    let payload = Buffer.alloc(2)
+    payload.writeUInt8(this._fc, 0)
+    payload.writeUInt8(this._code, 1)
+    return payload
   }
 
 }

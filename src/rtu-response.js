@@ -1,7 +1,7 @@
-let debug = require('debug')('serial-response')
+let debug = require('debug')('rtu-response')
 let CommonResponseBody = require('./common-response-body.js')
 
-class RTUResponse {
+class ModbusRTUResponse {
 
   static fromBuffer (buffer) {
     if (buffer.length < 1) {
@@ -26,7 +26,7 @@ class RTUResponse {
       return null
     }
 
-    return new RTUResponse(address, crc, body)
+    return new ModbusRTUResponse(address, crc, body)
   }
 
   constructor (address, crc, body) {
@@ -43,18 +43,14 @@ class RTUResponse {
     return this._crc
   }
 
-  get bodyLength () {
-    return this._body.length + 3
-  }
-
-  get length () {
-    return this._body.length + 3
-  }
-
   get body () {
     return this._body
   }
 
+  get byteCount () {
+    return this._body.byteCount + 3
+  }
+
 }
 
-module.exports = RTUResponse
+module.exports = ModbusRTUResponse

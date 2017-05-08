@@ -76,7 +76,7 @@ class ModbusTCPRequest {
 
     payload.writeUInt16BE(this._id, 0) // transaction id
     payload.writeUInt16BE(0x0000, 2) // protocol version
-    payload.writeUInt16BE(body.length + 1, 4) // length
+    payload.writeUInt16BE(this._body.byteCount + 1, 4) // length
     payload.writeUInt8(this._unitId, 6) // unit id
 
     body.copy(payload, 7)

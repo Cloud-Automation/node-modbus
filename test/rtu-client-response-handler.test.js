@@ -4,12 +4,12 @@
 
 let assert = require('assert')
 
-describe('RTU Modbus Response Tests', function () {
-  let RTUResponseHandler = require('../src/rtu-response-handler.js')
+describe('Modbus/RTU Client Response Tests', function () {
+  let ModbusRTUClientResponseHandler = require('../src/rtu-client-response-handler.js')
   let handler
 
   beforeEach(function () {
-    handler = new RTUResponseHandler()
+    handler = new ModbusRTUClientResponseHandler()
   })
 
   describe('Read Coils Test', function () {
@@ -29,12 +29,11 @@ describe('RTU Modbus Response Tests', function () {
 
       assert.ok(response !== null)
       assert.equal(1, response.address)
-      assert.equal(0, response.crc)
-      assert.equal(7, response.length)
+      assert.equal(56576, response.crc)
+      assert.equal(7, response.byteCount)
 
       assert.equal(1, response.body.fc)
       assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.coils)
-      assert.deepEqual(Buffer.from([0xdd, 0x00]), response.body.payload)
     })
     it('should handle a exception', function () {
       let responseBuffer = Buffer.from([
@@ -66,14 +65,12 @@ describe('RTU Modbus Response Tests', function () {
         0x00, 0x00  // crc
       ])
 
-      /* deliver first part */
       handler.handleData(responseBufferA)
 
       let response = handler.shift()
 
       assert.ok(response === undefined)
 
-      /* deliver second part */
       handler.handleData(responseBufferB)
 
       response = handler.shift()
@@ -84,7 +81,6 @@ describe('RTU Modbus Response Tests', function () {
       assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.coils)
     })
   })
-
   describe('Read Discrete Inputs Test', function () {
     it('should handle a valid read discrete inputs response', function () {
       let responseBuffer = Buffer.from([
@@ -113,7 +109,7 @@ describe('RTU Modbus Response Tests', function () {
         0x01,       // address
         0x03,       // function code
         0x04,       // byte count
-        0x12, 0x34, // regiser
+        0x12, 0x34, // register
         0x43, 0x21,
         0x00, 0x00  // crc
       ])
@@ -126,9 +122,9 @@ describe('RTU Modbus Response Tests', function () {
       assert.equal(1, response.address)
       assert.equal(3, response.body.fc)
       assert.deepEqual([0x1234, 0x4321], response.body.values)
-      assert.deepEqual(Buffer.from([0x12, 0x34, 0x43, 0x21]), response.body.payload)
     })
   })
+
   describe('Read Input Registers Test', function () {
     it('should handle a valid read input registers response', function () {
       let responseBuffer = Buffer.from([
@@ -148,9 +144,9 @@ describe('RTU Modbus Response Tests', function () {
       assert.equal(1, response.address)
       assert.equal(4, response.body.fc)
       assert.deepEqual([0x1234, 0x4321], response.body.values)
-      assert.deepEqual(Buffer.from([0x12, 0x34, 0x43, 0x21]), response.body.payload)
     })
   })
+
   describe('Write Single Coil Test', function () {
     it('should handle a valid write single coil response', function () {
       let responseBuffer = Buffer.from([

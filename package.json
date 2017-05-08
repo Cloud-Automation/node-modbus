@@ -9,18 +9,18 @@
     "url": "https://github.com/Cloud-Automation/node-modbus"
   },
   "engines": {
-    "node": ">=4.5.0"
+    "node": ">=6.0.0"
   },
   "dependencies": {
     "crc": "3.4.0"
   },
   "devDependencies": {
-    "mocha": "^3.0.2",
+    "mocha": "^3.3.0",
     "sinon": "2.2.0",
     "standard": "^8.5.0"
   },
   "scripts": {
-    "test": "standard && mocha test/*.test.js"
+    "test": "standard ./src ./test && mocha test/*.test.js"
   },
   "license": "MIT",
   "keywords": [

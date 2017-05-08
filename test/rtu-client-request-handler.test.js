@@ -1,11 +1,16 @@
 'use strict'
 
 /* global describe, it, beforeEach */
+let assert = require('assert')
 let sinon = require('sinon')
 let EventEmitter = require('events')
+let ReadCoilsRequest = require('../src/request/read-coils.js')
+let ReadCoilsResponse = require('../src/response/read-coils.js')
+let ModbusRTUResponse = require('../src/rtu-response.js')
+let ExceptionResponse = require('../src/response/exception.js')
 
-describe('RTU Modbus Request Tests', function () {
-  let RTURequestHandler = require('../src/rtu-request-handler.js')
+describe('Modbus/RTU Client Request Tests', function () {
+  let ModbusRTUClientRequestHandler = require('../src/rtu-client-request-handler.js')
   let socket
   let socketMock
 
@@ -16,21 +21,75 @@ describe('RTU Modbus Request Tests', function () {
     socketMock = sinon.mock(socket)
   })
 
-  describe('Read Coils Tests.', function () {
-    let ReadCoilsRequest = require('../src/request/read-coils.js')
-    it('should write a rtu request', function () {
-      let handler = new RTURequestHandler(socket, 4)
+  describe('Register Test.', function () {
+    it('should register an rtu request', function () {
+      let handler = new ModbusRTUClientRequestHandler(socket, 4)
       let readCoilsRequest = new ReadCoilsRequest(0x4321, 0x0120)
-      let requestBuffer = Buffer.from([0x04, 0x01, 0x43, 0x21, 0x01, 0x20, 0x06, 0x5c])
 
-      socketMock.expects('write').once().withArgs(requestBuffer)
+      socket.emit('open')
 
-      handler.register(readCoilsRequest)
+      socketMock.expects('write').once()
+
+      let promise = handler.register(readCoilsRequest)
+
+      assert.ok(promise instanceof Promise)
 
       socketMock.verify()
     })
   })
 
+  describe('Handle Data Tests.', function () {
+    it('should register an rtu request and handle a response', function (done) {
+      let ReadCoilsRequest = require('../src/request/read-coils.js')
+      let handler = new ModbusRTUClientRequestHandler(socket, 4)
+      let request = new ReadCoilsRequest(0x0000, 0x0008)
+      let response = new ReadCoilsResponse([0, 1, 0, 1, 0, 1, 0, 1], 8)
+      let rtuResponse = new ModbusRTUResponse(4, 61472, response)
+
+      socket.emit('open')
+
+      socketMock.expects('write').once()
+
+      handler.register(request)
+        .then(function (resp) {
+          assert.ok(true)
+          socketMock.verify()
+
+          done()
+        }).catch(function () {
+          assert.ok(false)
+          done()
+        })
+
+      handler.handle(rtuResponse)
+    })
+    it('should register an rtu request and handle a exception response', function (done) {
+      let ReadCoilsRequest = require('../src/request/read-coils.js')
+      let handler = new ModbusRTUClientRequestHandler(socket, 4)
+      let request = new ReadCoilsRequest(0x0000, 0x0008)
+      let response = new ExceptionResponse(0x81, 0x01)
+      let rtuResponse = new ModbusRTUResponse(4, 8352, response)
+
+      socket.emit('open')
+
+      socketMock.expects('write').once()
+
+      handler.register(request)
+        .then(function (resp) {
+          assert.ok(false)
+
+          done()
+        }).catch(function () {
+          assert.ok(true)
+          socketMock.verify()
+
+          done()
+        })
+
+      handler.handle(rtuResponse)
+    })
+  })
+/*
   describe('Read Discrete Inputs Tests.', function () {
     let ReadDiscreteInputsRequest = require('../src/request/read-discrete-inputs.js')
     it('should write a rtu request', function () {
@@ -159,4 +218,6 @@ describe('RTU Modbus Request Tests', function () {
       socketMock.verify()
     })
   })
+
+*/
 })

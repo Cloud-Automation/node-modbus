@@ -4,7 +4,7 @@ const OUT_OF_SYNC = 'OutOfSync'
 const OFFLINE = 'Offline'
 const MODBUS_EXCEPTION = 'ModbusException'
 
-let debug = require('debug')('request-handler')
+let debug = require('debug')('client-request-handler')
 let UserRequest = require('./user-request.js')
 let ExceptionResponseBody = require('./response/exception.js')
 
@@ -93,7 +93,7 @@ class ModbusClientRequestHandler {
     if (response.body.fc < 0x80 && response.body.fc !== request.body.fc) {
       debug('something is weird, request fc and response fc do not match.')
       /* clear all request, client must be reset */
-      request.reject({
+      userRequest.reject({
         'err': OUT_OF_SYNC,
         'message': 'request fc and response fc does not match.'
       })
@@ -104,11 +104,11 @@ class ModbusClientRequestHandler {
     /* check if response is an exception */
     if (response.body instanceof ExceptionResponseBody) {
       debug('response is a exception')
-      request.reject({
+      userRequest.reject({
         'err': MODBUS_EXCEPTION,
         'response': response
       })
-      this._clearCurrenRequest()
+      this._clearCurrentRequest()
       this._flush()
       return
     }
@@ -159,8 +159,8 @@ class ModbusClientRequestHandler {
       this._flush()
     }.bind(this))
 
-    this._socket.write(payload, function () {
-      debug('request fully flushed')
+    this._socket.write(payload, function (err, result) {
+      debug('request fully flushed, ( error:', err, ')', result)
     })
   }
 

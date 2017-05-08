@@ -37,6 +37,7 @@ class WriteSingleRegisterRequestBody extends ModbusRequestBody {
     payload.writeUInt8(this._fc, 0) // function code
     payload.writeUInt16BE(this._address, 1) // output address
     payload.writeUInt16BE(this._value, 3) // output value
+    return payload
   }
 
   get byteCount () {

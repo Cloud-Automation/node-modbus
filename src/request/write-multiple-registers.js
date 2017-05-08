@@ -28,12 +28,12 @@ class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
     this._values = values
 
     if (this._values instanceof Buffer) {
-      this._byteCount = Math.min(this._values.length, 0xF6)
+      this._byteCount = Math.min(this._values.length + 6, 0xF6)
       this._quantity = Math.floor(this._byteCount / 2)
     }
 
     if (this._values instanceof Array) {
-      this._byteCount = Math.min(this._values.length * 2, 0xF6)
+      this._byteCount = Math.min(this._values.length * 2 + 6, 0xF6)
       this._quantity = (this._byteCount / 2).toFixed(0)
     }
   }
@@ -58,15 +58,16 @@ class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
   }
 
   createPayload () {
+    let payload
     if (this._values instanceof Buffer) {
-      let payload = Buffer.alloc(6 + this._byteCount)
+      payload = Buffer.alloc(6 + this._byteCount)
       payload.writeUInt8(this._fc, 0) // function code
       payload.writeUInt16BE(this._start, 1) // start address
       payload.writeUInt16BE(this._quantity, 3)
       payload.writeUInt8(this._byteCount, 5)
       this._values.copy(payload, 6, 0, this._byteCount)
     } else if (this._values instanceof Array) {
-      let payload = Buffer.alloc(6 + this._byteCount)
+      payload = Buffer.alloc(6 + this._byteCount)
       payload.writeUInt8(this._fc, 0) // function code
       payload.writeUInt16BE(this._start, 1) // start address
       payload.writeUInt16BE(this._quantity, 3)
@@ -78,6 +79,7 @@ class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
         payload.writeUInt16BE(v, 6 + i * 2)
       }.bind(this))
     }
+    return payload
   }
 
 }

@@ -1,23 +1,10 @@
 'use strict'
 
-/* global describe, it, beforeEach  */
+/* global describe, it */
 
 let assert = require('assert')
-let Modbus = require('../')
-let sinon = require('sinon')
-let EventEmitter = require('events')
 
-describe('TCP Client Tests.', function () {
-  let socket
-  let socketMock
-
-  beforeEach(function () {
-    socket = new EventEmitter()
-
-    socket.write = function () { }
-
-    socketMock = sinon.mock(socket)
-  })
+describe('Modbus Response Tests.', function () {
   /* with the read coils tests we test most of the common errors
    * like modbus exceptions, outOfSync errors, timeouts and so on */
   describe('Read Coils Tests.', function () {
@@ -63,6 +50,8 @@ describe('TCP Client Tests.', function () {
 
       assert.ok(response === null)
     })
+  })
+  /*
     it('should handle a invalid request (invalid quantity)', function (done) {
       let client = new Modbus.client.TCP(socket)
 
@@ -872,4 +861,5 @@ describe('TCP Client Tests.', function () {
         })
     })
   })
+  */
 })
