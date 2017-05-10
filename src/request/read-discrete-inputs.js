@@ -5,6 +5,23 @@ let ModbusRequestBody = require('./request-body.js')
  */
 class ReadDiscreteInputsRequestBody extends ModbusRequestBody {
 
+  static fromBuffer (buffer) {
+    try {
+      let fc = buffer.readUInt8(0)
+
+      if (fc !== 0x02) {
+        return null
+      }
+
+      let start = buffer.readUInt16BE(1)
+      let quantity = buffer.readUInt16BE(3)
+
+      return new ReadDiscreteInputsRequestBody(start, quantity)
+    } catch (e) {
+      return null
+    }
+  }
+
   /** Create a new Read Discrete Inputs Request Body.
    * @param {Number} start Start Address.
    * @param {Number} count Quantity of coils to be read.
