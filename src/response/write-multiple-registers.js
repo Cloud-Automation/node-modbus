@@ -7,8 +7,13 @@ let ModbusResponseBody = require('./response-body.js')
 class WriteMultipleRegistersResponseBody extends ModbusResponseBody {
 
   static fromBuffer (buffer) {
-    let start = buffer.readUInt16BE(0)
-    let quantity = buffer.readUInt16BE(2)
+    let fc = buffer.readUInt8(0)
+    let start = buffer.readUInt16BE(1)
+    let quantity = buffer.readUInt16BE(3)
+
+    if (fc !== 0x10) {
+      return null
+    }
 
     return new WriteMultipleRegistersResponseBody(start, quantity)
   }

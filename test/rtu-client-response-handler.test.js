@@ -29,11 +29,12 @@ describe('Modbus/RTU Client Response Tests', function () {
 
       assert.ok(response !== null)
       assert.equal(1, response.address)
-      assert.equal(56576, response.crc)
+      assert.equal(1, response.body.fc)
+      assert.equal(257, response.crc)
       assert.equal(7, response.byteCount)
 
       assert.equal(1, response.body.fc)
-      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.coils)
+      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
     })
     it('should handle a exception', function () {
       let responseBuffer = Buffer.from([
@@ -78,7 +79,7 @@ describe('Modbus/RTU Client Response Tests', function () {
       assert.ok(response !== undefined)
       assert.equal(1, response.address)
       assert.equal(1, response.body.fc)
-      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.coils)
+      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
     })
   })
   describe('Read Discrete Inputs Test', function () {
@@ -99,7 +100,7 @@ describe('Modbus/RTU Client Response Tests', function () {
       assert.ok(response !== undefined)
       assert.equal(1, response.address)
       assert.equal(2, response.body.fc)
-      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.coils)
+      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
     })
   })
 

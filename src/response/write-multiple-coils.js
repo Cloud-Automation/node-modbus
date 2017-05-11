@@ -7,8 +7,13 @@ let ModbusResponseBody = require('./response-body.js')
 class WriteMultipleCoilsResponseBody extends ModbusResponseBody {
 
   static fromBuffer (buffer) {
-    let start = buffer.readUInt16BE(0)
-    let quantity = buffer.readUInt16BE(2)
+    let fc = buffer.readUInt8(0)
+    let start = buffer.readUInt16BE(1)
+    let quantity = buffer.readUInt16BE(3)
+
+    if (fc !== 0x0f) {
+      return null
+    }
 
     return new WriteMultipleCoilsResponseBody(start, quantity)
   }

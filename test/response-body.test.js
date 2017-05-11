@@ -11,6 +11,7 @@ describe('Modbus Response Tests.', function () {
     let ReadCoilsResponseBody = require('../src/response/read-coils.js')
     it('should create request from buffer', function () {
       let buffer = Buffer.from([
+        0x01,       // fc
         0x02,       // byte count
         0xdd,       // coils
         0x00
@@ -20,7 +21,7 @@ describe('Modbus Response Tests.', function () {
 
       assert.ok(response !== null)
       assert.equal(0x01, response.fc)
-      assert.equal(0x02, response.length)
+      assert.equal(0x02, response.numberOfBytes)
       assert.equal(0x04, response.byteCount)
       assert.deepEqual(
         [true,
@@ -38,10 +39,11 @@ describe('Modbus Response Tests.', function () {
         false,
         false,
         false,
-        false], response.coils)
+        false], response.valuesAsArray)
     })
     it('should handle invalid buffer content', function () {
       let buffer = Buffer.from([
+        0x01,       // fc
         0x02,       // byte count
         0xdd       // coils
       ])

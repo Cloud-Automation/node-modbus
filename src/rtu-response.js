@@ -1,5 +1,5 @@
 let debug = require('debug')('rtu-response')
-let CommonResponseBody = require('./common-response-body.js')
+let ResponseFactory = require('./response/response-factory.js')
 
 class ModbusRTUResponse {
 
@@ -12,7 +12,7 @@ class ModbusRTUResponse {
 
     debug('address', address, 'buffer', buffer)
 
-    let body = CommonResponseBody.fromBuffer(buffer.slice(1))
+    let body = ResponseFactory.fromBuffer(buffer.slice(1))
 
     if (!body) {
       return null
@@ -20,7 +20,7 @@ class ModbusRTUResponse {
 
     let crc
     try {
-      crc = buffer.readUInt16BE(1 + body.length)
+      crc = buffer.readUInt16BE(1 + body.bodyCount)
     } catch (e) {
       debug('If NoSuchIndexException, it is probably serial and not all data has arrived')
       return null

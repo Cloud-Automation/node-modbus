@@ -11,8 +11,14 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
    * @returns ReadHoldingRegistersResponseBody
    */
   static fromBuffer (buffer) {
-    let byteCount = buffer.readUInt8(0)
-    let payload = buffer.slice(1, 1 + byteCount)
+    let fc = buffer.readUInt8(0)
+    let byteCount = buffer.readUInt8(1)
+    let payload = buffer.slice(2, 2 + byteCount)
+
+    if (fc !== 0x03) {
+      return null
+    }
+
     let values = []
     for (let i = 0; i < byteCount; i += 2) {
       values.push(payload.readUInt16BE(i))
@@ -25,6 +31,14 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
     super(0x03)
     this._byteCount = byteCount
     this._values = values
+
+    if (values instanceof Array) {
+      this._valuesAsArray = values
+    }
+
+    if (values instanceof Buffer) {
+      this._valuesAsBuffer = values
+    }
   }
 
   get byteCount () {
@@ -33,6 +47,14 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
 
   get values () {
     return this._values
+  }
+
+  get valuesAsArray () {
+    return this._valuesAsArray
+  }
+
+  get valuesAsBuffer () {
+    return this._valuesAsBuffer
   }
 
   get length () {

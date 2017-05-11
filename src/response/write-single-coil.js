@@ -11,8 +11,13 @@ class WriteSingleCoilResponseBody extends ModbusResponseBody {
    * @returns New WriteSingleResponseBody Object
    */
   static fromBuffer (buffer) {
-    let address = buffer.readUInt16BE(0)
-    let value = buffer.readUInt16BE(2) === 0xFF00
+    let fc = buffer.readUInt8(0)
+    let address = buffer.readUInt16BE(1)
+    let value = buffer.readUInt16BE(3) === 0xFF00
+
+    if (fc !== 0x05) {
+      return null
+    }
 
     return new WriteSingleCoilResponseBody(address, value)
   }

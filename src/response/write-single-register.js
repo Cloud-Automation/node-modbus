@@ -6,8 +6,13 @@ let ModbusResponseBody = require('./response-body.js')
  */
 class WriteSingleRegisterResponseBody extends ModbusResponseBody {
   static fromBuffer (buffer) {
-    let address = buffer.readUInt16BE(0)
-    let value = buffer.readUInt16BE(2)
+    let fc = buffer.readUInt8(0)
+    let address = buffer.readUInt16BE(1)
+    let value = buffer.readUInt16BE(3)
+
+    if (fc !== 0x06) {
+      return null
+    }
 
     return new WriteSingleRegisterResponseBody(address, value)
   }

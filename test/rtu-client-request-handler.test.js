@@ -43,8 +43,8 @@ describe('Modbus/RTU Client Request Tests', function () {
       let ReadCoilsRequest = require('../src/request/read-coils.js')
       let handler = new ModbusRTUClientRequestHandler(socket, 4)
       let request = new ReadCoilsRequest(0x0000, 0x0008)
-      let response = new ReadCoilsResponse([0, 1, 0, 1, 0, 1, 0, 1], 8)
-      let rtuResponse = new ModbusRTUResponse(4, 61472, response)
+      let response = new ReadCoilsResponse([0, 1, 0, 1, 0, 1, 0, 1], 1)
+      let rtuResponse = new ModbusRTUResponse(4, 61345, response)
 
       socket.emit('open')
 

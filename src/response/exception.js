@@ -23,8 +23,9 @@ class ExceptionResponseBody extends ModbusResponseBody {
    * @param {Buffer} buffer Buffer
    * @returns {ExceptionResponseBody}
    */
-  static fromBuffer (fc, buffer) {
-    let code = buffer.readUInt8(0)
+  static fromBuffer (buffer) {
+    let fc = buffer.readUInt8(0)
+    let code = buffer.readUInt8(1)
     return new ExceptionResponseBody(fc - 0x80, code)
   }
 

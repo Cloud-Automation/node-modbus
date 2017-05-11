@@ -36,7 +36,7 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
       assert.equal(11, response.byteCount)
       assert.equal(3, response.unitId)
       assert.equal(1, response.body.fc)
-      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.coils)
+      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
     })
     it('should handle a exception', function () {
       let responseBuffer = Buffer.from([
@@ -95,7 +95,7 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
       assert.equal(11, response.byteCount)
       assert.equal(3, response.unitId)
       assert.equal(1, response.body.fc)
-      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.coils)
+      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
     })
   })
 
@@ -123,7 +123,7 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
       assert.equal(11, response.byteCount)
       assert.equal(3, response.unitId)
       assert.equal(2, response.body.fc)
-      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.coils)
+      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
     })
   })
   describe('Read Holding Registers Test', function () {
@@ -150,7 +150,7 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
       assert.equal(13, response.byteCount)
       assert.equal(3, response.unitId)
       assert.equal(3, response.body.fc)
-      assert.deepEqual([0x1234, 0x4321], response.body.values)
+      assert.deepEqual([0x1234, 0x4321], response.body.valuesAsArray)
     })
   })
   describe('Read Input Registers Test', function () {
@@ -162,7 +162,7 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
         0x03,       // unit id
         0x04,       // function code
         0x04,       // byte count
-        0x12, 0x34, // regiser
+        0x12, 0x34, // register
         0x43, 0x21
       ])
 
@@ -177,7 +177,7 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
       assert.equal(13, response.byteCount)
       assert.equal(3, response.unitId)
       assert.equal(4, response.body.fc)
-      assert.deepEqual([0x1234, 0x4321], response.body.values)
+      assert.deepEqual([0x1234, 0x4321], response.body.valuesAsArray)
     })
   })
   describe('Write Single Coil Test', function () {

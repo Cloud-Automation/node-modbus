@@ -1,4 +1,3 @@
-let debug = require('debug')('read-discrete-inputs')
 let ModbusResponseBody = require('./response-body.js')
 
 /** Read Discrete Inputs Response Body (Function Code 0x02)
@@ -12,38 +11,56 @@ class ReadDiscreteInputsResponseBody extends ModbusResponseBody {
    * @returns ReadDiscreteInputsResponseBody
    */
   static fromBuffer (buffer) {
-    let byteCount = buffer.readUInt8(0)
-    let coilStatus = buffer.slice(1, 1 + byteCount)
+    let fc = buffer.readUInt8(0)
+    let byteCount = buffer.readUInt8(1)
+    let coilStatus = buffer.slice(2, 2 + byteCount)
 
-    debug('read coils byteCount', byteCount, 'coilStatus', coilStatus)
-
-    /* calculate coils */
-    let coils = []
-
-    let cntr = 0
-    for (let i = 0; i < byteCount; i += 1) {
-      let h = 1
-      debug('handling byte', i)
-      let cur = coilStatus.readUInt8(i)
-      for (let j = 0; j < 8; j += 1) {
-        debug('bit', j)
-        coils[cntr] = (cur & h) > 0
-        h = h << 1
-        cntr += 1
-      }
+    if (coilStatus.length !== byteCount) {
+      return null
     }
 
-    return new ReadDiscreteInputsResponseBody(coils, byteCount + 1)
+    if (fc !== 0x02) {
+      return null
+    }
+
+    return new ReadDiscreteInputsResponseBody(coilStatus, byteCount)
   }
 
   /** Creates a ReadDiscreteInputsResponseBody
    * @param {Array} coils Array with Boolean values
    * @param {Number} length Quantity of Coils
    */
-  constructor (coils, length) {
+  constructor (coils, numberOfBytes) {
     super(0x02)
     this._coils = coils
-    this._length = length
+    this._numberOfBytes = numberOfBytes
+
+    if (coils instanceof Array) {
+      this._valuesAsArray = coils
+      this._valuesAsBuffer = Buffer.alloc(numberOfBytes)
+      for (let i = 0; i < coils.length; i += 1) {
+        let byteOffset = Math.floor(i / 8)
+        let bitOffset = i % 8
+        let byte = this._valuesAsBuffer.readUInt8(byteOffset)
+
+        byte += coils[i] ? Math.pow(2, bitOffset) : 0
+
+        this._valuesAsBuffer.writeUInt8(byte, byteOffset)
+      }
+    }
+
+    if (coils instanceof Buffer) {
+      this._valuesAsBuffer = coils
+      this._valuesAsArray = []
+      for (let i = 0; i < coils.length * 8; i += 1) {
+        let byteOffset = Math.floor(i / 8)
+        let bitOffset = i % 8
+        let mask = Math.pow(2, bitOffset)
+        let byte = this._valuesAsBuffer.readUInt8(byteOffset)
+        let value = ((byte & mask) > 0) ? 1 : 0
+        this._valuesAsArray.push(value)
+      }
+    }
   }
 
   /** Coils */
@@ -51,43 +68,33 @@ class ReadDiscreteInputsResponseBody extends ModbusResponseBody {
     return this._coils
   }
 
-  /** Quantity of Coils */
-  get length () {
-    return this._length
+  get valuesAsArray () {
+    return this._valuesAsArray
+  }
+
+  get valuesAsBuffer () {
+    return this._valuesAsBuffer
+  }
+
+  /** Length */
+  get numberOfBytes () {
+    return this._numberOfBytes
   }
 
   get byteCount () {
-    return Math.ceil(this._coils.length / 8) + 2
+    return Math.ceil(this._coils.length / 8) + 3
   }
 
   createPayload () {
-    let val = 0
-    let thisByteBitCount = 0
-    let byteIdx = 2
     let payload = Buffer.alloc(this.byteCount)
 
     payload.writeUInt8(this._fc, 0)
-    payload.writeUInt8(this.byteCount, 1)
+    payload.writeUInt8(this._numberOfBytes, 1)
 
-    for (var totalBitCount = 0; totalBitCount < this._coils.length; totalBitCount += 1) {
-      var buf = this._coils[totalBitCount]
-      var mask = 1 << (totalBitCount % 8)
-
-      if (buf & mask) {
-        val += 1 << (thisByteBitCount % 8)
-      }
-
-      thisByteBitCount += 1
-
-      if (thisByteBitCount % 8 === 0 || totalBitCount === (this._coils.length) - 1) {
-        payload.writeUInt8(val, byteIdx)
-        val = 0; byteIdx = byteIdx + 1
-      }
-    }
+    this._valuesAsBuffer.copy(payload, 2)
 
     return payload
   }
 
 }
-
 module.exports = ReadDiscreteInputsResponseBody
