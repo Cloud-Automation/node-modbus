@@ -5,6 +5,22 @@ let ModbusRequestBody = require('./request-body.js')
  */
 class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
 
+  static fromBuffer (buffer) {
+    try {
+      let fc = buffer.readUInt8(0)
+      let start = buffer.readUInt16BE(1)
+      let count = buffer.readUInt16BE(3)
+
+      if (fc !== 0x03) {
+        return null
+      }
+
+      return new ReadHoldingRegistersRequestBody(start, count)
+    } catch (e) {
+      return null
+    }
+  }
+
   /** Create a new Read Holding Registers Request Body.
    * @param {Number} start Start Address.
    * @param {Numer} count Quantity of registers to be read.

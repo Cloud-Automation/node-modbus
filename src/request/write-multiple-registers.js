@@ -5,6 +5,23 @@ let ModbusRequestBody = require('./request-body.js')
  */
 class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
 
+  static fromBuffer (buffer) {
+    try {
+      let fc = buffer.readUInt8(0)
+      let address = buffer.readUInt16BE(1)
+      let numberOfBytes = buffer.readUInt8(5)
+      let values = buffer.slice(6, 6 + numberOfBytes)
+
+      if (fc !== 0x10) {
+        return null
+      }
+
+      return new WriteMultipleRegistersRequestBody(address, values)
+    } catch (e) {
+      return null
+    }
+  }
+
   /** Create a new Write Multiple Registers Request Body.
    * @param {Number} address Write address.
    * @param {Array|Buffer} values Values to be written. Either a Array of UInt16 values or a Buffer.
@@ -13,9 +30,9 @@ class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
    * @throws {InvalidArraySizeException}
    * @throws {InvalidBufferSizeException}
    */
-  constructor (start, values) {
+  constructor (address, values) {
     super(0x10)
-    if (start > 0xFFFF) {
+    if (address > 0xFFFF) {
       throw new Error('InvalidStartAddress')
     }
     if (Array.isArray(values) && values.length > 0x7b) {
@@ -24,23 +41,34 @@ class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
     if (values instanceof Buffer && values.length > 0x7b * 2) {
       throw new Error('InvalidBufferSize')
     }
-    this._start = start
+    this._address = address
     this._values = values
 
     if (this._values instanceof Buffer) {
       this._byteCount = Math.min(this._values.length + 6, 0xF6)
-      this._quantity = Math.floor(this._byteCount / 2)
+      this._numberOfBytes = this._values.length
+      this._quantity = Math.floor(this._values.length / 2)
+      this._valuesAsBuffer = this._values
+      this._valuesAsArray = []
+      for (let i = 0; i < this._values.length; i += 2) {
+        this._valuesAsArray.push(this._values.readUInt16BE(i))
+      }
     }
 
     if (this._values instanceof Array) {
       this._byteCount = Math.min(this._values.length * 2 + 6, 0xF6)
-      this._quantity = (this._byteCount / 2).toFixed(0)
+      this._numberOfBytes = Math.floor(this._values.length * 2)
+      this._quantity = this._values.length
+      this._valuesAsBuffer = Buffer.alloc(this._numberOfBytes)
+      this._values.forEach(function (v, i) {
+        this._valuesAsBuffer.writeUInt16BE(v, i * 2)
+      }.bind(this))
     }
   }
 
   /** Start Address to begin writing data */
-  get start () {
-    return this._start
+  get address () {
+    return this._address
   }
 
   /** Quantity of registers beein written */
@@ -53,32 +81,29 @@ class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
     return this._values
   }
 
+  get valuesAsArray () {
+    return this._valuesAsArray
+  }
+
+  get valuesAsBuffer () {
+    return this._valuesAsBuffer
+  }
+
   get byteCount () {
     return this._byteCount
   }
 
+  get numberOfBytes () {
+    return this._numberOfBytes
+  }
+
   createPayload () {
-    let payload
-    if (this._values instanceof Buffer) {
-      payload = Buffer.alloc(6 + this._byteCount)
-      payload.writeUInt8(this._fc, 0) // function code
-      payload.writeUInt16BE(this._start, 1) // start address
-      payload.writeUInt16BE(this._quantity, 3)
-      payload.writeUInt8(this._byteCount, 5)
-      this._values.copy(payload, 6, 0, this._byteCount)
-    } else if (this._values instanceof Array) {
-      payload = Buffer.alloc(6 + this._byteCount)
-      payload.writeUInt8(this._fc, 0) // function code
-      payload.writeUInt16BE(this._start, 1) // start address
-      payload.writeUInt16BE(this._quantity, 3)
-      payload.writeUInt8(this._byteCount, 5)
-      this._values.some(function (v, i) {
-        if (i >= this._quantity) {
-          return true
-        }
-        payload.writeUInt16BE(v, 6 + i * 2)
-      }.bind(this))
-    }
+    let payload = Buffer.alloc(6 + this._numberOfBytes)
+    payload.writeUInt8(this._fc, 0) // function code
+    payload.writeUInt16BE(this._address, 1) // start address
+    payload.writeUInt16BE(this._quantity, 3)
+    payload.writeUInt8(this._numberOfBytes, 5)
+    this._valuesAsBuffer.copy(payload, 6)
     return payload
   }
 

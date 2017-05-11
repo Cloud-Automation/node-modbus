@@ -5,6 +5,22 @@ let ModbusRequestBody = require('./request-body.js')
  */
 class WriteSingleCoilRequestBody extends ModbusRequestBody {
 
+  static fromBuffer (buffer) {
+    try {
+      let fc = buffer.readUInt8(0)
+      let address = buffer.readUInt16BE(1)
+      let value = buffer.readUInt16BE(3) === 0xff00
+
+      if (fc !== 0x05) {
+        return null
+      }
+
+      return new WriteSingleCoilRequestBody(address, value)
+    } catch (e) {
+      return null
+    }
+  }
+
   /** Create a new Write Single Coil Request Body.
    * @param {Number} address Write address.
    * @param {Boolean} value Value to be written.

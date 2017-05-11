@@ -5,6 +5,22 @@ let ModbusRequestBody = require('./request-body.js')
  */
 class WriteSingleRegisterRequestBody extends ModbusRequestBody {
 
+  static fromBuffer (buffer) {
+    try {
+      let fc = buffer.readUInt8(0)
+      let address = buffer.readUInt16BE(1)
+      let value = buffer.readUInt16BE(3)
+
+      if (fc !== 0x06) {
+        return null
+      }
+
+      return new WriteSingleRegisterRequestBody(address, value)
+    } catch (e) {
+      return null
+    }
+  }
+
   /** Create a new Write Single Register Request Body.
    * @param {Number} address Write address.
    * @param {Number} value Value to be written.
