@@ -11,7 +11,17 @@ class ModbusRequestBody {
    * @returns {ModbusRequestBody} The actual request body or null if there is not enough data in the buffer.
    */
   static fromBuffer (buffer) {
+    let ReadCoilsResponse = require('./read-coils.js')
 
+    try {
+      let fc = buffer.readUInt8(0)
+
+      if (fc === 0x01) {
+        return ReadCoilsResponse.fromBuffer(buffer)
+      }
+    } catch (e) {
+      return null
+    }
   }
 
   /** Creates a new Common Modbus Request Body. Do not use this, use the actual request body

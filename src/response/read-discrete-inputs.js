@@ -11,19 +11,23 @@ class ReadDiscreteInputsResponseBody extends ModbusResponseBody {
    * @returns ReadDiscreteInputsResponseBody
    */
   static fromBuffer (buffer) {
-    let fc = buffer.readUInt8(0)
-    let byteCount = buffer.readUInt8(1)
-    let coilStatus = buffer.slice(2, 2 + byteCount)
+    try {
+      let fc = buffer.readUInt8(0)
+      let byteCount = buffer.readUInt8(1)
+      let coilStatus = buffer.slice(2, 2 + byteCount)
 
-    if (coilStatus.length !== byteCount) {
+      if (coilStatus.length !== byteCount) {
+        return null
+      }
+
+      if (fc !== 0x02) {
+        return null
+      }
+
+      return new ReadDiscreteInputsResponseBody(coilStatus, byteCount)
+    } catch (e) {
       return null
     }
-
-    if (fc !== 0x02) {
-      return null
-    }
-
-    return new ReadDiscreteInputsResponseBody(coilStatus, byteCount)
   }
 
   /** Creates a ReadDiscreteInputsResponseBody
@@ -82,7 +86,7 @@ class ReadDiscreteInputsResponseBody extends ModbusResponseBody {
   }
 
   get byteCount () {
-    return Math.ceil(this._coils.length / 8) + 3
+    return this._numberOfBytes + 2
   }
 
   createPayload () {

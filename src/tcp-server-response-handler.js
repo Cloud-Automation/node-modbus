@@ -2,6 +2,7 @@
 
 let debug = require('debug')('modbus tcp response handler')
 let ModbusTCPResponse = require('./tcp-response.js')
+let ReadCoilsResponseBody = require('./response/read-coils.js')
 
 class TCPResponseHandler {
 
@@ -23,7 +24,10 @@ class TCPResponseHandler {
         return
       }
 
-      this._handleReadCoilsRequest(request, cb)
+      let responseBody = ReadCoilsResponseBody.fromRequest(request.body, this._server.coils)
+      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+
+      return response
     }
   }
 

@@ -7,6 +7,20 @@ let ModbusResponseBody = require('./response-body.js')
  */
 class ReadCoilsResponseBody extends ModbusResponseBody {
 
+  /** Creates a response body from a request body and
+   * the coils buffer
+   * @param {ReadCoilsRequestBody} request
+   * @param {Buffer} coils
+   * @returns {ReadCoilsResponseBody}
+   */
+  static fromRequest (requestBody, coils) {
+    let start = requestBody.start / 8
+    let count = requestBody.count / 8
+    let buf = coils.slice(start, start + count)
+
+    return new ReadCoilsResponseBody(buf, buf.length)
+  }
+
   /** Create ReadCoilsResponseBody from buffer.
    * @param {Buffer} buffer
    * @returns {ReadCoilsResponseBody} Returns Null of not enough data located in the buffer.

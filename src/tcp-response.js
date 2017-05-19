@@ -6,6 +6,21 @@ let ResponseFactory = require('./response/response-factory.js')
  */
 class ModbusTCPResponse {
 
+  /** Create Modbus/TCP Response from a Modbus/TCP Request including
+   * the modbus function body.
+   * @param {ModbusTCPRequest} request
+   * @param {ModbusResponseBody} body
+   * @returns {ModbusTCPResponse}
+   */
+  static fromRequest (tcpRequest, modbusBody) {
+    return new ModbusTCPResponse(
+      tcpRequest.id,
+      tcpRequest.protocol,
+      modbusBody.length + 1,
+      tcpRequest.unitId,
+      modbusBody)
+  }
+
   /** Create Modbus/TCP Response from a buffer
    * @param {Buffer} buffer
    * @returns {ModbusTCPResponse} Returns null if not enough data located in the buffer.
