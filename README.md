@@ -93,7 +93,7 @@ client.on('connect', function () {
 
     }, console.error);
 
-    client.writeSingleRegister(13, Buffer.from([0x00 0x2A])).then(function (resp) {
+    client.writeSingleRegister(13, Buffer.from([0x00, 0x2A])).then(function (resp) {
 
 	    // resp will look like { fc: 6, byteCount: 4, registerAddress: 13, registerValue: 42 }
 	    console.log(resp);
