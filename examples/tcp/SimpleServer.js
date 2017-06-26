@@ -5,10 +5,10 @@ var modbus = require('../..')
 
 var server = stampit()
     .refs({
-      'logEnabled': true,
+      'logEnabled': false,
       'logLevel': 'debug',
       'port': 8888,
-      'responseDelay': 100,
+      'responseDelay': 0,
       'coils': new Buffer(100000),
       'holding': new Buffer(100000),
       'whiteListIPs': [

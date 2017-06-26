@@ -73,16 +73,8 @@ module.exports = stampit()
     }.bind(this)
 
     var onSend = function (pdu) {
-      var crc = 0
-
-      var base = Buffer.allocUnsafe(1)
-      base.writeUInt8(1)
+      var base = Buffer.from([0x01])
       var buf = Buffer.concat([base, pdu])
-
-      for (var i = 0; i < buf.length; i += 1) {
-        crc = (buf.readUInt8(i) + crc) % 0xFFFF
-      }
-
       var crc16 = crc.crc16modbus(buf)
       var crcBuf = Buffer.allocUnsafe(2)
 
