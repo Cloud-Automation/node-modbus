@@ -135,6 +135,21 @@ client.on('error', function (err) {
     console.log(err);
     
 })
+
+// when using arrays as parameters, jsmodbus assumes that all elements inside
+// the array are 16bit values. If you want to send a bigger value (32 bit), you need
+// to send a buffer, instead of an array:
+
+var buf = Buffer.allocUnsafe(4); // 4 bytes == 32bit
+buf.writeInt32BE(77777);
+
+// now you can call any function normally, just sending a buffer instead of an
+// array
+client.writeMultipleRegisters(4, buf).then(function (resp) {
+    // resp will look like { fc : 16, startAddress: 4, quantity: 4 }
+    console.log(resp);
+}, console.error);
+
 ```
 
 Server example
