@@ -11,7 +11,7 @@ module.exports = stampit()
     var trashRequestId
     var buffer = Buffer.alloc(0)
     var socket
-    var closed = false
+    var closed = true
 
     var init = function () {
       this.setState('init')
@@ -51,6 +51,7 @@ module.exports = stampit()
     }.bind(this)
 
     var onSocketConnect = function () {
+      closed = false
       this.emit('connect')
       this.setState('ready')
     }.bind(this)
