@@ -23,7 +23,7 @@ module.exports = stampit()
       }
 
       if (fc !== 16) {
-        request.defer.reject()
+        request.defer.reject(new Error('received unexpected function code'))
         return
       }
 
