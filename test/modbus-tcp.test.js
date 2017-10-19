@@ -2,6 +2,7 @@
 'use strict'
 var assert = require('assert')
 var EventEmitter = require('events')
+var sinon = require('sinon')
 
 describe('Modbus TCP Tests.', function () {
   describe('Server Tests.', function () {
@@ -53,7 +54,7 @@ describe('Modbus TCP Tests.', function () {
     var StateMachine = require('stampit-state-machine')
     var Logger = require('stampit-log')
 
-    it('should handle a chopped data request fine.', function (done) {
+    it('should handle a chopped data response fine.', function (done) {
       var ModbusTcpClient = require('../src/modbus-tcp-client.js')
       var injectedSocket = new EventEmitter()
       var exResponse = Buffer.from([0x01, 0x02, 0x055, 0x01])
@@ -84,8 +85,8 @@ describe('Modbus TCP Tests.', function () {
       })
 
       /* Send header data */
-      injectedSocket.emit('data', Buffer.from([0x00, 0x01, 0x00, 0x00, 0x00, 0x05, 0x01]))
-      /* emitting a read coils request (start = 0, count = 10) */
+      injectedSocket.emit('data', Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x01]))
+      /* emitting a read coils response */
       injectedSocket.emit('data', Buffer.from([0x01, 0x02, 0x55, 0x01]))
     })
 
@@ -109,6 +110,65 @@ describe('Modbus TCP Tests.', function () {
       for (let i = 0; i < 0x10000; i++) {
         client.emit('send', Buffer.allocUnsafe(5))
       }
+    })
+
+    it('should destroy socket and throw error when received request id is not as expected', function (done) {
+      const ModbusTcpClient = require('../src/modbus.js').client.tcp.complete
+      const injectedSocket = Object.assign(new EventEmitter(), {
+        write: (data) => {
+          const requestId = data.readUInt16BE(0)
+          data.writeUInt16BE(requestId + 1, 0)
+          injectedSocket.emit('data', data)
+        },
+        connect: () => {
+          injectedSocket.emit('connect')
+        },
+        destroy: sinon.spy()
+      })
+
+      const client = stampit()
+        .compose(ModbusTcpClient)({
+          injectedSocket: injectedSocket
+        })
+
+      client.on('error', (err) => {
+        assert(err.message.match(/out of sync/i))
+        assert(err.message.match(/request/i))
+        assert(injectedSocket.destroy.called)
+        done()
+      })
+
+      client.connect()
+      client.readHoldingRegisters(10, 0).then(() => assert.fail())
+    })
+
+    it('should destroy socket and throw error when received protocol id is not as expected', function (done) {
+      const ModbusTcpClient = require('../src/modbus.js').client.tcp.complete
+      const injectedSocket = Object.assign(new EventEmitter(), {
+        write: (data) => {
+          data.writeUInt16BE(0xffff, 2) // put invalid protocolId
+          injectedSocket.emit('data', data)
+        },
+        connect: () => {
+          injectedSocket.emit('connect')
+        },
+        destroy: sinon.spy()
+      })
+
+      const client = stampit()
+        .compose(ModbusTcpClient)({
+          injectedSocket: injectedSocket
+        })
+
+      client.on('error', (err) => {
+        assert(err.message.match(/out of sync/i))
+        assert(err.message.match(/protocol/i))
+        assert(injectedSocket.destroy.called)
+        done()
+      })
+
+      client.connect()
+      client.readHoldingRegisters(10, 0).then(() => assert.fail())
     })
   })
 })

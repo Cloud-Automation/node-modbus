@@ -88,10 +88,26 @@ module.exports = stampit()
 
         var id = buffer.readUInt16BE(0)
         var len = buffer.readUInt16BE(4)
+        var protocolId = buffer.readUInt16BE(2)
+
+        if (protocolId !== 0x0000) {
+          this.log.debug('current mbap contains invalid protocol id.')
+          this.setState('error')
+          console.log(protocolId)
+          this.emit('error', new Error('Socket out of sync, received invalid protocol id'))
+          return
+        }
 
         if (id === trashRequestId) {
           this.log.debug('current mbap contains trashed request id.')
 
+          return
+        }
+
+        if (id !== currentRequestId) {
+          this.log.debug('current mbap contains invalid request id.')
+          this.setState('error')
+          this.emit('error', new Error('Socket out of sync, received invalid request id'))
           return
         }
 
