@@ -48,11 +48,11 @@ module.exports = stampit()
 
       currentRequest.timeout = setTimeout(function () {
         currentRequest.defer.reject({ err: 'timeout' })
+        currentRequest = undefined
 
         this.logError('Request timed out.')
 
         this.setState('error')
-      //                this.setState('ready')
       }.bind(this), this.timeout)
 
       this.setState('waiting')
