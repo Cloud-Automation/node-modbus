@@ -8,7 +8,6 @@ module.exports = stampit()
     var currentRequestId = reqId
     var closedOnPurpose = false
     var reconnect = false
-    var trashRequestId
     var buffer = Buffer.alloc(0)
     var socket
     var closed = true
@@ -25,13 +24,14 @@ module.exports = stampit()
 
       this.on('send', onSend)
       this.on('newState_error', onError)
-      this.on('trashCurrentRequest', onTrashCurrentRequest)
 
       this.on('stateChanged', this.log.debug)
     }.bind(this)
 
     var connect = function () {
       this.setState('connect')
+
+      buffer = Buffer.alloc(0)
 
       if (!socket) {
         /* for testing you are able to inject a mocking object
@@ -93,14 +93,7 @@ module.exports = stampit()
         if (protocolId !== 0x0000) {
           this.log.debug('current mbap contains invalid protocol id.')
           this.setState('error')
-          console.log(protocolId)
           this.emit('error', new Error('Socket out of sync, received invalid protocol id'))
-          return
-        }
-
-        if (id === trashRequestId) {
-          this.log.debug('current mbap contains trashed request id.')
-
           return
         }
 
@@ -156,15 +149,8 @@ module.exports = stampit()
       socket.write(pkt)
     }.bind(this)
 
-    var onTrashCurrentRequest = function () {
-      trashRequestId = currentRequestId
-    }
-
     this.connect = function () {
-      this.setState('connect')
-
       connect()
-
       return this
     }
 
