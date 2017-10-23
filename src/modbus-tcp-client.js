@@ -69,6 +69,7 @@ module.exports = stampit()
           connect()
         }, this.reconnectTimeout || 0)
       }
+      closedOnPurpose = false
     }.bind(this)
 
     var onSocketError = function (err) {
