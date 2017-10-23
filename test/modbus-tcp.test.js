@@ -61,6 +61,7 @@ describe('Modbus TCP Tests.', function () {
 
       /* dummy method */
       injectedSocket.connect = function () { }
+      injectedSocket.destroy = function () { }
 
       /* create the client by composing
        * logger, state machine and the tcp client,
@@ -82,6 +83,10 @@ describe('Modbus TCP Tests.', function () {
       client.on('data', function (data) {
         assert.equal(data.compare(exResponse), 0)
         done()
+      })
+
+      client.on('error', function (err) {
+        assert.fail(err)
       })
 
       /* Send header data */
