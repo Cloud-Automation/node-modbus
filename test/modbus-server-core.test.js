@@ -89,6 +89,7 @@ describe('Modbus Server Core Tests.', function () {
 
   describe('Read Discrete Inputs Tests.', function () {
     var ReadDiscreteInputs = require('../src/handler/server/ReadDiscreteInputs.js')
+    var discreteBuf = Buffer.alloc(100)
     var Core = stampit().compose(ModbusCore, ReadDiscreteInputs)
 
     it('should handle a read discrete inputs request just fine.', function (done) {
@@ -107,12 +108,44 @@ describe('Modbus Server Core Tests.', function () {
       core.onData(request, resp)
     })
 
+    it('should handle a read discrete inputs request just fine (with actual discrete buffer).', function (done) {
+      var core = Core({ discrete: discreteBuf })
+      var request = Buffer.from([0x02, 0x00, 0, 0x00, 5])
+      var exResponse = Buffer.from([0x02, 1, 0x15])
+
+      discreteBuf.writeUInt8(0x15, 0)
+
+      var resp = function (response) {
+        assert.equal(response.compare(exResponse), 0)
+
+        done()
+      }
+
+      core.onData(request, resp)
+    })
+
     it('should handle a read discrete inputs request with odd start address just fine.', function (done) {
       var core = Core()
       var request = Buffer.from([0x02, 0x00, 2, 0x00, 5])
       var exResponse = Buffer.from([0x02, 1, 0x05])
 
       core.getInput().writeUInt8(0x15, 0)
+
+      var resp = function (response) {
+        assert.equal(response.compare(exResponse), 0)
+
+        done()
+      }
+
+      core.onData(request, resp)
+    })
+
+    it('should handle a read discrete inputs request with odd start address just fine (with actual discrete buffer).', function (done) {
+      var core = Core({ discrete: discreteBuf })
+      var request = Buffer.from([0x02, 0x00, 2, 0x00, 5])
+      var exResponse = Buffer.from([0x02, 1, 0x05])
+
+      discreteBuf.writeUInt8(0x15, 0)
 
       var resp = function (response) {
         assert.equal(response.compare(exResponse), 0)
