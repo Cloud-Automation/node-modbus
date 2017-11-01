@@ -35,7 +35,7 @@ var handler = stampit()
 
         this.emit('readDiscreteInputsRequest', start, quantity)
 
-        var mem = this.getInput()
+        var mem = this.getDiscrete()
 
         if (start > mem.length * 8 || start + quantity > mem.length * 8) {
           this.log.debug('wrong pdu length.')
