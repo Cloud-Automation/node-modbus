@@ -14,7 +14,7 @@ class TCPRequestHandler {
   }
 
   handle (data) {
-    this._buffer = Buffer.compose([this._buffer, data])
+    this._buffer = Buffer.concat([this._buffer, data])
 
     do {
       let request = TCPRequest.fromBuffer(this._buffer)
@@ -23,7 +23,7 @@ class TCPRequestHandler {
         return
       }
 
-      this._requests.shift(request)
+      this._requests.unshift(request)
 
       this._buffer = this._buffer.slice(request.byteCount)
     } while (1)
