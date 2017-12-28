@@ -38,6 +38,6 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x01        // coils
     ])
 
-    assert(payload = responseBuffer)
+    assert(payload.equals(responseBuffer))
   })
 })
