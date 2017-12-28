@@ -5,6 +5,7 @@
 let assert = require('assert')
 let ReadCoilsRequest = require('../src/request/read-coils.js')
 let ReadCoilsResponse = require('../src/response/read-coils.js')
+let ModbusRequestBody = require('../src/request/request-body.js')
 
 describe('ReadCoils Tests.', function () {
   describe('ReadCoils Response', function () {
@@ -23,6 +24,15 @@ describe('ReadCoils Tests.', function () {
       assert.equal(0x02, message.numberOfBytes)
       assert.deepEqual([1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0], message.valuesAsArray)
       assert.deepEqual(Buffer.from([0x55, 0x01]), message.valuesAsBuffer)
+    })
+    it('should mask out extra bits', function () {
+      let requestBody = ModbusRequestBody.fromBuffer(Buffer.from([0x01, 0x00, 0x00, 0x00, 0x09]))
+      let coils = Buffer.from([0xff, 0xff])
+      let response = ReadCoilsResponse.fromRequest(requestBody, coils)
+      let buffer = response.createPayload()
+      let expected = Buffer.from([0x01, 0x02, 0xff, 0x01])
+
+      assert.deepEqual(expected, buffer)
     })
     it('should return null on not enough buffer data', function () {
       let buffer = Buffer.from([0x01])
