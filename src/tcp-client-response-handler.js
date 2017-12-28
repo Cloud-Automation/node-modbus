@@ -29,7 +29,7 @@ class ModbusTCPClientResponseHandler extends ModbusClientResponseHandler {
         return
       }
 
-      debug('response id', response.id, 'protocol', response.protocol, 'length', response.length, 'unit', response.unitId)
+      debug('response id', response.id, 'protocol', response.protocol, 'length', response.bodyLength, 'unit', response.unitId)
 
       debug('reset buffer from', this._buffer.length, 'to', (this._buffer.length - response.byteCount))
 
