@@ -26,6 +26,8 @@ class TCPResponseHandler {
 
       let responseBody = ReadCoilsResponseBody.fromRequest(request.body, this._server.coils)
       let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let payload = response.createPayload()
+      cb(payload)
 
       return response
     }
