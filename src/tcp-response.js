@@ -16,7 +16,7 @@ class ModbusTCPResponse {
     return new ModbusTCPResponse(
       tcpRequest.id,
       tcpRequest.protocol,
-      modbusBody.length + 1,
+      modbusBody.byteCount + 1,
       tcpRequest.unitId,
       modbusBody)
   }
@@ -94,6 +94,26 @@ class ModbusTCPResponse {
   /** Modbus response body */
   get body () {
     return this._body
+  }
+
+  createPayload () {
+    /* Payload is a buffer with:
+     * Transaction ID = 2 Bytes
+     * Protocol ID = 2 Bytes
+     * Length = 2 Bytes
+     * Unit ID = 1 Byte
+     * Function code = 1 Byte
+     * Byte count = 1 Byte
+     * Coil status = n Bytes
+     */
+    let payload = Buffer.alloc(this.byteCount)
+    payload.writeUInt16BE(this._id, 0)
+    payload.writeUInt16BE(this._protocol, 2)
+    payload.writeUInt16BE(this._bodyLength, 4)
+    payload.writeUInt8(this._unitId, 6)
+    this._body.createPayload().copy(payload, 7)
+
+    return payload
   }
 
 }
