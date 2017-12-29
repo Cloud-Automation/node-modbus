@@ -34,6 +34,15 @@ describe('ReadCoils Tests.', function () {
 
       assert.deepEqual(expected, buffer)
     })
+    it('should return an individual coil if requested', function () {
+      let requestBody = ModbusRequestBody.fromBuffer(Buffer.from([0x01, 0x00, 0x00, 0x00, 0x01]))
+      let coils = Buffer.from([0xff, 0xff])
+      let response = ReadCoilsResponse.fromRequest(requestBody, coils)
+      let buffer = response.createPayload()
+      let expected = Buffer.from([0x01, 0x01, 0x01])
+
+      assert.deepEqual(expected, buffer)
+    })
     it('should return null on not enough buffer data', function () {
       let buffer = Buffer.from([0x01])
       let message = ReadCoilsResponse.fromBuffer(buffer)
