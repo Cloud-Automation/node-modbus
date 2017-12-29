@@ -32,7 +32,7 @@ let ModbusTCPClient = require('./modbus-tcp-client.js')
 let ModbusRTUClient = require('./modbus-rtu-client.js')
 
 /** module:jsmodbus.server.TCP */
-let ModbusTCPServer
+let ModbusTCPServer = require('./modbus-tcp-server.js')
 
 module.exports = {
   'client': {
@@ -43,4 +43,3 @@ module.exports = {
     'TCP': ModbusTCPServer
   }
 }
-

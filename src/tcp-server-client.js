@@ -39,7 +39,7 @@ class ModbusTCPClient {
       }
 
       this._responseHandler.handle(request, function (response) {
-        this._socket.write(response.payload, function () {
+        this._socket.write(response, function () {
           debug('response flushed')
         })
       }.bind(this))

@@ -26,7 +26,9 @@ class ModbusTCPServer extends EventEmitter {
     this.emit('connection', client)
   }
 
+  get coils () {
+    return this._coils
+  }
 }
 
 module.exports = ModbusTCPServer
-
