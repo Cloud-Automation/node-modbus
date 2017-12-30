@@ -31,6 +31,22 @@ class TCPResponseHandler {
 
       return response
     }
+    /* read discrete input request */
+    if (request.body.fc === 0x02) {
+      if (!this._server.discrete) {
+        debug('no discrete input buffer on server, trying readDiscreteInputs handler')
+        this._server.emit('readDiscreteInputs', request, cb)
+        return
+      }
+
+      let ReadDiscreteInputsResponseBody = require('./response/read-discrete-inputs.js')
+      let responseBody = ReadDiscreteInputsResponseBody.fromRequest(request.body, this._server.discrete)
+      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let payload = response.createPayload()
+      cb(payload)
+
+      return response
+    }
   }
 
 }
