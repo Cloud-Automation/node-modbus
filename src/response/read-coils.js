@@ -14,9 +14,17 @@ class ReadCoilsResponseBody extends ModbusResponseBody {
    * @returns {ReadCoilsResponseBody}
    */
   static fromRequest (requestBody, coils) {
-    let start = requestBody.start / 8
-    let count = requestBody.count / 8
-    let buf = coils.slice(start, start + count)
+
+    let startByte = Math.floor(requestBody.start / 8)
+    let endByte = Math.ceil((requestBody.start + requestBody.count) / 8)
+
+    let bufferSegment = coils.slice(startByte, endByte)
+    let buf = Buffer.from(bufferSegment)
+
+    let end = (requestBody.start + requestBody.count) / 8
+    let zeroShift = (endByte - end) * 8
+
+    buf[endByte - 1] = buf[endByte - 1] >>> zeroShift
 
     return new ReadCoilsResponseBody(buf, buf.length)
   }
