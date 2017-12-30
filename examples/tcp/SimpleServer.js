@@ -32,5 +32,6 @@ server.on('connection', function (client) {
 })
 
 server.coils.writeUInt16BE(0x1234, 0)
+server.discrete.writeUInt16BE(0x5678, 0)
 
 netServer.listen(8502)
