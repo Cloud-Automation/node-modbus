@@ -23,6 +23,10 @@ class ModbusRequestBody {
         let ReadDiscreteInputsResponse = require('./read-discrete-inputs.js')
         return ReadDiscreteInputsResponse.fromBuffer(buffer)
       }
+      if (fc === 0x03) {
+        let ReadHoldingRegistersResponse = require('./read-holding-registers.js')
+        return ReadHoldingRegistersResponse.fromBuffer(buffer)
+      }
     } catch (e) {
       return null
     }
