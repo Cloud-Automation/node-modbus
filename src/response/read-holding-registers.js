@@ -6,6 +6,22 @@ let ModbusResponseBody = require('./response-body.js')
  */
 class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
 
+  /** Create ReadHoldingRegistersResponseBody from Request
+   * @param {ReadHoldingRegistersRequestBody} request
+   * @param {Buffer} holdingRegisters
+   * @returns ReadHoldingRegistersResponseBody
+   */
+  static fromRequest (requestBody, holdingRegisters) {
+
+    let startByte = requestBody.start
+    let endByte = requestBody.start + (requestBody.count * 2)
+
+    let bufferSegment = holdingRegisters.slice(startByte, endByte)
+    let buf = Buffer.from(bufferSegment)
+
+    return new ReadHoldingRegistersResponseBody(buf.length, buf)
+  }
+
   /** Create ReadHoldingRegistersResponseBody from Buffer
    * @param {Buffer} buffer
    * @returns ReadHoldingRegistersResponseBody
@@ -42,7 +58,7 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
   }
 
   get byteCount () {
-    return this._values.length * 2 + 2
+    return this._values.length + 2
   }
 
   get values () {
@@ -58,16 +74,16 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
   }
 
   get length () {
-    return this._values.length * 2
+    return this._values.length
   }
 
   createPayload () {
-    let payload = Buffer.alloc(this._byteCount)
+    let payload = Buffer.alloc(this.byteCount)
 
     payload.writeUInt8(this._fc, 0)
-    payload.writeUInt8(this._length, 1)
+    payload.writeUInt8(this.length, 1)
     this._values.forEach(function (value, i) {
-      payload.writeUInt16BE(value, 2 + i)
+      payload.writeUInt8(value, 2 + i)
     })
 
     return payload

@@ -33,6 +33,10 @@ class ModbusTCPServer extends EventEmitter {
   get discrete () {
     return this._discrete
   }
+
+  get holdingRegisters () {
+    return this._holding
+  }
 }
 
 module.exports = ModbusTCPServer
