@@ -37,6 +37,10 @@ class ModbusTCPServer extends EventEmitter {
   get holdingRegisters () {
     return this._holding
   }
+
+  get inputRegisters () {
+    return this._input
+  }
 }
 
 module.exports = ModbusTCPServer
