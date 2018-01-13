@@ -27,6 +27,10 @@ class ModbusRequestBody {
         let ReadHoldingRegistersResponse = require('./read-holding-registers.js')
         return ReadHoldingRegistersResponse.fromBuffer(buffer)
       }
+      if (fc === 0x04) {
+        let ReadInputRegistersResponse = require('./read-input-registers.js')
+        return ReadInputRegistersResponse.fromBuffer(buffer)
+      }
     } catch (e) {
       return null
     }

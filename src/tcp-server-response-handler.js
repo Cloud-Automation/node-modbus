@@ -49,7 +49,7 @@ class TCPResponseHandler {
     }
     /* read holding registers request */
     if (request.body.fc === 0x03) {
-      if (!this._server.discrete) {
+      if (!this._server.holdingRegisters) {
         debug('no holding register buffer on server, trying readHoldingRegisters handler')
         this._server.emit('readHoldingRegisters', request, cb)
         return
@@ -57,6 +57,22 @@ class TCPResponseHandler {
 
       let ReadHoldingRegistersResponseBody = require('./response/read-holding-registers.js')
       let responseBody = ReadHoldingRegistersResponseBody.fromRequest(request.body, this._server.holdingRegisters)
+      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let payload = response.createPayload()
+      cb(payload)
+
+      return response
+    }
+    /* read input registers request */
+    if (request.body.fc === 0x04) {
+      if (!this._server.inputRegisters) {
+        debug('no input register buffer on server, trying readInputRegisters handler')
+        this._server.emit('readInputRegisters', request, cb)
+        return
+      }
+
+      let ReadInputRegistersResponseBody = require('./response/read-input-registers.js')
+      let responseBody = ReadInputRegistersResponseBody.fromRequest(request.body, this._server.inputRegisters)
       let response = ModbusTCPResponse.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
