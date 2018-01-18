@@ -33,6 +33,10 @@ module.exports = stampit()
         this.parity = 'none'
       }
 
+      if (!this.unitId) {
+        this.unitId = 0x01
+      }
+
       // TODO: flowControl - ['xon', 'xoff', 'xany', 'rtscts']
 
       // TODO: settings - ['brk', 'cts', 'dtr', 'dts', 'rts']
@@ -73,7 +77,7 @@ module.exports = stampit()
     }.bind(this)
 
     var onSend = function (pdu) {
-      var base = Buffer.from([0x01])
+      var base = Buffer.from([this.unitId])
       var buf = Buffer.concat([base, pdu])
       var crc16 = crc.crc16modbus(buf)
       var crcBuf = Buffer.allocUnsafe(2)
