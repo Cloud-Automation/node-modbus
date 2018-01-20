@@ -1,5 +1,6 @@
 'use strict'
 
+let debug = require('debug')('tcp-server-request-handler')
 let TCPRequest = require('./tcp-request.js')
 
 class TCPRequestHandler {
@@ -15,9 +16,11 @@ class TCPRequestHandler {
 
   handle (data) {
     this._buffer = Buffer.concat([this._buffer, data])
+    debug('this._buffer', this._buffer)
 
     do {
       let request = TCPRequest.fromBuffer(this._buffer)
+      debug('request', request)
 
       if (!request) {
         return
