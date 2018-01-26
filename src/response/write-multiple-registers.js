@@ -5,7 +5,6 @@ let ModbusResponseBody = require('./response-body.js')
  * @class
  */
 class WriteMultipleRegistersResponseBody extends ModbusResponseBody {
-
   static fromBuffer (buffer) {
     let fc = buffer.readUInt8(0)
     let start = buffer.readUInt16BE(1)
@@ -45,7 +44,6 @@ class WriteMultipleRegistersResponseBody extends ModbusResponseBody {
 
     return payload
   }
-
 }
 
 module.exports = WriteMultipleRegistersResponseBody

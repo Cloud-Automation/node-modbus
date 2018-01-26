@@ -4,7 +4,6 @@ let ModbusRequestBody = require('./request-body.js')
  * @extends ModbusRequestBody
  */
 class WriteSingleRegisterRequestBody extends ModbusRequestBody {
-
   static fromBuffer (buffer) {
     try {
       let fc = buffer.readUInt8(0)
@@ -46,6 +45,10 @@ class WriteSingleRegisterRequestBody extends ModbusRequestBody {
   /** Value to be written. */
   get value () {
     return this._value
+  }
+
+  get name () {
+    return 'WriteSingleRegister'
   }
 
   createPayload () {

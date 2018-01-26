@@ -7,7 +7,6 @@ let ModbusClientResponseHandler = require('./client-response-handler.js')
  * @class
  */
 class ModbusRTUClientResponseHandler extends ModbusClientResponseHandler {
-
   handleData (data) {
     debug('receiving new data')
     this._buffer = Buffer.concat([this._buffer, data])
@@ -36,7 +35,6 @@ class ModbusRTUClientResponseHandler extends ModbusClientResponseHandler {
   shift () {
     return this._messages.shift()
   }
-
 }
 
 module.exports = ModbusRTUClientResponseHandler

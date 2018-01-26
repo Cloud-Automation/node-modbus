@@ -38,21 +38,21 @@ describe('TCP Client Tests.', function () {
       assert.equal(0x04, response.byteCount)
       assert.deepEqual(
         [true,
-        false,
-        true,
-        true,
-        true,
-        false,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false], response.valuesAsArray)
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false], response.valuesAsArray)
     })
     it('should handle invalid buffer content', function () {
       let buffer = Buffer.from([

@@ -3,12 +3,11 @@ let CommonRequestBody = require('./request/request-body.js')
 
 /** Class representing a Modbus TCP Request */
 class ModbusTCPRequest {
-
   /** Convert a buffer into a new Modbus TCP Request. Returns null if the buffer
    * does not contain enough data.
    * @param {Buffer} buffer
    * @return {ModbusTCPRequest} A new Modbus TCP Request or Null.
-  */
+   */
   static fromBuffer (buffer) {
     try {
       let id = buffer.readUInt16BE(0)
@@ -21,9 +20,14 @@ class ModbusTCPRequest {
 
       let body = CommonRequestBody.fromBuffer(buffer.slice(7, 7 + length - 1))
 
+      /* TODO: if request not supported, create exception body */
+      if (!body) {
+        return null
+      }
+
       return new ModbusTCPRequest(id, protocol, length, unitId, body)
     } catch (e) {
-      debug('not enough data to create a tcp request')
+      debug('not enough data to create a tcp request', e)
       return null
     }
   }
@@ -68,8 +72,13 @@ class ModbusTCPRequest {
     return this._body
   }
 
+  /** get function name **/
+  get name () {
+    return this._body.name
+  }
+
   /** Creates a buffer object representing the modbus tcp request.
-    * @returns {Buffer} */
+   * @returns {Buffer} */
   createPayload () {
     let body = this._body.createPayload()
     let payload = Buffer.alloc(7 + this._body.byteCount)
@@ -88,7 +97,6 @@ class ModbusTCPRequest {
   get byteCount () {
     return this._length + 6 + 1
   }
-
 }
 
 module.exports = ModbusTCPRequest

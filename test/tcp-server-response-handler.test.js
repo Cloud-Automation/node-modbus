@@ -1,5 +1,7 @@
 'use strict'
 
+/* global describe, it */
+
 let assert = require('assert')
 let ReadCoilsResponseBody = require('../src/response/read-coils.js')
 let ReadDiscreteInputsResponseBody = require('../src/response/read-discrete-inputs.js')
@@ -10,7 +12,6 @@ let ModbusTCPResponse = require('../src/tcp-response.js')
 let ModbusTCPRequest = require('../src/tcp-request.js')
 
 describe('Modbus/TCP Server Response Handler Tests', function () {
-
   /* we are using the read coils function to test the modbus/tcp specifics */
 
   it('should handle a valid read coils request', function () {
@@ -18,10 +19,10 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
-      0x01,       // unit id
-      0x01,       // function code
+      0x01, // unit id
+      0x01, // function code
       0x00, 0x00, // starting address
-      0x00, 0x08  // quantity
+      0x00, 0x08 // quantity
     ])
 
     let coils = Buffer.from([
@@ -36,10 +37,10 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x04, // byte count
-      0x01,       // unit id
-      0x01,       // function code
-      0x01,       // byte count
-      0x01        // coils
+      0x01, // unit id
+      0x01, // function code
+      0x01, // byte count
+      0x01 // coils
     ])
 
     assert(payload.equals(responseBuffer))
@@ -50,10 +51,10 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
-      0x01,       // unit id
-      0x02,       // function code
+      0x01, // unit id
+      0x02, // function code
       0x00, 0x00, // starting address
-      0x00, 0x03  // quantity
+      0x00, 0x03 // quantity
     ])
 
     let discreteInputs = Buffer.from([
@@ -68,10 +69,10 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x04, // byte count
-      0x01,       // unit id
-      0x02,       // function code
-      0x01,       // byte count
-      0x07        // coils
+      0x01, // unit id
+      0x02, // function code
+      0x01, // byte count
+      0x07 // coils
     ])
 
     assert(payload.equals(responseBuffer))
@@ -82,17 +83,17 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
-      0x01,       // unit id
-      0x03,       // function code
+      0x01, // unit id
+      0x03, // function code
       0x00, 0x00, // starting address
-      0x00, 0x03  // quantity
+      0x00, 0x03 // quantity
     ])
 
     let holdingRegisters = Buffer.from([
       0xff, 0x10,
       0x07, 0x08,
       0x01, 0x10,
-      0xff, 0x88,
+      0xff, 0x88
     ])
 
     let request = ModbusTCPRequest.fromBuffer(requestBuffer)
@@ -103,12 +104,12 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x09, // byte count
-      0x01,       // unit id
-      0x03,       // function code
-      0x06,       // byte count
+      0x01, // unit id
+      0x03, // function code
+      0x06, // byte count
       0xff, 0x10, // coils
       0x07, 0x08, // coils
-      0x01, 0x10, // coils
+      0x01, 0x10 // coils
     ])
     assert(payload.equals(responseBuffer))
   })
@@ -118,17 +119,17 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
-      0x01,       // unit id
-      0x04,       // function code
+      0x01, // unit id
+      0x04, // function code
       0x00, 0x00, // starting address
-      0x00, 0x03  // quantity
+      0x00, 0x03 // quantity
     ])
 
     let inputRegisters = Buffer.from([
       0xff, 0x10,
       0x07, 0x08,
       0x01, 0x10,
-      0xff, 0x88,
+      0xff, 0x88
     ])
 
     let request = ModbusTCPRequest.fromBuffer(requestBuffer)
@@ -139,12 +140,12 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x09, // byte count
-      0x01,       // unit id
-      0x04,       // function code
-      0x06,       // byte count
+      0x01, // unit id
+      0x04, // function code
+      0x06, // byte count
       0xff, 0x10, // coils
       0x07, 0x08, // coils
-      0x01, 0x10, // coils
+      0x01, 0x10 // coils
     ])
     assert(payload.equals(responseBuffer))
   })
@@ -154,10 +155,10 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
-      0x01,       // unit id
-      0x05,       // function code
+      0x01, // unit id
+      0x05, // function code
       0x00, 0x02, // output address
-      0xff, 0x00  // output value
+      0xff, 0x00 // output value
     ])
 
     let request = ModbusTCPRequest.fromBuffer(requestBuffer)
@@ -168,10 +169,10 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
-      0x01,       // unit id
-      0x05,       // function code
+      0x01, // unit id
+      0x05, // function code
       0x00, 0x02, // output address
-      0xff, 0x00  // output value
+      0xff, 0x00 // output value
     ])
     assert(payload.equals(responseBuffer))
   })

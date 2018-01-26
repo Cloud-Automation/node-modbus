@@ -1,17 +1,15 @@
 'use strict'
 
 /** Common Modbus Request Body
-  * @abstract
-  */
+ * @abstract
+ */
 class ModbusRequestBody {
-
   /** Create a Modbus Request Body from a buffer object. Depending on the function code
    * in the buffer the request body could by any function codes request body.
    * @param {Buffer} buffer The buffer to be parsed.
    * @returns {ModbusRequestBody} The actual request body or null if there is not enough data in the buffer.
    */
   static fromBuffer (buffer) {
-
     try {
       let fc = buffer.readUInt8(0)
 
@@ -69,7 +67,6 @@ class ModbusRequestBody {
   get byteCount () {
     throw new Error('No implemented yet.')
   }
-
 }
 
 module.exports = ModbusRequestBody

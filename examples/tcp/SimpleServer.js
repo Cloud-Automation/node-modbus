@@ -3,11 +3,10 @@
 let net = require('net')
 let modbus = require('../..')
 let netServer = new net.Server()
-let server = new modbus.server.TCP(netServer, {
-  'coils': Buffer.alloc(1024),
-  'discrete': Buffer.alloc(1024),
-  'holding': Buffer.alloc(1024),
-  'input': Buffer.alloc(1024)
+let server = new modbus.server.TCP(netServer)
+
+server.on('connection', function (client) {
+  console.log('New Connection')
 })
 
 server.on('readCoils', function (request, response, send) {

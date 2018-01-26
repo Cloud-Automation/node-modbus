@@ -13,7 +13,6 @@ const PROTOCOL = 'Protocol'
  * @class
  */
 class ModbusTCPClientRequestHandler extends ModbusClientRequestHandler {
-
   /** Create a new TCPClientRequestHandler
    * @param {net.Socket} socket net.Socket
    * @param {Number} unitId Unit ID
@@ -76,7 +75,6 @@ class ModbusTCPClientRequestHandler extends ModbusClientRequestHandler {
 
     super.handle(response)
   }
-
 }
 
 module.exports = ModbusTCPClientRequestHandler

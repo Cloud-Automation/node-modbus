@@ -5,7 +5,6 @@ let ModbusTCPResponse = require('./tcp-response.js')
 let ReadCoilsResponseBody = require('./response/read-coils.js')
 
 class TCPResponseHandler {
-
   constructor (server) {
     this._server = server
     this._server.setMaxListeners(1)
@@ -90,7 +89,9 @@ class TCPResponseHandler {
       let WriteSingleCoilResponseBody = require('./response/write-single-coil.js')
       let responseBody = WriteSingleCoilResponseBody.fromRequest(request.body)
 
-      let address = responseBody.address - 1
+      let address = request.body.address
+
+      debug('Writing value %d to address %d', request.body.value === 0xFF00 ? 1 : 0, address)
 
       // find the byte that contains the coil to be written
       let oldValue = this._server.coils.readUInt8(Math.floor(address / 8))
@@ -98,7 +99,7 @@ class TCPResponseHandler {
 
       // write the correct bit
       // if the value is true, the bit is set using bitwise or
-      if (responseBody.value){
+      if (request.body.value === 0xFF00) {
         newValue = oldValue | Math.pow(2, address % 8)
       } else {
         newValue = oldValue & ~Math.pow(2, address % 8)
@@ -113,7 +114,6 @@ class TCPResponseHandler {
       return response
     }
   }
-
 }
 
 module.exports = TCPResponseHandler

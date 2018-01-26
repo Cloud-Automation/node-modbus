@@ -4,7 +4,6 @@ let ModbusRequestBody = require('./request-body.js')
  * @extends ModbusRequestBody
  */
 class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
-
   static fromBuffer (buffer) {
     try {
       let fc = buffer.readUInt8(0)
@@ -53,6 +52,10 @@ class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
     return 5
   }
 
+  get name () {
+    return 'ReadHoldingRegisters'
+  }
+
   createPayload () {
     let payload = Buffer.alloc(5)
     payload.writeUInt8(this._fc, 0) // function code
@@ -60,7 +63,6 @@ class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
     payload.writeUInt16BE(this._count, 3) // quantitiy of coils
     return payload
   }
-
 }
 
 module.exports = ReadHoldingRegistersRequestBody

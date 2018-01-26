@@ -18,7 +18,6 @@ let ModbusRTUClientResponseHandler = require('./rtu-client-response-handler.js')
  * @class
  */
 class ModbusRTUClient extends ModbusClient {
-
   /** Creates a new Modbus/RTU Client.
    * @param {SerialSocket} socket The serial Socket.
    * @param {Number} address The address of the serial client.
@@ -29,7 +28,6 @@ class ModbusRTUClient extends ModbusClient {
     this._requestHandler = new ModbusRTUClientRequestHandler(this._socket, address)
     this._responseHandler = new ModbusRTUClientResponseHandler()
   }
-
 }
 
 module.exports = ModbusRTUClient

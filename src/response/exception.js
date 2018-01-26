@@ -17,7 +17,6 @@ let ModbusResponseBody = require('./response-body.js')
  * @class
  */
 class ExceptionResponseBody extends ModbusResponseBody {
-
   /** Create Exception Response from buffer.
    * @param {Number} fc Function Code
    * @param {Buffer} buffer Buffer
@@ -58,7 +57,6 @@ class ExceptionResponseBody extends ModbusResponseBody {
     payload.writeUInt8(this._code, 1)
     return payload
   }
-
 }
 
 module.exports = ExceptionResponseBody

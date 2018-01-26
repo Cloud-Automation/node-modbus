@@ -4,7 +4,6 @@ let ModbusRequestBody = require('./request-body.js')
  * @extends ModbusRequestBody
  */
 class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
-
   static fromBuffer (buffer) {
     try {
       let fc = buffer.readUInt8(0)
@@ -97,6 +96,10 @@ class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
     return this._numberOfBytes
   }
 
+  get name () {
+    return 'WriteMultipleRegisters'
+  }
+
   createPayload () {
     let payload = Buffer.alloc(6 + this._numberOfBytes)
     payload.writeUInt8(this._fc, 0) // function code
@@ -106,7 +109,6 @@ class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
     this._valuesAsBuffer.copy(payload, 6)
     return payload
   }
-
 }
 
 module.exports = WriteMultipleRegistersRequestBody
