@@ -79,6 +79,39 @@ class TCPResponseHandler {
 
       return response
     }
+    /* write single coil request */
+    if (request.body.fc === 0x05) {
+      if (!this._server.coils) {
+        debug('no coils buffer on server, trying writeSingleCoil handler')
+        this._server.emit('writeSingleCoil', request, cb)
+        return
+      }
+
+      let WriteSingleCoilResponseBody = require('./response/write-single-coil.js')
+      let responseBody = WriteSingleCoilResponseBody.fromRequest(request.body)
+
+      let address = responseBody.address - 1
+
+      // find the byte that contains the coil to be written
+      let oldValue = this._server.coils.readUInt8(Math.floor(address / 8))
+      let newValue
+
+      // write the correct bit
+      // if the value is true, the bit is set using bitwise or
+      if (responseBody.value){
+        newValue = oldValue | Math.pow(2, address % 8)
+      } else {
+        newValue = oldValue & ~Math.pow(2, address % 8)
+      }
+
+      this._server.coils.writeUInt8(newValue, Math.floor(address / 8))
+
+      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let payload = response.createPayload()
+      cb(payload)
+
+      return response
+    }
   }
 
 }
