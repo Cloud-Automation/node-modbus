@@ -14,7 +14,7 @@ describe('TCP Client Tests.', function () {
   beforeEach(function () {
     socket = new EventEmitter()
 
-    socket.write = function () { }
+    socket.write = function () {}
 
     socketMock = sinon.mock(socket)
   })
@@ -24,9 +24,9 @@ describe('TCP Client Tests.', function () {
     let ReadCoilsResponseBody = require('../src/response/read-coils.js')
     it('should create request from buffer', function () {
       let buffer = Buffer.from([
-        0x01,       // fc
-        0x02,       // byte count
-        0xdd,       // coils
+        0x01, // fc
+        0x02, // byte count
+        0xdd, // coils
         0x00
       ])
 
@@ -52,13 +52,14 @@ describe('TCP Client Tests.', function () {
           false,
           false,
           false,
-          false], response.valuesAsArray)
+          false
+        ], response.valuesAsArray)
     })
     it('should handle invalid buffer content', function () {
       let buffer = Buffer.from([
-        0x01,       // fc
-        0x02,       // byte count
-        0xdd        // coils
+        0x01, // fc
+        0x02, // byte count
+        0xdd // coils
       ])
 
       let response = ReadCoilsResponseBody.fromBuffer(buffer)
@@ -75,7 +76,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (e) {
-          assert.equal('InvalidQuantity', e.err)
+          assert.equal('InvalidQuantity', e.message)
           socketMock.verify()
           done()
         })
@@ -86,9 +87,9 @@ describe('TCP Client Tests.', function () {
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
         0x00, 0x03, // byte count
-        0x01,       // unit id
-        0x81,       // function code
-        0x01        // exception code
+        0x01, // unit id
+        0x81, // function code
+        0x01 // exception code
       ])
 
       socket.emit('connect')
@@ -157,20 +158,20 @@ describe('TCP Client Tests.', function () {
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
         0x00, 0x05, // byte count
-        0x01,       // unit id
-        0x01,       // function code
-        0x02,       // byte count
-        0xdd,       // coils
+        0x01, // unit id
+        0x01, // function code
+        0x02, // byte count
+        0xdd, // coils
         0x00
       ])
       let responseB = Buffer.from([
         0x00, 0x02, // transaction id
         0x00, 0x00, // protocol
         0x00, 0x05, // byte count
-        0x01,       // unit id
-        0x01,       // function code
-        0x02,       // byte count
-        0xdd,       // coils
+        0x01, // unit id
+        0x01, // function code
+        0x02, // byte count
+        0xdd, // coils
         0x00
       ])
 
@@ -200,10 +201,10 @@ describe('TCP Client Tests.', function () {
         0x00, 0x02, // transaction id is WRONG!!!!
         0x00, 0x00, // protocol
         0x00, 0x05, // byte count
-        0x01,       // unit id
-        0x01,       // function code
-        0x02,       // byte count
-        0xdd,       // coils
+        0x01, // unit id
+        0x01, // function code
+        0x02, // byte count
+        0xdd, // coils
         0x00
       ])
 
@@ -227,10 +228,10 @@ describe('TCP Client Tests.', function () {
         0x00, 0x02, // transaction id is WRONG!!!!
         0x00, 0x00, // protocol
         0x00, 0x05, // byte count
-        0x01,       // unit id
-        0x01,       // function code
-        0x02,       // byte count
-        0xdd,       // coils
+        0x01, // unit id
+        0x01, // function code
+        0x02, // byte count
+        0xdd, // coils
         0x00
       ])
 
@@ -261,10 +262,10 @@ describe('TCP Client Tests.', function () {
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
         0x00, 0x05, // byte count
-        0x01,       // unit id
-        0x02,       // function code WRONG!!!
-        0x02,       // byte count
-        0xdd,       // coils
+        0x01, // unit id
+        0x02, // function code WRONG!!!
+        0x02, // byte count
+        0xdd, // coils
         0x00
       ])
 
@@ -288,10 +289,10 @@ describe('TCP Client Tests.', function () {
         0x00, 0x01, // transaction id
         0x00, 0x01, // protocol WRONG !!!!
         0x00, 0x05, // byte count
-        0x01,       // unit id
-        0x01,       // function code
-        0x02,       // byte count
-        0xdd,       // coils
+        0x01, // unit id
+        0x01, // function code
+        0x02, // byte count
+        0xdd, // coils
         0x00
       ])
 
@@ -318,10 +319,10 @@ describe('TCP Client Tests.', function () {
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
         0x00, 0x05, // byte count
-        0x02,       // unit id
-        0x02,       // function code
-        0x02,       // byte count
-        0xdd,       // coils
+        0x02, // unit id
+        0x02, // function code
+        0x02, // byte count
+        0xdd, // coils
         0x00
       ])
 
@@ -352,7 +353,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
-          assert.equal('InvalidStartAddress', error.err)
+          assert.equal('InvalidStartAddress', error.message)
           socketMock.verify()
           done()
         })
@@ -367,7 +368,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (e) {
-          assert.equal('InvalidQuantity', e.err)
+          assert.equal('InvalidQuantity', e.message)
           socketMock.verify()
           done()
         })
@@ -380,9 +381,9 @@ describe('TCP Client Tests.', function () {
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
         0x00, 0x07, // byte count
-        0x02,       // unit id
-        0x03,       // function code
-        0x04,       // byte count
+        0x02, // unit id
+        0x03, // function code
+        0x04, // byte count
         0x43, 0x21, // registers
         0x12, 0x34
       ])
@@ -414,7 +415,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
-          assert.equal('InvalidStartAddress', error.err)
+          assert.equal('InvalidStartAddress', error.message)
           socketMock.verify()
           done()
         })
@@ -429,7 +430,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (e) {
-          assert.equal('InvalidQuantity', e.err)
+          assert.equal('InvalidQuantity', e.message)
           socketMock.verify()
           done()
         })
@@ -442,9 +443,9 @@ describe('TCP Client Tests.', function () {
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
         0x00, 0x07, // byte count
-        0x02,       // unit id
-        0x04,       // function code
-        0x04,       // byte count
+        0x02, // unit id
+        0x04, // function code
+        0x04, // byte count
         0x43, 0x21, // registers
         0x12, 0x34
       ])
@@ -476,7 +477,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
-          assert.equal('InvalidStartAddress', error.err)
+          assert.equal('InvalidStartAddress', error.message)
           socketMock.verify()
           done()
         })
@@ -491,7 +492,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (e) {
-          assert.equal('InvalidQuantity', e.err)
+          assert.equal('InvalidQuantity', e.message)
           socketMock.verify()
           done()
         })
@@ -504,10 +505,10 @@ describe('TCP Client Tests.', function () {
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
         0x00, 0x06, // byte count
-        0x02,       // unit id
-        0x05,       // function code
+        0x02, // unit id
+        0x05, // function code
         0x12, 0x34, // output address
-        0xFF, 0x00  // output value
+        0xFF, 0x00 // output value
       ])
 
       socket.emit('connect')
@@ -537,7 +538,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
-          assert.equal('InvalidStartAddress', error.err)
+          assert.equal('InvalidStartAddress', error.message)
           socketMock.verify()
           done()
         })
@@ -550,10 +551,10 @@ describe('TCP Client Tests.', function () {
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
         0x00, 0x06, // byte count
-        0x02,       // unit id
-        0x06,       // function code
+        0x02, // unit id
+        0x06, // function code
         0x12, 0x34, // output address
-        0x43, 0x21  // output value
+        0x43, 0x21 // output value
       ])
 
       socket.emit('connect')
@@ -583,7 +584,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
-          assert.equal('InvalidStartAddress', error.err)
+          assert.equal('InvalidStartAddress', error.message)
           socketMock.verify()
           done()
         })
@@ -598,7 +599,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
-          assert.equal('InvalidValue', error.err)
+          assert.equal('InvalidValue', error.message)
           socketMock.verify()
           done()
         })
@@ -613,7 +614,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
-          assert.equal('InvalidValue', error.err)
+          assert.equal('InvalidValue', error.message)
           socketMock.verify()
           done()
         })
@@ -628,7 +629,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
-          assert.equal('InvalidValue', error.err)
+          assert.equal('InvalidValue', error.message)
           socketMock.verify()
           done()
         })
@@ -641,10 +642,10 @@ describe('TCP Client Tests.', function () {
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
         0x00, 0x06, // byte count
-        0x02,       // unit id
-        0x0F,       // function code
+        0x02, // unit id
+        0x0F, // function code
         0x12, 0x34, // starting address
-        0x00, 0x08  // quantity of outputs
+        0x00, 0x08 // quantity of outputs
       ])
 
       socket.emit('connect')
@@ -670,10 +671,10 @@ describe('TCP Client Tests.', function () {
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
         0x00, 0x06, // byte count
-        0x02,       // unit id
-        0x0F,       // function code
+        0x02, // unit id
+        0x0F, // function code
         0x12, 0x34, // starting address
-        0x00, 0x08  // quantity of outputs
+        0x00, 0x08 // quantity of outputs
       ])
 
       socket.emit('connect')
@@ -704,7 +705,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
-          assert.equal('InvalidStartAddress', error.err)
+          assert.equal('InvalidStartAddress', error.message)
           socketMock.verify()
           done()
         })
@@ -724,7 +725,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
-          assert.equal('InvalidArraySize', error.err)
+          assert.equal('InvalidArraySize', error.message)
           socketMock.verify()
           done()
         })
@@ -740,7 +741,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
-          assert.equal('InvalidBufferSize', error.err)
+          assert.equal('InvalidBufferSize', error.message)
           socketMock.verify()
           done()
         })
@@ -756,7 +757,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
-          assert.equal('InvalidBufferSize', error.err)
+          assert.equal('InvalidBufferSize', error.message)
           socketMock.verify()
           done()
         })
@@ -769,10 +770,10 @@ describe('TCP Client Tests.', function () {
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
         0x00, 0x06, // byte count
-        0x02,       // unit id
-        0x10,       // function code
+        0x02, // unit id
+        0x10, // function code
         0x12, 0x34, // starting address
-        0x00, 0x10  // quantity of outputs
+        0x00, 0x10 // quantity of outputs
       ])
 
       socket.emit('connect')
@@ -798,10 +799,10 @@ describe('TCP Client Tests.', function () {
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
         0x00, 0x06, // byte count
-        0x02,       // unit id
-        0x10,       // function code
+        0x02, // unit id
+        0x10, // function code
         0x12, 0x34, // starting address
-        0x00, 0x10  // quantity of outputs
+        0x00, 0x10 // quantity of outputs
       ])
 
       socket.emit('connect')
@@ -832,7 +833,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
-          assert.equal('InvalidStartAddress', error.err)
+          assert.equal('InvalidStartAddress', error.message)
           socketMock.verify()
           done()
         })
@@ -852,7 +853,7 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
-          assert.equal('InvalidArraySize', error.err)
+          assert.equal('InvalidArraySize', error.message)
           socketMock.verify()
           done()
         })
@@ -867,8 +868,9 @@ describe('TCP Client Tests.', function () {
       client.writeMultipleRegisters(0x0, buf)
         .then(function (resp) {
           assert.ok(false)
+          done()
         }).catch(function (error) {
-          assert.equal('InvalidBufferSize', error.err)
+          assert.equal('InvalidBufferSize', error.message)
           socketMock.verify()
           done()
         })
