@@ -15,6 +15,10 @@ class TCPResponseHandler {
   }
 
   handle (request, cb) {
+    if (!request) {
+      return null
+    }
+
     /* read coils request */
     if (request.body.fc === 0x01) {
       if (!this._server.coils) {
@@ -91,11 +95,21 @@ class TCPResponseHandler {
 
       let address = request.body.address
 
-      debug('Writing value %d to address %d', request.body.value === 0xFF00 ? 1 : 0, address)
+      debug('Writing value %d to address %d', request.body.value, address)
 
       // find the byte that contains the coil to be written
       let oldValue = this._server.coils.readUInt8(Math.floor(address / 8))
       let newValue
+
+      if (request.body.value !== 0xFF00 && request.body.value !== 0x0000) {
+        debug('illegal data value')
+        let ExceptionResponseBody = require('./response/exception.js')
+        /* illegal data value */
+        let responseBody = new ExceptionResponseBody(request.body.fc, 0x03)
+        let response = ModbusTCPResponse.fromRequest(request, responseBody)
+        cb(response.createPayload())
+        return response
+      }
 
       // write the correct bit
       // if the value is true, the bit is set using bitwise or
@@ -105,7 +119,17 @@ class TCPResponseHandler {
         newValue = oldValue & ~Math.pow(2, address % 8)
       }
 
-      this._server.coils.writeUInt8(newValue, Math.floor(address / 8))
+      if (responseBody.address / 8 > this._server.coils.length) {
+        debug('illegal data address')
+        let ExceptionResponseBody = require('./response/exception.js')
+        /* illegal data address */
+        let responseBody = new ExceptionResponseBody(request.body.fc, 0x02)
+        let response = ModbusTCPResponse.fromRequest(request, responseBody)
+        cb(response.createPayload())
+        return response
+      } else {
+        this._server.coils.writeUInt8(newValue, Math.floor(address / 8))
+      }
 
       let response = ModbusTCPResponse.fromRequest(request, responseBody)
       let payload = response.createPayload()
@@ -124,16 +148,32 @@ class TCPResponseHandler {
       let WriteSingleRegisterResponseBody = require('./response/write-single-register.js')
       let responseBody = WriteSingleRegisterResponseBody.fromRequest(request.body)
 
-      this._server.emit('preWriteSingleRegister', responseBody.value, responseBody.address)
-
-      let mem = this._server.holding.writeUInt16BE(responseBody.value, responseBody.address)
-
-      this._server.emit('WriteSingleRegister', responseBody.value, responseBody.address)
+      if (responseBody.address * 2 > this._server.holding.length) {
+        debug('illegal data address')
+        let ExceptionResponseBody = require('./response/exception.js')
+        /* illegal data address */
+        let responseBody = new ExceptionResponseBody(request.body.fc, 0x02)
+        let response = ModbusTCPResponse.fromRequest(request, responseBody)
+        cb(response.createPayload())
+        return response
+      } else {
+        this._server.holding.writeUInt16BE(responseBody.value, responseBody.address * 2)
+      }
 
       let response = ModbusTCPResponse.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
 
+      return response
+    }
+
+    if (request.body.fc > 0x80) {
+      /* exception request */
+
+      let ExceptionResponseBody = require('./response/exception.js')
+      let responseBody = ExceptionResponseBody.fromRequest(request.body)
+      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      cb(response.createPayload())
       return response
     }
   }

@@ -32,18 +32,14 @@ class ModbusTCPClient {
 
       if (!request) {
         debug('no request to process')
-        return
+        /* TODO: close client connection */
+        break
       }
-
-      debug('emitting pre%s signal', request.name)
-      this._server.emit('pre' + request.name, request, this)
 
       this._responseHandler.handle(request, function (response) {
         this._socket.write(response, function () {
-          debug('emitting post%s signal', request.name)
-          this._server.emit('post' + request.name)
           debug('response flushed')
-        }.bind(this))
+        })
       }.bind(this))
     } while (1)
   }

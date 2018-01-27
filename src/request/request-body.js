@@ -1,5 +1,7 @@
 'use strict'
 
+let debug = require('debug')('request-body')
+
 /** Common Modbus Request Body
  * @abstract
  */
@@ -10,34 +12,44 @@ class ModbusRequestBody {
    * @returns {ModbusRequestBody} The actual request body or null if there is not enough data in the buffer.
    */
   static fromBuffer (buffer) {
+    /* TODO:detect non modbus requests and return a InvalidProtocolRequest. Requests
+     * of this kind should lead to disconnecting the client. This way we can make sure that
+     * unintendet messages do not harm the server */
     try {
       let fc = buffer.readUInt8(0)
 
       if (fc === 0x01) {
-        let ReadCoilsResponse = require('./read-coils.js')
-        return ReadCoilsResponse.fromBuffer(buffer)
+        let ReadCoilsRequest = require('./read-coils.js')
+        return ReadCoilsRequest.fromBuffer(buffer)
       }
       if (fc === 0x02) {
-        let ReadDiscreteInputsResponse = require('./read-discrete-inputs.js')
-        return ReadDiscreteInputsResponse.fromBuffer(buffer)
+        let ReadDiscreteInputsRequest = require('./read-discrete-inputs.js')
+        return ReadDiscreteInputsRequest.fromBuffer(buffer)
       }
       if (fc === 0x03) {
-        let ReadHoldingRegistersResponse = require('./read-holding-registers.js')
-        return ReadHoldingRegistersResponse.fromBuffer(buffer)
+        let ReadHoldingRegistersRequest = require('./read-holding-registers.js')
+        return ReadHoldingRegistersRequest.fromBuffer(buffer)
       }
       if (fc === 0x04) {
-        let ReadInputRegistersResponse = require('./read-input-registers.js')
-        return ReadInputRegistersResponse.fromBuffer(buffer)
+        let ReadInputRegistersRequest = require('./read-input-registers.js')
+        return ReadInputRegistersRequest.fromBuffer(buffer)
       }
       if (fc === 0x05) {
-        let WriteSingleCoilResponse = require('./write-single-coil.js')
-        return WriteSingleCoilResponse.fromBuffer(buffer)
+        let WriteSingleCoilRequest = require('./write-single-coil.js')
+        return WriteSingleCoilRequest.fromBuffer(buffer)
       }
       if (fc === 0x06) {
-        let WriteSingleRegisterResponse = require('./write-single-register.js')
-        return WriteSingleRegisterResponse.fromBuffer(buffer)
+        let WriteSingleRegisterRequest = require('./write-single-register.js')
+        return WriteSingleRegisterRequest.fromBuffer(buffer)
+      }
+
+      if (fc <= 0x2B) {
+        debug('Illegal Function (fc %d)', fc)
+        let ExceptionRequest = require('./exception.js')
+        return new ExceptionRequest(fc, 0x01)
       }
     } catch (e) {
+      debug('Exception while reading function code', e)
       return null
     }
   }

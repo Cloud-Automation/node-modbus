@@ -28,6 +28,10 @@ class ExceptionResponseBody extends ModbusResponseBody {
     return new ExceptionResponseBody(fc - 0x80, code)
   }
 
+  static fromRequest (requestBody) {
+    return new ExceptionResponseBody(requestBody.fc, requestBody.code)
+  }
+
   /** Create ExceptionResponseBody
    * @param {Number} fc Function Code
    * @param {Number} code Exception Code

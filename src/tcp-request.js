@@ -10,6 +10,11 @@ class ModbusTCPRequest {
    */
   static fromBuffer (buffer) {
     try {
+      if (buffer.length < 7) {
+        debug('no enough data in the buffer yet')
+        return null
+      }
+
       let id = buffer.readUInt16BE(0)
       let protocol = buffer.readUInt16BE(2)
       let length = buffer.readUInt16BE(4)
@@ -20,7 +25,6 @@ class ModbusTCPRequest {
 
       let body = CommonRequestBody.fromBuffer(buffer.slice(7, 7 + length - 1))
 
-      /* TODO: if request not supported, create exception body */
       if (!body) {
         return null
       }
