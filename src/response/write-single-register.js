@@ -5,6 +5,20 @@ let ModbusResponseBody = require('./response-body.js')
  * @class
  */
 class WriteSingleRegisterResponseBody extends ModbusResponseBody {
+
+ /** Create WriteSingleRegisterResponseBody from Request
+ * @param {WriteSingleRegisterRequestBody} request
+ * @param {Buffer} coil
+ * @returns WriteSingleRegisterResponseBody
+ */
+  static fromRequest (requestBody) {
+
+    let address = requestBody.address
+    let value = requestBody.value
+
+    return new WriteSingleRegisterResponseBody(address, value)
+  } 
+
   static fromBuffer (buffer) {
     let fc = buffer.readUInt8(0)
     let address = buffer.readUInt16BE(1)
