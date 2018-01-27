@@ -34,11 +34,11 @@ class ModbusTCPServer extends EventEmitter {
     return this._discrete
   }
 
-  get holdingRegisters () {
+  get holding () {
     return this._holding
   }
 
-  get inputRegisters () {
+  get input () {
     return this._input
   }
 }

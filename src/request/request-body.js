@@ -35,6 +35,10 @@ class ModbusRequestBody {
         let WriteSingleCoilResponse = require('./write-single-coil.js')
         return WriteSingleCoilResponse.fromBuffer(buffer)
       }
+      if (fc === 0x06) {
+        let WriteSingleRegisterResponse = require('./write-single-register.js')
+        return WriteSingleRegisterResponse.fromBuffer(buffer)
+      }
     } catch (e) {
       return null
     }

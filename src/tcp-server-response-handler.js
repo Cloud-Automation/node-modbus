@@ -49,7 +49,7 @@ class TCPResponseHandler {
     }
     /* read holding registers request */
     if (request.body.fc === 0x03) {
-      if (!this._server.holdingRegisters) {
+      if (!this._server.holding) {
         debug('no holding register buffer on server, trying readHoldingRegisters handler')
         this._server.emit('readHoldingRegisters', request, cb)
         return
@@ -65,7 +65,7 @@ class TCPResponseHandler {
     }
     /* read input registers request */
     if (request.body.fc === 0x04) {
-      if (!this._server.inputRegisters) {
+      if (!this._server.input) {
         debug('no input register buffer on server, trying readInputRegisters handler')
         this._server.emit('readInputRegisters', request, cb)
         return
@@ -105,6 +105,29 @@ class TCPResponseHandler {
       }
 
       this._server.coils.writeUInt8(newValue, Math.floor(address / 8))
+
+      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let payload = response.createPayload()
+      cb(payload)
+
+      return response
+    }
+    /* write single register request */
+    if (request.body.fc === 0x06) {
+      if (!this._server.holding) {
+        debug('no register buffer on server, trying writeSingleRegister handler')
+        this._server.emit('writeSingleRegister', request, cb)
+        return
+      }
+
+      let WriteSingleRegisterResponseBody = require('./response/write-single-register.js')
+      let responseBody = WriteSingleRegisterResponseBody.fromRequest(request.body)
+
+      this._server.emit('preWriteSingleRegister', responseBody.value, responseBody.address)
+
+      let mem = this._server.holding.writeUInt16BE(responseBody.value, responseBody.address)
+
+      this._server.emit('WriteSingleRegister', responseBody.value, responseBody.address)
 
       let response = ModbusTCPResponse.fromRequest(request, responseBody)
       let payload = response.createPayload()

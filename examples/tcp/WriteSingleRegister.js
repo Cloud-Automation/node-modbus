@@ -4,14 +4,13 @@ let modbus = require('../..')
 let net = require('net')
 let socket = new net.Socket()
 let options = {
-  'host': process.argv[2],
-  'port': process.argv[3]
+  'host': '127.0.0.1',
+  'port': '8502'
 }
 let client = new modbus.client.TCP(socket)
 
-// override logger function
 socket.on('connect', function () {
-  client.writeSingleRegister(process.argv[4], process.argv[5])
+  client.writeSingleRegister(2, 102)
     .then(function (resp) {
       console.log(resp)
       socket.end()
