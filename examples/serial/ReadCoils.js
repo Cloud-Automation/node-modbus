@@ -22,4 +22,3 @@ socket.on('open', function () {
 })
 
 socket.on('error', console.error)
-

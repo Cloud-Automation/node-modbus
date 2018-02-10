@@ -18,7 +18,7 @@ class WriteMultipleCoilsResponseBody extends ModbusResponseBody {
 
     return new WriteMultipleCoilsResponseBody(start, quantity)
   }
-
+  
   static fromBuffer (buffer) {
     let fc = buffer.readUInt8(0)
     let start = buffer.readUInt16BE(1)
@@ -58,7 +58,6 @@ class WriteMultipleCoilsResponseBody extends ModbusResponseBody {
 
     return payload
   }
-
 }
 
 module.exports = WriteMultipleCoilsResponseBody

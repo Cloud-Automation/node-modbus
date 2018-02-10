@@ -1,5 +1,4 @@
 class Response {
-
   static compose (head, body) {
     return new Response(head, body)
   }
@@ -20,7 +19,6 @@ class Response {
   get length () {
     return this._head.length + this._body.length
   }
-
 }
 
 module.exports = Response

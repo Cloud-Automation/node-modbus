@@ -7,7 +7,6 @@ let ModbusClientResponseHandler = require('./client-response-handler.js')
  * @class
  */
 class ModbusTCPClientResponseHandler extends ModbusClientResponseHandler {
-
   /** Create new Modbus/TCP Client Response Handler */
   constructor () {
     super()
@@ -39,7 +38,6 @@ class ModbusTCPClientResponseHandler extends ModbusClientResponseHandler {
       this._buffer = this._buffer.slice(response.byteCount)
     } while (1)
   }
-
 }
 
 module.exports = ModbusTCPClientResponseHandler

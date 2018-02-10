@@ -5,7 +5,6 @@ let ResponseFactory = require('./response/response-factory.js')
  * @class
  */
 class ModbusTCPResponse {
-
   /** Create Modbus/TCP Response from a Modbus/TCP Request including
    * the modbus function body.
    * @param {ModbusTCPRequest} request
@@ -115,7 +114,6 @@ class ModbusTCPResponse {
 
     return payload
   }
-
 }
 
 module.exports = ModbusTCPResponse

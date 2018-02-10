@@ -4,7 +4,6 @@
 
 let assert = require('assert')
 let WriteMultipleRegistersRequest = require('../src/request/write-multiple-registers.js')
-let WriteMultipleRegistersResponse = require('../src/response/write-multiple-registers.js')
 
 describe('WriteMultipleRegisters Tests.', function () {
   describe('WriteMultipleRegisters Response', function () {

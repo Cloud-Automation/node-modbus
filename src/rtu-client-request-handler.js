@@ -9,7 +9,6 @@ let CRC = require('crc')
  * @class
  */
 class ModbusRTUClientRequestHandler extends ModbusClientRequestHandler {
-
   /** Create a new ModbusRTUClientRequestHandler
    * @param {SerialSocket} socket Any serial Socket that implements the serialport interface
    * @param {address} address The serial address of the modbus slave
@@ -59,7 +58,6 @@ class ModbusRTUClientRequestHandler extends ModbusClientRequestHandler {
 
     super.handle(response)
   }
-
 }
 
 module.exports = ModbusRTUClientRequestHandler

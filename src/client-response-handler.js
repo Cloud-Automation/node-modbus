@@ -3,7 +3,6 @@
  * @abstract
  */
 class ModbusClientResponseHandler {
-
   /** Create new Modbus Client Response Hanlder */
   constructor () {
     if (new.target === ModbusClientResponseHandler) {
@@ -26,7 +25,6 @@ class ModbusClientResponseHandler {
   shift () {
     return this._messages.shift()
   }
-
 }
 
 module.exports = ModbusClientResponseHandler

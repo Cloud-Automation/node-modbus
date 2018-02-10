@@ -8,7 +8,6 @@ let debug = require('debug')('user-request')
  * @class
  */
 class UserRequest {
-
   constructor (request, timeout) {
     debug('creating new user request with timeout', timeout)
     this._request = request
@@ -60,7 +59,6 @@ class UserRequest {
   get reject () {
     return this._reject
   }
-
 }
 
 module.exports = UserRequest

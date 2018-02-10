@@ -69,4 +69,3 @@ describe('ReadDiscreteInputs Tests.', function () {
     })
   })
 })
-

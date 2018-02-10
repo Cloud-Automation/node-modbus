@@ -28,4 +28,3 @@ socket.on('data', function () {
 })
 
 socket.on('error', console.error)
-
