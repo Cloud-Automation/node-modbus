@@ -135,8 +135,47 @@ class TCPResponseHandler {
 
       return response
     }
-  }
+    /* write multiple coil request */
+    if (request.body.fc === 0x0f) {
+      if (!this._server.coils) {
+        debug('no coils buffer on server, trying writeMultipleCoils handler')
+        this._server.emit('writeMultipleCoils', request, cb)
+        return
+      }
 
+    let WriteMultipleCoilsResponseBody = require('./response/write-multiple-coils.js')
+    let bufferUtils = require('./buffer-utils.js')
+    let responseBody = WriteMultipleCoilsResponseBody.fromRequest(request.body)
+
+    //Shift ouputs over so they can be used to replace current coil values
+    let start_address = request.body.address
+    let end_address = start_address + request.body.quantity
+    let outputs = request.body.valuesAsBuffer
+    let buffer = bufferUtils.bufferShift(start_address, end_address, outputs)
+
+    //Ensure start byte is configured correctly
+    let start_byte = Math.floor(start_address / 8)
+    let first_byte = bufferUtils.firstByte(start_address, this._server.coils[start_byte], buffer[0])
+    buffer[0] = first_byte
+
+    //Ensure last byte is configured correctly
+    let final_byte = Math.floor(end_address / 8)
+    let last_byte = bufferUtils.lastByte(end_address, this._server.coils[final_byte], buffer[buffer.length - 1])
+    buffer[buffer.length - 1] = last_byte
+
+    this._server.emit('writeMultipleCoils', this._server.coils)
+    this._server.coils.fill(buffer, start_byte, final_byte + 1)
+    this._server.emit('postWriteMultipleCoils', this._server.coils)
+
+    debug('Write Multiple Coils responseBody', responseBody)
+
+    let response = ModbusTCPResponse.fromRequest(request, responseBody)
+    let payload = response.createPayload()
+    cb(payload)
+
+    return response
+    }
+  }
 }
 
 module.exports = TCPResponseHandler

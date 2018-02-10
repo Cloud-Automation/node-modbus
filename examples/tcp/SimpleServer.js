@@ -34,13 +34,24 @@ server.on('WriteSingleRegister', function (value, address) {
     console.log('New {register, value}: {', address, ',', server.holding.readUInt16BE(address), '}')
 })
 
+server.on('writeMultipleCoils', function (value) {
+    console.log('Write multiple coils - Existing: ', value)
+})
+
+server.on('postWriteMultipleCoils', function (value) {
+    console.log('Write multiple coils - Complete: ', value)
+})
+
 server.on('connection', function (client) {
 
   /* work with the modbus tcp client */
 
 })
 
-server.coils.writeUInt16BE(0x1234, 0)
+server.coils.writeUInt16BE(0x0000, 0)
+server.coils.writeUInt16BE(0x0000, 2)
+server.coils.writeUInt16BE(0x0000, 4)
+server.coils.writeUInt16BE(0x0000, 6)
 
 server.discrete.writeUInt16BE(0x5678, 0)
 
