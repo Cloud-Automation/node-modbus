@@ -5,7 +5,6 @@ let RequestHandler = require('./tcp-server-request-handler.js')
 let ResponseHandler = require('./tcp-server-response-handler.js')
 
 class ModbusTCPClient {
-
   constructor (server, socket) {
     this._server = server
     this._socket = socket
@@ -28,14 +27,13 @@ class ModbusTCPClient {
     debug('new data coming in')
     this._requestHandler.handle(data)
 
-    let request
-
     do {
-      request = this._requestHandler.shift()
+      let request = this._requestHandler.shift()
 
       if (!request) {
         debug('no request to process')
-        return
+        /* TODO: close client connection */
+        break
       }
 
       this._responseHandler.handle(request, function (response) {
@@ -45,7 +43,6 @@ class ModbusTCPClient {
       }.bind(this))
     } while (1)
   }
-
 }
 
 module.exports = ModbusTCPClient

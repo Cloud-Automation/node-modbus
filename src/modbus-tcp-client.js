@@ -24,7 +24,6 @@ let ModbusTCPClientResponseHandler = require('./tcp-client-response-handler.js')
  *
  */
 class ModbusTCPClient extends ModbusClient {
-
   /** Creates a new Modbus/TCP Client.
    * @param {net.Socket} socket The TCP Socket.
    * @param {Number} unitId Unit ID
@@ -46,7 +45,6 @@ class ModbusTCPClient extends ModbusClient {
     this._requestHandler = new ModbusTCPClientRequestHandler(this._socket, this._unitId, timeout)
     this._responseHandler = new ModbusTCPClientResponseHandler()
   }
-
 }
 
 module.exports = ModbusTCPClient

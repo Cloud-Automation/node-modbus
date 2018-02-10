@@ -4,7 +4,6 @@
 
 let assert = require('assert')
 let WriteSingleRegisterRequest = require('../src/request/write-single-register.js')
-let WriteSingleRegisterResponse = require('../src/response/write-single-register.js')
 
 describe('WriteSingleRegister Tests.', function () {
   describe('WriteSingleRegister Response', function () {

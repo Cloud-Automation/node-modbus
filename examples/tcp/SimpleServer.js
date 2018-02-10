@@ -3,11 +3,10 @@
 let net = require('net')
 let modbus = require('../..')
 let netServer = new net.Server()
-let server = new modbus.server.TCP(netServer, {
-  'coils': Buffer.alloc(1024),
-  'discrete': Buffer.alloc(1024),
-  'holding': Buffer.alloc(1024),
-  'input': Buffer.alloc(1024)
+let server = new modbus.server.TCP(netServer)
+
+server.on('connection', function (client) {
+  console.log('New Connection')
 })
 
 server.on('readCoils', function (request, response, send) {
@@ -26,12 +25,12 @@ server.on('readHoldingRegisters', function (request, response, send) {
 })
 
 server.on('preWriteSingleRegister', function (value, address) {
-    console.log('Write Single Register')
-    console.log('Original {register, value}: {', address, ',', server.holding.readUInt16BE(address), '}')
+  console.log('Write Single Register')
+  console.log('Original {register, value}: {', address, ',', server.holding.readUInt16BE(address), '}')
 })
 
 server.on('WriteSingleRegister', function (value, address) {
-    console.log('New {register, value}: {', address, ',', server.holding.readUInt16BE(address), '}')
+  console.log('New {register, value}: {', address, ',', server.holding.readUInt16BE(address), '}')
 })
 
 server.on('writeMultipleCoils', function (value) {

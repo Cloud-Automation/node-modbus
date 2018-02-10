@@ -3,7 +3,6 @@
  * @abstract
  */
 class ModbusResponseBody {
-
   static fromBuffer (buffer) {
     let ReadCoilsResponse = require('./read-coils.js')
 
@@ -46,7 +45,6 @@ class ModbusResponseBody {
   createPayload () {
     throw new Error('Not implemented yet.')
   }
-
 }
 
 module.exports = ModbusResponseBody

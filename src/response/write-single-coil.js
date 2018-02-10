@@ -5,19 +5,17 @@ let ModbusResponseBody = require('./response-body.js')
  * @class
  */
 class WriteSingleCoilResponseBody extends ModbusResponseBody {
-
   /** Create WriteSingleCoilResponseBody from Request
  * @param {WriteSingleCoilRequestBody} request
  * @param {Buffer} coil
  * @returns WriteSingleCoilResponseBody
  */
-static fromRequest (requestBody) {
+  static fromRequest (requestBody) {
+    let address = requestBody.address
+    let value = requestBody.value
 
-  let address = requestBody.address
-  let value = requestBody.value
-
-  return new WriteSingleCoilResponseBody(address, value)
-}
+    return new WriteSingleCoilResponseBody(address, value)
+  }
 
   /** Creates a WriteSingleResponseBody from a Buffer
    * @param {Buffer} buffer

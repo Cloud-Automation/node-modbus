@@ -99,4 +99,3 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
     assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
   })
 })
-

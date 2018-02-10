@@ -72,7 +72,6 @@ class ResponseFactory {
       return null
     }
   }
-
 }
 
 module.exports = ResponseFactory

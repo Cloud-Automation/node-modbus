@@ -4,7 +4,6 @@
 
 let assert = require('assert')
 let ReadInputRegistersRequest = require('../src/request/read-input-registers.js')
-let ReadInputRegistersResponse = require('../src/response/read-input-registers.js')
 
 describe('ReadInputRegisters Tests.', function () {
   describe('ReadInputRegisters Response', function () {
@@ -41,4 +40,3 @@ describe('ReadInputRegisters Tests.', function () {
     })
   })
 })
-

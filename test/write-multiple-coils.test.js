@@ -4,7 +4,6 @@
 
 let assert = require('assert')
 let WriteMultipleCoilsRequest = require('../src/request/write-multiple-coils.js')
-let WriteMultipleCoilsResponse = require('../src/response/write-multiple-coils.js')
 
 describe('WriteMultipleCoils Tests.', function () {
   describe('WriteMultipleCoils Response', function () {
@@ -47,4 +46,3 @@ describe('WriteMultipleCoils Tests.', function () {
     })
   })
 })
-

@@ -6,7 +6,6 @@ let ModbusResponseBody = require('./response-body.js')
  * @class
  */
 class ReadCoilsResponseBody extends ModbusResponseBody {
-
   /** Creates a response body from a request body and
    * the coils buffer
    * @param {ReadCoilsRequestBody} request
@@ -14,7 +13,6 @@ class ReadCoilsResponseBody extends ModbusResponseBody {
    * @returns {ReadCoilsResponseBody}
    */
   static fromRequest (requestBody, coils) {
-
     let startByte = Math.floor(requestBody.start / 8)
     let endByte = Math.ceil((requestBody.start + requestBody.count) / 8)
 
@@ -123,7 +121,6 @@ class ReadCoilsResponseBody extends ModbusResponseBody {
 
     return payload
   }
-
 }
 
 module.exports = ReadCoilsResponseBody

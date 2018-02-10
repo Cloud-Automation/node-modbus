@@ -2,7 +2,6 @@ let debug = require('debug')('rtu-response')
 let ResponseFactory = require('./response/response-factory.js')
 
 class ModbusRTUResponse {
-
   static fromBuffer (buffer) {
     if (buffer.length < 1) {
       return null
@@ -50,7 +49,6 @@ class ModbusRTUResponse {
   get byteCount () {
     return this._body.byteCount + 3
   }
-
 }
 
 module.exports = ModbusRTUResponse

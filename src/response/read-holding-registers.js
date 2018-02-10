@@ -5,14 +5,12 @@ let ModbusResponseBody = require('./response-body.js')
  * @class
  */
 class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
-
   /** Create ReadHoldingRegistersResponseBody from Request
    * @param {ReadHoldingRegistersRequestBody} request
    * @param {Buffer} holdingRegisters
    * @returns ReadHoldingRegistersResponseBody
    */
   static fromRequest (requestBody, holdingRegisters) {
-
     let startByte = requestBody.start
     let endByte = requestBody.start + (requestBody.count * 2)
 
@@ -88,7 +86,6 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
 
     return payload
   }
-
 }
 
 module.exports = ReadHoldingRegistersResponseBody

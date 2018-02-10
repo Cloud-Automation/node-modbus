@@ -4,10 +4,14 @@ let ModbusRequestBody = require('./request-body.js')
  * @extends ModbusRequestBody
  */
 class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
-
   static fromBuffer (buffer) {
     try {
       let fc = buffer.readUInt8(0)
+
+      if (fc !== 0x0F) {
+        return null
+      }
+
       let address = buffer.readUInt16BE(1)
       let quantity = buffer.readUInt16BE(3)
       let numberOfBytes = buffer.readUInt8(5)
@@ -121,6 +125,10 @@ class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
     return this._numberOfBytes
   }
 
+  get name () {
+    return 'WriteMultipleCoils'
+  }
+
   createPayload () {
     if (this._values instanceof Buffer) {
       let payload = Buffer.alloc(this._byteCount)
@@ -147,7 +155,6 @@ class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
       return payload
     }
   }
-
 }
 
 module.exports = WriteMultipleCoilsRequestBody

@@ -1,4 +1,4 @@
-let debug = require('debug')('read-discrete-inputs-response')
+// let debug = require('debug')('read-discrete-inputs-response')
 let ModbusResponseBody = require('./response-body.js')
 
 /** Read Discrete Inputs Response Body (Function Code 0x02)
@@ -6,27 +6,25 @@ let ModbusResponseBody = require('./response-body.js')
  * @class
  */
 class ReadDiscreteInputsResponseBody extends ModbusResponseBody {
+  /** Create ReadDiscreteInputsResponseBody from Request
+   * @param {ReadDiscreteInputsRequestBody} request
+   * @param {Buffer} discreteInputs
+   * @returns ReadDiscreteInputsResponseBody
+   */
+  static fromRequest (requestBody, discreteInputs) {
+    let startByte = Math.floor(requestBody.start / 8)
+    let endByte = Math.ceil((requestBody.start + requestBody.count) / 8)
 
-    /** Create ReadDiscreteInputsResponseBody from Request
-     * @param {ReadDiscreteInputsRequestBody} request
-     * @param {Buffer} discreteInputs
-     * @returns ReadDiscreteInputsResponseBody
-     */
-    static fromRequest (requestBody, discreteInputs) {
+    let bufferSegment = discreteInputs.slice(startByte, endByte)
+    let buf = Buffer.from(bufferSegment)
 
-      let startByte = Math.floor(requestBody.start / 8)
-      let endByte = Math.ceil((requestBody.start + requestBody.count) / 8)
+    let end = (requestBody.start + requestBody.count) / 8
+    let zeroShift = (endByte - end) * 8
 
-      let bufferSegment = discreteInputs.slice(startByte, endByte)
-      let buf = Buffer.from(bufferSegment)
+    buf[endByte - 1] = buf[endByte - 1] >>> zeroShift
 
-      let end = (requestBody.start + requestBody.count) / 8
-      let zeroShift = (endByte - end) * 8
-
-      buf[endByte - 1] = buf[endByte - 1] >>> zeroShift
-
-      return new ReadDiscreteInputsResponseBody(buf, buf.length)
-    }
+    return new ReadDiscreteInputsResponseBody(buf, buf.length)
+  }
 
   /** Create ReadDiscreteInputsResponseBody from Buffer
    * @param {Buffer} buffer
@@ -121,6 +119,5 @@ class ReadDiscreteInputsResponseBody extends ModbusResponseBody {
 
     return payload
   }
-
 }
 module.exports = ReadDiscreteInputsResponseBody

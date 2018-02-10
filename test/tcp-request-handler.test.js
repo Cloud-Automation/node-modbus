@@ -13,7 +13,7 @@ describe('TCP Modbus Request Tests', function () {
 
   beforeEach(function () {
     socket = new EventEmitter()
-    socket.write = function () { }
+    socket.write = function () {}
 
     socketMock = sinon.mock(socket)
   })
@@ -26,13 +26,17 @@ describe('TCP Modbus Request Tests', function () {
 
     socket.emit('connect')
 
-    socketMock.expects('write').once().withArgs(requestBuffer)
+    socketMock.expects('write').once().withArgs(requestBuffer).yields()
 
-      /* should flush the request right away */
+    /* should flush the request right away */
     let promise = handler.register(readCoilsRequest)
 
     assert.ok(promise instanceof Promise)
 
     socketMock.verify()
   })
+})
+
+process.on('unhandledRejection', function (err) {
+  console.error(err)
 })

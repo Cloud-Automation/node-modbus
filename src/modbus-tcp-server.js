@@ -5,11 +5,10 @@ let EventEmitter = require('events')
 let ModbusTCPClient = require('./tcp-server-client.js')
 
 class ModbusTCPServer extends EventEmitter {
-
   constructor (server, options) {
     super()
     this._server = server
-    this._options = options || { }
+    this._options = options || {}
 
     this._coils = this._options.coils || Buffer.alloc(1024)
     this._discrete = this._options.discrete || Buffer.alloc(1024)

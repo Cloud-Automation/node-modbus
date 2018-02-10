@@ -13,7 +13,6 @@ let WriteMultipleRegistersRequestBody = require('./request/write-multiple-regist
  * @abstract
  */
 class ModbusClient {
-
   /** Creates a new Modbus client object.
    * @param {Socket} socket A socket object
    * @throws {NoSocketException}
@@ -70,7 +69,7 @@ class ModbusClient {
     try {
       request = new ReadCoilsRequestBody(start, count)
     } catch (e) {
-      return Promise.reject({err: e.message})
+      return Promise.reject(e)
     }
 
     return this._requestHandler.register(request)
@@ -93,7 +92,7 @@ class ModbusClient {
     try {
       request = new ReadDiscreteInputsRequestBody(start, count)
     } catch (e) {
-      return Promise.reject({err: e.message})
+      return Promise.reject(e)
     }
 
     return this._requestHandler.register(request)
@@ -116,7 +115,7 @@ class ModbusClient {
     try {
       request = new ReadHoldingRegistersRequestBody(start, count)
     } catch (e) {
-      return Promise.reject({err: e.message})
+      return Promise.reject(e)
     }
 
     return this._requestHandler.register(request)
@@ -140,7 +139,7 @@ class ModbusClient {
     try {
       request = new ReadInputRegistersRequestBody(start, count)
     } catch (e) {
-      return Promise.reject({err: e.message})
+      return Promise.reject(e)
     }
 
     return this._requestHandler.register(request)
@@ -164,7 +163,7 @@ class ModbusClient {
     try {
       request = new WriteSingleCoilRequestBody(address, value)
     } catch (e) {
-      return Promise.reject({err: e.message})
+      return Promise.reject(e)
     }
 
     return this._requestHandler.register(request)
@@ -187,7 +186,7 @@ class ModbusClient {
     try {
       request = new WriteSingleRegisterRequestBody(address, value)
     } catch (e) {
-      return Promise.reject({err: e.message})
+      return Promise.reject(e)
     }
 
     return this._requestHandler.register(request)
@@ -219,7 +218,7 @@ class ModbusClient {
     try {
       request = new WriteMultipleCoilsRequestBody(start, values, quantity)
     } catch (e) {
-      return Promise.reject({err: e.message})
+      return Promise.reject(e)
     }
 
     return this._requestHandler.register(request)
@@ -249,12 +248,11 @@ class ModbusClient {
     try {
       request = new WriteMultipleRegistersRequestBody(start, values)
     } catch (e) {
-      return Promise.reject({err: e.message})
+      return Promise.reject(e)
     }
 
     return this._requestHandler.register(request)
   }
-
 }
 
 module.exports = ModbusClient

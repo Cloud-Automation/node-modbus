@@ -4,7 +4,6 @@
 
 let assert = require('assert')
 let WriteSingleCoilRequest = require('../src/request/write-single-coil.js')
-let WriteSingleCoilResponse = require('../src/response/write-single-coil.js')
 
 describe('WriteSingleCoil Tests.', function () {
   describe('WriteSingleCoil Response', function () {
@@ -42,4 +41,3 @@ describe('WriteSingleCoil Tests.', function () {
 
   })
 })
-

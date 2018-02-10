@@ -1,7 +1,6 @@
 let CRC = require('crc')
 
 class ModbusRTURequest {
-
   constructor (address, body) {
     this._address = address
     this._body = body
@@ -13,6 +12,10 @@ class ModbusRTURequest {
 
   get body () {
     return this._body
+  }
+
+  get name () {
+    return this._body.name
   }
 
   createPayload () {

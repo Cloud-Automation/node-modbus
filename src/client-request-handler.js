@@ -12,7 +12,6 @@ let ExceptionResponseBody = require('./response/exception.js')
  * @abstract
  */
 class ModbusClientRequestHandler {
-
   /** Create a new Request handler for Client requests
    * @param {net.Socket} socket A net.Socket object.
    * @param {Number} timeout The request timeout value in ms.
@@ -161,9 +160,9 @@ class ModbusClientRequestHandler {
 
     this._socket.write(payload, function (err, result) {
       debug('request fully flushed, ( error:', err, ')', result)
-    })
+      this._currentRequest.done()
+    }.bind(this))
   }
-
 }
 
 module.exports = ModbusClientRequestHandler

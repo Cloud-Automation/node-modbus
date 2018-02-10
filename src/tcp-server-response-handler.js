@@ -5,7 +5,6 @@ let ModbusTCPResponse = require('./tcp-response.js')
 let ReadCoilsResponseBody = require('./response/read-coils.js')
 
 class TCPResponseHandler {
-
   constructor (server) {
     this._server = server
     this._server.setMaxListeners(1)
@@ -16,6 +15,10 @@ class TCPResponseHandler {
   }
 
   handle (request, cb) {
+    if (!request) {
+      return null
+    }
+
     /* read coils request */
     if (request.body.fc === 0x01) {
       if (!this._server.coils) {
@@ -90,21 +93,43 @@ class TCPResponseHandler {
       let WriteSingleCoilResponseBody = require('./response/write-single-coil.js')
       let responseBody = WriteSingleCoilResponseBody.fromRequest(request.body)
 
-      let address = responseBody.address - 1
+      let address = request.body.address
+
+      debug('Writing value %d to address %d', request.body.value, address)
 
       // find the byte that contains the coil to be written
       let oldValue = this._server.coils.readUInt8(Math.floor(address / 8))
       let newValue
 
+      if (request.body.value !== 0xFF00 && request.body.value !== 0x0000) {
+        debug('illegal data value')
+        let ExceptionResponseBody = require('./response/exception.js')
+        /* illegal data value */
+        let responseBody = new ExceptionResponseBody(request.body.fc, 0x03)
+        let response = ModbusTCPResponse.fromRequest(request, responseBody)
+        cb(response.createPayload())
+        return response
+      }
+
       // write the correct bit
       // if the value is true, the bit is set using bitwise or
-      if (responseBody.value){
+      if (request.body.value === 0xFF00) {
         newValue = oldValue | Math.pow(2, address % 8)
       } else {
         newValue = oldValue & ~Math.pow(2, address % 8)
       }
 
-      this._server.coils.writeUInt8(newValue, Math.floor(address / 8))
+      if (responseBody.address / 8 > this._server.coils.length) {
+        debug('illegal data address')
+        let ExceptionResponseBody = require('./response/exception.js')
+        /* illegal data address */
+        let responseBody = new ExceptionResponseBody(request.body.fc, 0x02)
+        let response = ModbusTCPResponse.fromRequest(request, responseBody)
+        cb(response.createPayload())
+        return response
+      } else {
+        this._server.coils.writeUInt8(newValue, Math.floor(address / 8))
+      }
 
       let response = ModbusTCPResponse.fromRequest(request, responseBody)
       let payload = response.createPayload()
@@ -123,11 +148,17 @@ class TCPResponseHandler {
       let WriteSingleRegisterResponseBody = require('./response/write-single-register.js')
       let responseBody = WriteSingleRegisterResponseBody.fromRequest(request.body)
 
-      this._server.emit('preWriteSingleRegister', responseBody.value, responseBody.address)
-
-      let mem = this._server.holding.writeUInt16BE(responseBody.value, responseBody.address)
-
-      this._server.emit('WriteSingleRegister', responseBody.value, responseBody.address)
+      if (responseBody.address * 2 > this._server.holding.length) {
+        debug('illegal data address')
+        let ExceptionResponseBody = require('./response/exception.js')
+        /* illegal data address */
+        let responseBody = new ExceptionResponseBody(request.body.fc, 0x02)
+        let response = ModbusTCPResponse.fromRequest(request, responseBody)
+        cb(response.createPayload())
+        return response
+      } else {
+        this._server.holding.writeUInt16BE(responseBody.value, responseBody.address * 2)
+      }
 
       let response = ModbusTCPResponse.fromRequest(request, responseBody)
       let payload = response.createPayload()
@@ -135,6 +166,7 @@ class TCPResponseHandler {
 
       return response
     }
+
     /* write multiple coil request */
     if (request.body.fc === 0x0f) {
       if (!this._server.coils) {
@@ -143,37 +175,47 @@ class TCPResponseHandler {
         return
       }
 
-    let WriteMultipleCoilsResponseBody = require('./response/write-multiple-coils.js')
-    let bufferUtils = require('./buffer-utils.js')
-    let responseBody = WriteMultipleCoilsResponseBody.fromRequest(request.body)
+      let WriteMultipleCoilsResponseBody = require('./response/write-multiple-coils.js')
+      let bufferUtils = require('./buffer-utils.js')
+      let responseBody = WriteMultipleCoilsResponseBody.fromRequest(request.body)
 
-    //Shift ouputs over so they can be used to replace current coil values
-    let start_address = request.body.address
-    let end_address = start_address + request.body.quantity
-    let outputs = request.body.valuesAsBuffer
-    let buffer = bufferUtils.bufferShift(start_address, end_address, outputs)
+      //Shift ouputs over so they can be used to replace current coil values
+      let start_address = request.body.address
+      let end_address = start_address + request.body.quantity
+      let outputs = request.body.valuesAsBuffer
+      let buffer = bufferUtils.bufferShift(start_address, end_address, outputs)
 
-    //Ensure start byte is configured correctly
-    let start_byte = Math.floor(start_address / 8)
-    let first_byte = bufferUtils.firstByte(start_address, this._server.coils[start_byte], buffer[0])
-    buffer[0] = first_byte
+      //Ensure start byte is configured correctly
+      let start_byte = Math.floor(start_address / 8)
+      let first_byte = bufferUtils.firstByte(start_address, this._server.coils[start_byte], buffer[0])
+      buffer[0] = first_byte
 
-    //Ensure last byte is configured correctly
-    let final_byte = Math.floor(end_address / 8)
-    let last_byte = bufferUtils.lastByte(end_address, this._server.coils[final_byte], buffer[buffer.length - 1])
-    buffer[buffer.length - 1] = last_byte
+      //Ensure last byte is configured correctly
+      let final_byte = Math.floor(end_address / 8)
+      let last_byte = bufferUtils.lastByte(end_address, this._server.coils[final_byte], buffer[buffer.length - 1])
+      buffer[buffer.length - 1] = last_byte
 
-    this._server.emit('writeMultipleCoils', this._server.coils)
-    this._server.coils.fill(buffer, start_byte, final_byte + 1)
-    this._server.emit('postWriteMultipleCoils', this._server.coils)
+      this._server.emit('writeMultipleCoils', this._server.coils)
+      this._server.coils.fill(buffer, start_byte, final_byte + 1)
+      this._server.emit('postWriteMultipleCoils', this._server.coils)
 
-    debug('Write Multiple Coils responseBody', responseBody)
+      debug('Write Multiple Coils responseBody', responseBody)
 
-    let response = ModbusTCPResponse.fromRequest(request, responseBody)
-    let payload = response.createPayload()
-    cb(payload)
+      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let payload = response.createPayload()
+      cb(payload)
 
-    return response
+      return response
+    }
+
+    if (request.body.fc > 0x80) {
+      /* exception request */
+
+      let ExceptionResponseBody = require('./response/exception.js')
+      let responseBody = ExceptionResponseBody.fromRequest(request.body)
+      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      cb(response.createPayload())
+      return response
     }
   }
 }
