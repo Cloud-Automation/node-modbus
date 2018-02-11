@@ -46,6 +46,10 @@ class ModbusRequestBody {
         let WriteMultipleCoilsResponse = require('./write-multiple-coils.js')
         return WriteMultipleCoilsResponse.fromBuffer(buffer)
       }
+      if (fc === 0x10) {
+        let WriteMultipleRegistersResponse = require('./write-multiple-registers.js')
+        return WriteMultipleRegistersResponse.fromBuffer(buffer)
+      }
 
       if (fc <= 0x2B) {
         debug('Illegal Function (fc %d)', fc)
