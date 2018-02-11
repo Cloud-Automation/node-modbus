@@ -208,6 +208,40 @@ class TCPResponseHandler {
       return response
     }
 
+    /* write multiple registers request */
+    if (request.body.fc === 0x10) {
+      if (!this._server.holding) {
+        debug('no register buffer on server, trying writeMultipleRegisters handler')
+        this._server.emit('writeMultipleRegisters', request, cb)
+        return
+      }
+
+      let WriteMultipleRegistersResponseBody = require('./response/write-multiple-registers.js')
+      let responseBody = WriteMultipleRegistersResponseBody.fromRequest(request.body)
+
+      if (responseBody.address * 2 > this._server.holding.length) {
+        debug('illegal data address')
+        let ExceptionResponseBody = require('./response/exception.js')
+        /* illegal data address */
+        let responseBody = new ExceptionResponseBody(request.body.fc, 0x10)
+        let response = ModbusTCPResponse.fromRequest(request, responseBody)
+        cb(response.createPayload())
+        return response
+      } else {
+        this._server.emit('writeMultipleRegisters', this._server.holding)
+        this._server.holding.fill(request.body.values,
+                                request.body.address * 2, 
+                                request.body.address * 2 + request.body.values.length + 1)
+        this._server.emit('postWriteMultipleRegisters', this._server.holding)
+      }
+
+      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let payload = response.createPayload()
+      cb(payload)
+
+      return response
+    }
+
     if (request.body.fc > 0x80) {
       /* exception request */
 

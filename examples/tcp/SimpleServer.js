@@ -41,6 +41,14 @@ server.on('postWriteMultipleCoils', function (value) {
     console.log('Write multiple coils - Complete: ', value)
 })
 
+server.on('writeMultipleRegisters', function (value) {
+    console.log('Write multiple registers - Existing: ', value)
+})
+
+server.on('postWriteMultipleRegisters', function (value) {
+    console.log('Write multiple registers - Complete: ', value)
+})
+
 server.on('connection', function (client) {
 
   /* work with the modbus tcp client */

@@ -10,6 +10,7 @@ let ReadInputRegistersResponseBody = require('../src/response/read-input-registe
 let WriteSingleCoilResponseBody = require('../src/response/write-single-coil.js')
 let WriteSingleRegisterResponseBody = require('../src/response/write-single-register.js')
 let WriteMultipleCoilsResponseBody = require('../src/response/write-multiple-coils.js')
+let WriteMultipleRegistersResponseBody = require('../src/response/write-multiple-registers.js')
 let ModbusTCPResponse = require('../src/tcp-response.js')
 let ModbusTCPRequest = require('../src/tcp-request.js')
 
@@ -231,6 +232,36 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x0f,       // function code
       0x00, 0x02, // output address
       0x00, 0x10  // quantity of outputs
+    ])
+    assert(payload.equals(responseBuffer))
+  })
+
+  it('should handle a valid write multiple registers request', function () {
+    let requestBuffer = Buffer.from([
+      0x00, 0x01, // transaction id
+      0x00, 0x00, // protocol
+      0x00, 0x0b, // byte count
+      0x01,       // unit id
+      0x10,       // function code
+      0x00, 0x01, // starting address
+      0x00, 0x02, // quantity of outputs
+      0x04,       // byte count
+      0x00, 0x0a, // outputs value
+      0x01, 0x02  // outputs value
+    ])
+
+    let request = ModbusTCPRequest.fromBuffer(requestBuffer)
+    let responseBody = WriteMultipleRegistersResponseBody.fromRequest(request.body)
+    let response = ModbusTCPResponse.fromRequest(request, responseBody)
+    let payload = response.createPayload()
+    let responseBuffer = Buffer.from([
+      0x00, 0x01, // transaction id
+      0x00, 0x00, // protocol
+      0x00, 0x06, // byte count
+      0x01,       // unit id
+      0x10,       // function code
+      0x00, 0x01, // output address
+      0x00, 0x02  // quantity of outputs
     ])
     assert(payload.equals(responseBuffer))
   })
