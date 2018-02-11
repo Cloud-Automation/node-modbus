@@ -4,23 +4,15 @@ let modbus = require('../..')
 let net = require('net')
 let socket = new net.Socket()
 let options = {
-  'host': process.argv[2],
-  'port': process.argv[3]
+  'host': '127.0.0.1',
+  'port': '8502'
 }
 let client = new modbus.client.TCP(socket)
 
-// override logger function
 socket.on('connect', function () {
-  var values = []
+  var values = Buffer.from([0xff])
 
-  process.argv.forEach(function (v, i) {
-    if (i <= 3) {
-      return
-    }
-    values.push(parseInt(v))
-  })
-
-  client.writeMultipleCoils(0, values)
+  client.writeMultipleCoils(13, values, 8)
     .then(function (resp) {
       console.log(resp)
       socket.end()

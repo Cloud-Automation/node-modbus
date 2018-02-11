@@ -5,6 +5,20 @@ let ModbusResponseBody = require('./response-body.js')
  * @class
  */
 class WriteMultipleCoilsResponseBody extends ModbusResponseBody {
+
+  /** Create WriteMultipleCoilsResponseBody from Request
+  * @param {WriteMultipleCoilsRequestBody} request
+  * @param {Buffer} coil
+  * @returns WriteMultipleCoilsResponseBody
+  */
+  static fromRequest (requestBody) {
+
+    let start = requestBody.address
+    let quantity = requestBody.quantity
+
+    return new WriteMultipleCoilsResponseBody(start, quantity)
+  }
+  
   static fromBuffer (buffer) {
     let fc = buffer.readUInt8(0)
     let start = buffer.readUInt16BE(1)
