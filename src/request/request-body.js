@@ -42,15 +42,15 @@ class ModbusRequestBody {
         let WriteSingleRegisterRequest = require('./write-single-register.js')
         return WriteSingleRegisterRequest.fromBuffer(buffer)
       }
+      if (fc === 0x0f) {
+        let WriteMultipleCoilsResponse = require('./write-multiple-coils.js')
+        return WriteMultipleCoilsResponse.fromBuffer(buffer)
+      }
 
       if (fc <= 0x2B) {
         debug('Illegal Function (fc %d)', fc)
         let ExceptionRequest = require('./exception.js')
         return new ExceptionRequest(fc, 0x01)
-      }
-      if (fc === 0x0f) {
-        let WriteMultipleCoilsResponse = require('./write-multiple-coils.js')
-        return WriteMultipleCoilsResponse.fromBuffer(buffer)
       }
 
     } catch (e) {
