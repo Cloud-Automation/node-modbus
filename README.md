@@ -38,7 +38,7 @@ TCP Client Example
 // create a tcp modbus client
 let Modbus = require('jsmodbus')
 let net = require('net')
-let socket = new new.Socket()
+let socket = new net.Socket()
 let client = new Modbus.client.TCP(socket, unitId)
 let options = {
   'host' : host
