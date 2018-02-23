@@ -46,13 +46,10 @@ class ModbusClient {
         return
       }
       
-      /* unitId mis-match */
+      /* process the response in the request handler if unitId matches*/
       if (this._unitId != response.unitId) {
-        return
+        this._requestHandler.handle(response)
       }
-
-      /* process the response in the request handler */
-      this._requestHandler.handle(response)
     } while (1)
   }
 
