@@ -1,5 +1,6 @@
 let debug = require('debug')('read-coils-response')
 let ModbusResponseBody = require('./response-body.js')
+const { bufferToArrayStatus, arrayStatusToBuffer } = require('../buffer-utils.js')
 
 /** Read Coils Response Body
  * @extends ModbusResponseBody
@@ -13,18 +14,15 @@ class ReadCoilsResponseBody extends ModbusResponseBody {
    * @returns {ReadCoilsResponseBody}
    */
   static fromRequest (requestBody, coils) {
-    let startByte = Math.floor(requestBody.start / 8)
-    let endByte = Math.ceil((requestBody.start + requestBody.count) / 8)
+    let coilsStatus = bufferToArrayStatus(coils)
 
-    let bufferSegment = coils.slice(startByte, endByte)
-    let buf = Buffer.from(bufferSegment)
+    let start = requestBody.start
+    let end = start + requestBody.count
 
-    let end = (requestBody.start + requestBody.count) / 8
-    let zeroShift = (endByte - end) * 8
+    // Extract the segment of coils status
+    let coilsSegment = coilsStatus.slice(start, end)
 
-    buf[endByte - 1] = buf[endByte - 1] >>> zeroShift
-
-    return new ReadCoilsResponseBody(buf, buf.length)
+    return new ReadCoilsResponseBody(coilsSegment, Math.ceil(coilsSegment.length/8))
   }
 
   /** Create ReadCoilsResponseBody from buffer.
@@ -63,29 +61,12 @@ class ReadCoilsResponseBody extends ModbusResponseBody {
 
     if (coils instanceof Array) {
       this._valuesAsArray = coils
-      this._valuesAsBuffer = Buffer.alloc(numberOfBytes)
-      for (let i = 0; i < coils.length; i += 1) {
-        let byteOffset = Math.floor(i / 8)
-        let bitOffset = i % 8
-        let byte = this._valuesAsBuffer.readUInt8(byteOffset)
-
-        byte += coils[i] ? Math.pow(2, bitOffset) : 0
-
-        this._valuesAsBuffer.writeUInt8(byte, byteOffset)
-      }
+      this._valuesAsBuffer = arrayStatusToBuffer(coils)
     }
 
     if (coils instanceof Buffer) {
       this._valuesAsBuffer = coils
-      this._valuesAsArray = []
-      for (let i = 0; i < coils.length * 8; i += 1) {
-        let byteOffset = Math.floor(i / 8)
-        let bitOffset = i % 8
-        let mask = Math.pow(2, bitOffset)
-        let byte = this._valuesAsBuffer.readUInt8(byteOffset)
-        let value = ((byte & mask) > 0) ? 1 : 0
-        this._valuesAsArray.push(value)
-      }
+      this._valuesAsArray = bufferToArrayStatus(coils)
     }
   }
 
