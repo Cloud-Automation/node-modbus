@@ -3,6 +3,67 @@
 let assert = require('assert')
 let bufferUtils = require('../src/buffer-utils.js')
 
+describe('Buffer and status conversions.', function () {
+
+    it('should convert 10 coils status to buffer 2 bytes', function () {
+      let input = [0,0,0,0, 1,0,1,0, 1,0]
+      let expected = Buffer.from([0x50, 0x01])
+      let result = bufferUtils.arrayStatusToBuffer(input)
+
+      assert.deepEqual(expected, result)
+    })
+
+    it('should convert a buffer with hex to coils/discrete array status', function () {
+      let input  = Buffer.from([0x50, 0x01])
+      let expected  = [0,0,0,0, 1,0,1,0, 1,0,0,0, 0,0,0,0]
+      let result = bufferUtils.bufferToArrayStatus(input)
+
+      assert.deepEqual(expected, result)
+    })
+
+    it('should convert a buffer with bin to coils/discrete array status', function () {
+      let input  = Buffer.from([0b01010000, 0b00000001])
+      let expected  = [0,0,0,0, 1,0,1,0, 1,0,0,0, 0,0,0,0]
+      let result = bufferUtils.bufferToArrayStatus(input)
+
+      assert.deepEqual(expected, result)
+    })
+
+    it('should return empty array if buffer is not instance of Buffer', function () {
+      let expected = []
+
+      let input = 0b0101000000000001
+      let result = bufferUtils.bufferToArrayStatus(input)
+      assert.deepEqual(expected, result)
+
+      input  = [0b01010000, 0b00000001]
+      result = bufferUtils.bufferToArrayStatus(input)
+      assert.deepEqual(expected, result)
+
+      input  = null
+      result = bufferUtils.bufferToArrayStatus(input)
+      assert.deepEqual(expected, result)
+    })
+
+    it('should return empty buffer if coils is not instance of Array', function () {
+      let expected = Buffer.alloc(0)
+
+      let input = 0b0101000000000001
+      let result = bufferUtils.arrayStatusToBuffer(input)
+      assert.deepEqual(expected, result)
+
+      input  = null
+      result = bufferUtils.arrayStatusToBuffer(input)
+      assert.deepEqual(expected, result)
+
+      input  = Buffer.from([0b01010000, 0b00000001])
+      result = bufferUtils.arrayStatusToBuffer(input)
+      assert.deepEqual(expected, result)
+    })
+})
+
+
+
 describe('Buffer manipulation tests', function () {
 
   /* we are using the read coils function to test the modbus/tcp specifics */
