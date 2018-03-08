@@ -5,7 +5,7 @@ let TCPRequest = require('../src/tcp-request.js')
 
 describe('TCP Request Tests', function () {
 
-  it('should return a valid TCPRequest object for function 0x0F', function () {
+  it('should return a valid TCPRequest object for function 15', function () {
       let requestBuffer = Buffer.from([
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
@@ -14,7 +14,7 @@ describe('TCP Request Tests', function () {
         0x0F,       // function code
         0x00, 0x00, // address
         0x00, 0x08, // quantity
-        0x01,       // byte count
+        0x02,       // byte count
         0x55, 0x55, // values
       ])
 

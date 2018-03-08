@@ -7,12 +7,15 @@ let EventEmitter = require('events')
 
 
 describe('TCP Server Tests.', function () {
-  let socket
+  let socket, server
 
   beforeEach(function () {
     socket = new EventEmitter()
-
     socket.write = function (response) { }
+
+    server = new Modbus.server.TCP(socket, {
+        coils: Buffer.from([0x55, 0x55, 0x55])
+    })
   })
 
   describe('Write Single Coil Tests.', function () {
@@ -62,10 +65,6 @@ describe('TCP Server Tests.', function () {
 
   describe('Write Multiple Coils Tests.', function () {
     it('should correctly write <0F> in the server buffer coils at address 0', function (done) {
-      let server = new Modbus.server.TCP(socket, {
-          coils: Buffer.from([0x55, 0x55, 0x55])
-      })
-
       let request = Buffer.from([
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
@@ -85,10 +84,6 @@ describe('TCP Server Tests.', function () {
       done()
     })
     it('should correctly write <0F> in the server buffer coils at address 6', function (done) {
-      let server = new Modbus.server.TCP(socket, {
-          coils: Buffer.from([0x55, 0x55, 0x55])
-      })
-
       let request = Buffer.from([
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
@@ -104,14 +99,10 @@ describe('TCP Server Tests.', function () {
       socket.emit('connection', socket)
       socket.emit('data', request)
 
-      assert.deepEqual(Buffer.from([0xD5, 0x55, 0x55]), server.coils)
+      assert.deepEqual(Buffer.from([0xD5, 0x57, 0x55]), server.coils)
       done()
     })
     it('should correctly write <0F> in the server buffer coils at address 8', function (done) {
-      let server = new Modbus.server.TCP(socket, {
-          coils: Buffer.from([0x55, 0x55, 0x55])
-      })
-
       let request = Buffer.from([
         0x00, 0x01, // transaction id
         0x00, 0x00, // protocol
