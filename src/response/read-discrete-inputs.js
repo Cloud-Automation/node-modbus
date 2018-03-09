@@ -1,5 +1,6 @@
-// let debug = require('debug')('read-discrete-inputs-response')
+let debug = require('debug')('read-discrete-inputs-response')
 let ModbusResponseBody = require('./response-body.js')
+const { bufferToArrayStatus, arrayStatusToBuffer } = require('../buffer-utils.js')
 
 /** Read Discrete Inputs Response Body (Function Code 0x02)
  * @extends ModbusResponseBody
@@ -12,18 +13,15 @@ class ReadDiscreteInputsResponseBody extends ModbusResponseBody {
    * @returns ReadDiscreteInputsResponseBody
    */
   static fromRequest (requestBody, discreteInputs) {
-    let startByte = Math.floor(requestBody.start / 8)
-    let endByte = Math.ceil((requestBody.start + requestBody.count) / 8)
+    let discreteStatus = bufferToArrayStatus(discreteInputs)
 
-    let bufferSegment = discreteInputs.slice(startByte, endByte)
-    let buf = Buffer.from(bufferSegment)
+    let start = requestBody.start
+    let end = start + requestBody.count
 
-    let end = (requestBody.start + requestBody.count) / 8
-    let zeroShift = (endByte - end) * 8
+    // Extract the segment of coils status
+    let segmentStatus = discreteStatus.slice(start, end)
 
-    buf[endByte - 1] = buf[endByte - 1] >>> zeroShift
-
-    return new ReadDiscreteInputsResponseBody(buf, buf.length)
+    return new ReadDiscreteInputsResponseBody(segmentStatus, Math.ceil(segmentStatus.length/8))
   }
 
   /** Create ReadDiscreteInputsResponseBody from Buffer
@@ -51,45 +49,28 @@ class ReadDiscreteInputsResponseBody extends ModbusResponseBody {
   }
 
   /** Creates a ReadDiscreteInputsResponseBody
-   * @param {Array} coils Array with Boolean values
+   * @param {Array} discrete Array with Boolean values
    * @param {Number} length Quantity of Coils
    */
-  constructor (coils, numberOfBytes) {
+  constructor (discrete, numberOfBytes) {
     super(0x02)
-    this._coils = coils
+    this._discrete = discrete
     this._numberOfBytes = numberOfBytes
 
-    if (coils instanceof Array) {
-      this._valuesAsArray = coils
-      this._valuesAsBuffer = Buffer.alloc(numberOfBytes)
-      for (let i = 0; i < coils.length; i += 1) {
-        let byteOffset = Math.floor(i / 8)
-        let bitOffset = i % 8
-        let byte = this._valuesAsBuffer.readUInt8(byteOffset)
-
-        byte += coils[i] ? Math.pow(2, bitOffset) : 0
-
-        this._valuesAsBuffer.writeUInt8(byte, byteOffset)
-      }
+    if (discrete instanceof Array) {
+      this._valuesAsArray = discrete
+      this._valuesAsBuffer = arrayStatusToBuffer(discrete)
     }
 
-    if (coils instanceof Buffer) {
-      this._valuesAsBuffer = coils
-      this._valuesAsArray = []
-      for (let i = 0; i < coils.length * 8; i += 1) {
-        let byteOffset = Math.floor(i / 8)
-        let bitOffset = i % 8
-        let mask = Math.pow(2, bitOffset)
-        let byte = this._valuesAsBuffer.readUInt8(byteOffset)
-        let value = ((byte & mask) > 0) ? 1 : 0
-        this._valuesAsArray.push(value)
-      }
+    if (discrete instanceof Buffer) {
+      this._valuesAsBuffer = discrete
+      this._valuesAsArray = bufferToArrayStatus(discrete)
     }
   }
 
   /** Coils */
-  get coils () {
-    return this._coils
+  get discrete () {
+    return this._discrete
   }
 
   get valuesAsArray () {
