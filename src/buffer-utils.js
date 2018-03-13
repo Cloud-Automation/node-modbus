@@ -95,30 +95,37 @@ class BufferUtils {
     static bufferToArrayStatus(buffer) {
         let statusArray = []
         let pos, curByteIdx, curByte
-        if (buffer instanceof Buffer) {
-            for (let i = 0; i < buffer.length * 8; i += 1) {
-                pos = i % 8
-                curByteIdx = Math.floor(i / 8)
-                curByte = buffer.readUInt8(curByteIdx)
-                statusArray.push(((curByte & Math.pow(2, pos)) > 0) + 0)
-            }
+        if (!(buffer instanceof Buffer)) {
+            return statusArray
         }
+        
+        for (let i = 0; i < buffer.length * 8; i += 1) {
+            pos = i % 8
+            curByteIdx = Math.floor(i / 8)
+            curByte = buffer.readUInt8(curByteIdx)
+            statusArray.push(((curByte & Math.pow(2, pos)) > 0) + 0)
+        }
+        
         return statusArray
     }
 
     static arrayStatusToBuffer(array) {
         let byteCount = array instanceof Array ? Math.ceil(array.length / 8) : 0
         let buffer = Buffer.alloc(byteCount)
-        if (array instanceof Array) {
-            let byteOffset, bitOffset, byte
-            for (let i = 0; i < array.length; i += 1) {
-                byteOffset = Math.floor(i / 8)
-                bitOffset = i % 8
-                byte = buffer.readUInt8(byteOffset)
-                byte += array[i] ? Math.pow(2, bitOffset) : 0
-                buffer.writeUInt8(byte, byteOffset)
-            }
+        
+        if (!(array instanceof Array)) {
+            return buffer
         }
+        
+        let byteOffset, bitOffset, byte
+        for (let i = 0; i < array.length; i += 1) {
+            byteOffset = Math.floor(i / 8)
+            bitOffset = i % 8
+            byte = buffer.readUInt8(byteOffset)
+            byte += array[i] ? Math.pow(2, bitOffset) : 0
+            buffer.writeUInt8(byte, byteOffset)
+        }
+        
         return buffer
     }
 }
