@@ -214,4 +214,110 @@ describe('TCP Server Tests.', function () {
       socket.emit('data', request)
     })
   })
+
+  describe('Write Multiple Registers Tests.', function () {
+    it('should write <D903> in the server buffer at address 0', function (done) {
+      const request = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x09, // byte count
+        0x02, // unit id
+        0x10, // function code
+        0x00, 0x00, // address
+        0x00, 0x01, // quantity
+        0x02, // byte count
+        0xD9, 0x03, // values
+      ])
+      const expectedResponse = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x06, // byte count
+        0x02, // unit id
+        0x10, // function code
+        0x00, 0x00, // address
+        0x00, 0x01, // quantity
+      ])
+      const expectedHolding = Buffer.alloc(12, 0x00)
+      expectedHolding.writeUInt16BE(0xD903, 0)
+
+      socket.write = (response) => {
+        assert.deepEqual(expectedResponse, response)
+        assert.deepEqual(expectedHolding, server.holding)
+        done()
+      }
+
+      socket.emit('connection', socket)
+      socket.emit('data', request)
+    })
+    it('should write <D903 D903> in the server buffer at address 0', function (done) {
+      const request = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x0B, // byte count
+        0x02, // unit id
+        0x10, // function code
+        0x00, 0x00, // address
+        0x00, 0x02, // quantity
+        0x04, // byte count
+        0xD9, 0x03, // values
+        0xD9, 0x03, // values
+      ])
+      const expectedResponse = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x06, // byte count
+        0x02, // unit id
+        0x10, // function code
+        0x00, 0x00, // address
+        0x00, 0x02, // quantity
+      ])
+      const expectedHolding = Buffer.alloc(12, 0x00)
+      expectedHolding.writeUInt16BE(0xD903, 0)
+      expectedHolding.writeUInt16BE(0xD903, 2)
+
+      socket.write = (response) => {
+        assert.deepEqual(expectedResponse, response)
+        assert.deepEqual(expectedHolding, server.holding)
+        done()
+      }
+
+      socket.emit('connection', socket)
+      socket.emit('data', request)
+    })
+    it('should write <D903 D903> in the server buffer at address 4', function (done) {
+      const request = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x0B, // byte count
+        0x02, // unit id
+        0x10, // function code
+        0x00, 0x04, // address
+        0x00, 0x02, // quantity
+        0x04, // byte count
+        0xD9, 0x03, // values
+        0xD9, 0x03, // values
+      ])
+      const expectedResponse = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x06, // byte count
+        0x02, // unit id
+        0x10, // function code
+        0x00, 0x04, // address
+        0x00, 0x02, // quantity
+      ])
+      const expectedHolding = Buffer.alloc(12, 0x00)
+      expectedHolding.writeUInt16BE(0xD903, 8)
+      expectedHolding.writeUInt16BE(0xD903, 10)
+
+      socket.write = (response) => {
+        assert.deepEqual(expectedResponse, response)
+        assert.deepEqual(expectedHolding, server.holding)
+        done()
+      }
+
+      socket.emit('connection', socket)
+      socket.emit('data', request)
+    })
+  })
 })

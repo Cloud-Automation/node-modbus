@@ -20,7 +20,8 @@
     "standard": "^8.5.0"
   },
   "scripts": {
-    "test": "standard ./src ./test && mocha test/*.test.js"
+    "test": "standard ./src ./test && mocha test/*.test.js",
+    "watch": "standard ./src ./test && mocha --watch test/*.test.js"
   },
   "license": "MIT",
   "keywords": [
