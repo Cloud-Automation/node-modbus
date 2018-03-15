@@ -226,7 +226,7 @@ describe('TCP Server Tests.', function () {
         0x00, 0x00, // address
         0x00, 0x01, // quantity
         0x02, // byte count
-        0xD9, 0x03, // values
+        0xD9, 0x03 // values
       ])
       const expectedResponse = Buffer.from([
         0x00, 0x01, // transaction id
@@ -235,7 +235,7 @@ describe('TCP Server Tests.', function () {
         0x02, // unit id
         0x10, // function code
         0x00, 0x00, // address
-        0x00, 0x01, // quantity
+        0x00, 0x01 // quantity
       ])
       const expectedHolding = Buffer.alloc(12, 0x00)
       expectedHolding.writeUInt16BE(0xD903, 0)
@@ -260,7 +260,7 @@ describe('TCP Server Tests.', function () {
         0x00, 0x02, // quantity
         0x04, // byte count
         0xD9, 0x03, // values
-        0xD9, 0x03, // values
+        0xD9, 0x03 // values
       ])
       const expectedResponse = Buffer.from([
         0x00, 0x01, // transaction id
@@ -269,7 +269,7 @@ describe('TCP Server Tests.', function () {
         0x02, // unit id
         0x10, // function code
         0x00, 0x00, // address
-        0x00, 0x02, // quantity
+        0x00, 0x02 // quantity
       ])
       const expectedHolding = Buffer.alloc(12, 0x00)
       expectedHolding.writeUInt16BE(0xD903, 0)
@@ -295,7 +295,7 @@ describe('TCP Server Tests.', function () {
         0x00, 0x02, // quantity
         0x04, // byte count
         0xD9, 0x03, // values
-        0xD9, 0x03, // values
+        0xD9, 0x03 // values
       ])
       const expectedResponse = Buffer.from([
         0x00, 0x01, // transaction id
@@ -304,7 +304,7 @@ describe('TCP Server Tests.', function () {
         0x02, // unit id
         0x10, // function code
         0x00, 0x04, // address
-        0x00, 0x02, // quantity
+        0x00, 0x02 // quantity
       ])
       const expectedHolding = Buffer.alloc(12, 0x00)
       expectedHolding.writeUInt16BE(0xD903, 8)
