@@ -221,7 +221,7 @@ class TCPResponseHandler {
         this._server.emit('writeMultipleRegisters', this._server.holding)
         this._server.holding.fill(request.body.values,
                                 request.body.address * 2,
-                                request.body.address * 2 + request.body.values.length + 1)
+                                request.body.address * 2 + request.body.values.length)
         this._server.emit('postWriteMultipleRegisters', this._server.holding)
       }
 
