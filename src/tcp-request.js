@@ -63,7 +63,7 @@ class ModbusTCPRequest {
 
   /** The body length in bytes including the unit ID */
   get length () {
-    return this.length
+    return this._length
   }
 
   /** The unit ID */
