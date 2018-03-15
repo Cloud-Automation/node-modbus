@@ -56,7 +56,6 @@ class ModbusRequestBody {
         let ExceptionRequest = require('./exception.js')
         return new ExceptionRequest(fc, 0x01)
       }
-
     } catch (e) {
       debug('Exception while reading function code', e)
       return null

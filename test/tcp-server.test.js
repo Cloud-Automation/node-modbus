@@ -1,10 +1,9 @@
+/* global describe, it, beforeEach */
 'use strict'
 
 let assert = require('assert')
 let Modbus = require('../')
-let sinon = require('sinon')
 let EventEmitter = require('events')
-
 
 describe('TCP Server Tests.', function () {
   let socket, server
@@ -84,7 +83,7 @@ describe('TCP Server Tests.', function () {
         0x02, // unit id
         0x0F, // function code
         0x00, 0x00, // address
-        0x00, 0x04, // quantity
+        0x00, 0x04 // quantity
       ])
       const expectedCoils = Buffer.from([0x5F, 0x55, 0x55])
 
@@ -116,7 +115,7 @@ describe('TCP Server Tests.', function () {
         0x02, // unit id
         0x0F, // function code
         0x00, 0x00, // address
-        0x00, 0x08, // quantity
+        0x00, 0x08 // quantity
       ])
       const expectedCoils = Buffer.from([0xFF, 0x55, 0x55])
 
@@ -140,15 +139,6 @@ describe('TCP Server Tests.', function () {
         0x00, 0x09, // quantity
         0x02, // byte count
         0xFF, 0x01 // values
-      ])
-      const expectedResponse = Buffer.from([
-        0x00, 0x01, // transaction id
-        0x00, 0x00, // protocol
-        0x00, 0x06, // byte count
-        0x02, // unit id
-        0x0F, // function code
-        0x00, 0x00, // address
-        0x00, 0x09, // quantity
       ])
       const expectedCoils = Buffer.from([0xFF, 0x55, 0x55])
 
@@ -178,7 +168,7 @@ describe('TCP Server Tests.', function () {
         0x02, // unit id
         0x0F, // function code
         0x00, 0x06, // address
-        0x00, 0x04, // quantity
+        0x00, 0x04 // quantity
       ])
       const expectedCoils = Buffer.from([0xD5, 0x57, 0x55])
 
@@ -210,7 +200,7 @@ describe('TCP Server Tests.', function () {
         0x02, // unit id
         0x0F, // function code
         0x00, 0x08, // address
-        0x00, 0x04, // quantity
+        0x00, 0x04 // quantity
       ])
       const expectedCoils = Buffer.from([0x55, 0x5F, 0x55])
 
@@ -224,6 +214,4 @@ describe('TCP Server Tests.', function () {
       socket.emit('data', request)
     })
   })
-
-
 })

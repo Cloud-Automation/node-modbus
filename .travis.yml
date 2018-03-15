@@ -1,6 +1,7 @@
 language: node_js
 node_js:
-    - 7
-    - 6
-    - 6.0
+  - 8
+  - 7
+  - 6
+  - 6.0
 

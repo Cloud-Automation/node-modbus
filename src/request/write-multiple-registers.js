@@ -8,7 +8,6 @@ class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
     try {
       let fc = buffer.readUInt8(0)
       let address = buffer.readUInt16BE(1)
-      let quantity = buffer.readUInt16BE(3)
       let numberOfBytes = buffer.readUInt8(5)
       let values = buffer.slice(6, 6 + numberOfBytes)
 

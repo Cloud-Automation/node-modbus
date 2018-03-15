@@ -34,19 +34,19 @@ server.on('WriteSingleRegister', function (value, address) {
 })
 
 server.on('writeMultipleCoils', function (value) {
-    console.log('Write multiple coils - Existing: ', value)
+  console.log('Write multiple coils - Existing: ', value)
 })
 
 server.on('postWriteMultipleCoils', function (value) {
-    console.log('Write multiple coils - Complete: ', value)
+  console.log('Write multiple coils - Complete: ', value)
 })
 
 server.on('writeMultipleRegisters', function (value) {
-    console.log('Write multiple registers - Existing: ', value)
+  console.log('Write multiple registers - Existing: ', value)
 })
 
 server.on('postWriteMultipleRegisters', function (value) {
-    console.log('Write multiple registers - Complete: ', value)
+  console.log('Write multiple registers - Complete: ', value)
 })
 
 server.on('connection', function (client) {

@@ -177,8 +177,8 @@ class TCPResponseHandler {
       let { bufferToArrayStatus, arrayStatusToBuffer } = require('./buffer-utils.js')
       let WriteMultipleCoilsResponseBody = require('./response/write-multiple-coils.js')
 
-      let responseBody      = WriteMultipleCoilsResponseBody.fromRequest(request.body)
-      let oldStatus         = bufferToArrayStatus(this._server.coils)
+      let responseBody = WriteMultipleCoilsResponseBody.fromRequest(request.body)
+      let oldStatus = bufferToArrayStatus(this._server.coils)
       let requestCoilValues = bufferToArrayStatus(request.body.valuesAsBuffer)
       let start = request.body.address
       let end = start + request.body.quantity
@@ -220,7 +220,7 @@ class TCPResponseHandler {
       } else {
         this._server.emit('writeMultipleRegisters', this._server.holding)
         this._server.holding.fill(request.body.values,
-                                request.body.address * 2, 
+                                request.body.address * 2,
                                 request.body.address * 2 + request.body.values.length + 1)
         this._server.emit('postWriteMultipleRegisters', this._server.holding)
       }

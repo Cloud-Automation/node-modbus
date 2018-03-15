@@ -5,14 +5,12 @@ let ModbusResponseBody = require('./response-body.js')
  * @class
  */
 class WriteMultipleRegistersResponseBody extends ModbusResponseBody {
-
 /** Create WriteMultipleRegisterResponseBody from Request
 * @param {WriteMultipleRegistersRequestBody} request
 * @param {Buffer} coil
 * @returns WriteMultipleRegisterResponseBody
 */
   static fromRequest (requestBody) {
-
     let start = requestBody.address
     let quantity = requestBody.quantity
 

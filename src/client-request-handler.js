@@ -160,7 +160,7 @@ class ModbusClientRequestHandler {
 
     this._socket.write(payload, function (err, result) {
       debug('request fully flushed, ( error:', err, ')', result)
-    }.bind(this))
+    })
   }
 }
 

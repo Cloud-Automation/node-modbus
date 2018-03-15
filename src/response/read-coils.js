@@ -22,7 +22,7 @@ class ReadCoilsResponseBody extends ModbusResponseBody {
     // Extract the segment of coils status
     let coilsSegment = coilsStatus.slice(start, end)
 
-    return new ReadCoilsResponseBody(coilsSegment, Math.ceil(coilsSegment.length/8))
+    return new ReadCoilsResponseBody(coilsSegment, Math.ceil(coilsSegment.length / 8))
   }
 
   /** Create ReadCoilsResponseBody from buffer.

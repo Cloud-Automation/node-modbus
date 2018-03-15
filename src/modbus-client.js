@@ -45,9 +45,9 @@ class ModbusClient {
       if (!response) {
         return
       }
-      
+
       /* process the response in the request handler if unitId is a match */
-      if (this._unitId == response.unitId) {
+      if (this._unitId === response.unitId) {
         this._requestHandler.handle(response)
       }
     } while (1)

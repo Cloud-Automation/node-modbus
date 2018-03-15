@@ -59,8 +59,7 @@ describe('ReadCoils Tests.', function () {
       assert.ok(message === null)
     })
 
-
-    it('should return <55> when addres = 0 and count = 8 for coils <55 55 55>' , function () {
+    it('should return <55> when addres = 0 and count = 8 for coils <55 55 55>', function () {
       let coils = Buffer.from([0x55, 0x55, 0x55])
       let requestBuffer = Buffer.from([
         0x00, 0x01, // transaction id
@@ -82,12 +81,12 @@ describe('ReadCoils Tests.', function () {
         0x01, // unit id
         0x01, // function code
         0x01, // byte count
-        0x55, // coils
+        0x55 // coils
       ])
 
       assert.deepEqual(payload, responseBuffer)
     })
-    it('should return <55> when addres = 6 and count = 8 for coils <55 55 55>' , function () {
+    it('should return <55> when addres = 6 and count = 8 for coils <55 55 55>', function () {
       let coils = Buffer.from([0x55, 0x55, 0x55])
       let requestBuffer = Buffer.from([
         0x00, 0x01, // transaction id
@@ -109,12 +108,12 @@ describe('ReadCoils Tests.', function () {
         0x01, // unit id
         0x01, // function code
         0x01, // byte count
-        0x55, // coils
+        0x55 // coils
       ])
 
       assert.deepEqual(payload, responseBuffer)
     })
-    it('should return <55 01> when addres = 0 and count = 9 for coils <55 55 55>' , function () {
+    it('should return <55 01> when addres = 0 and count = 9 for coils <55 55 55>', function () {
       let coils = Buffer.from([0x55, 0x55, 0x55])
       let requestBuffer = Buffer.from([
         0x00, 0x01, // transaction id
@@ -136,12 +135,12 @@ describe('ReadCoils Tests.', function () {
         0x01, // unit id
         0x01, // function code
         0x02, // byte count
-        0x55, 0x01, // coils
+        0x55, 0x01 // coils
       ])
 
       assert.deepEqual(payload, responseBuffer)
     })
-    it('should return <2A> when addres = 1 and count = 7 for coils <55 55 55>' , function () {
+    it('should return <2A> when addres = 1 and count = 7 for coils <55 55 55>', function () {
       let coils = Buffer.from([0x55, 0x55, 0x55])
       let requestBuffer = Buffer.from([
         0x00, 0x01, // transaction id
@@ -163,12 +162,12 @@ describe('ReadCoils Tests.', function () {
         0x01, // unit id
         0x01, // function code
         0x01, // bit count
-        0x2a, // coils
+        0x2a // coils
       ])
 
       assert.deepEqual(payload, responseBuffer)
     })
-    it('should return <05> when addres = 0 and count = 4 for coils <55 55 55>' , function () {
+    it('should return <05> when addres = 0 and count = 4 for coils <55 55 55>', function () {
       let coils = Buffer.from([0x55, 0x55, 0x55])
       let requestBuffer = Buffer.from([
         0x00, 0x01, // transaction id
@@ -190,12 +189,12 @@ describe('ReadCoils Tests.', function () {
         0x01, // unit id
         0x01, // function code
         0x01, // byte count
-        0x05, // coils
+        0x05 // coils
       ])
 
       assert.deepEqual(payload, responseBuffer)
     })
-    it('should return <02> when addres = 1 and count = 3 for coils <55 55 55>' , function () {
+    it('should return <02> when addres = 1 and count = 3 for coils <55 55 55>', function () {
       let coils = Buffer.from([0x55, 0x55, 0x55])
       let requestBuffer = Buffer.from([
         0x00, 0x01, // transaction id
@@ -217,12 +216,11 @@ describe('ReadCoils Tests.', function () {
         0x01, // unit id
         0x01, // function code
         0x01, // byte count
-        0x02, // coils
+        0x02 // coils
       ])
 
       assert.deepEqual(payload, responseBuffer)
     })
-
   })
 
   describe('ReadCoils Requests', function () {

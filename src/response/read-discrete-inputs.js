@@ -1,6 +1,8 @@
-let debug = require('debug')('read-discrete-inputs-response')
 let ModbusResponseBody = require('./response-body.js')
-const { bufferToArrayStatus, arrayStatusToBuffer } = require('../buffer-utils.js')
+const {
+  bufferToArrayStatus,
+  arrayStatusToBuffer
+} = require('../buffer-utils.js')
 
 /** Read Discrete Inputs Response Body (Function Code 0x02)
  * @extends ModbusResponseBody
@@ -21,7 +23,7 @@ class ReadDiscreteInputsResponseBody extends ModbusResponseBody {
     // Extract the segment of coils status
     let segmentStatus = discreteStatus.slice(start, end)
 
-    return new ReadDiscreteInputsResponseBody(segmentStatus, Math.ceil(segmentStatus.length/8))
+    return new ReadDiscreteInputsResponseBody(segmentStatus, Math.ceil(segmentStatus.length / 8))
   }
 
   /** Create ReadDiscreteInputsResponseBody from Buffer
