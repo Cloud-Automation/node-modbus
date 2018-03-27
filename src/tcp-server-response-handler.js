@@ -58,7 +58,7 @@ class TCPResponseHandler {
       }
 
       let ReadHoldingRegistersResponseBody = require('./response/read-holding-registers.js')
-      let responseBody = ReadHoldingRegistersResponseBody.fromRequest(request.body, this._server.holdingRegisters)
+      let responseBody = ReadHoldingRegistersResponseBody.fromRequest(request.body, this._server.holding)
       let response = ModbusTCPResponse.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
@@ -74,7 +74,7 @@ class TCPResponseHandler {
       }
 
       let ReadInputRegistersResponseBody = require('./response/read-input-registers.js')
-      let responseBody = ReadInputRegistersResponseBody.fromRequest(request.body, this._server.inputRegisters)
+      let responseBody = ReadInputRegistersResponseBody.fromRequest(request.body, this._server.input)
       let response = ModbusTCPResponse.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
