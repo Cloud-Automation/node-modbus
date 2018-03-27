@@ -10,15 +10,12 @@ let options = {
 let client = new modbus.client.TCP(socket)
 
 socket.on('connect', function () {
-
-  setInterval(function() {
+  setInterval(function () {
     client.readHoldingRegisters(0, 2)
-      .then(function (resp) {
-      }).catch(function () {
+      .then(function (resp) {}).catch(function () {
         console.error(arguments)
         socket.end()
       })
-
   }, 200)
 })
 
