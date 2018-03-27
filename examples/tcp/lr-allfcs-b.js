@@ -7,7 +7,6 @@ let options = {
   'port': '8502'
 }
 let cycleDone = true
-let openConnection = 0
 
 setInterval(function () {
   if (!cycleDone) {
@@ -20,12 +19,10 @@ setInterval(function () {
   let client = new modbus.client.TCP(socket)
 
   socket.on('end', function () {
-    console.log('Open Connections %d', --openConnection)
     cycleDone = true
   })
 
   socket.on('connect', function () {
-    console.log('Open Connections %d', ++openConnection)
     let fc01 = client.readCoils(0, 40)
     let fc02 = client.readDiscreteInputs(0, 40)
     let fc03 = client.readHoldingRegisters(0, 100)
