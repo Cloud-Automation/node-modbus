@@ -103,6 +103,14 @@ Server example
 
 ````
 
+## Long Running Test Results
+
+We've got a munin server running some scripts. You can find detailed results on [jsmodbus.cloud-automation.de](jsmodbus.cloud-automation.de).
+
+![CPU usage per day](http://jsmodbus.cloud-automation.de/localdomain/localhost.localdomain/cpu_by_node_process-day.png)
+
+![Memory usage per day](http://jsmodbus.cloud-automation.de/localdomain/localhost.localdomain/memory_by_node_process-day.png)
+
 ## License
 
 Copyright (C) 2017 Stefan Poeter (Stefan.Poeter[at]cloud-automation.de)
