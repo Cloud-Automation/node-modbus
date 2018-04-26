@@ -1,2 +1,4 @@
 node_modules
 *.swp
+out
+old-tests

@@ -2,20 +2,25 @@
 
 const modbus = require('../')
 const v8 = require('v8')
-const Promise = require('bluebird')
-
-const client = modbus.client.tcp.complete({
+const net = require('net')
+const socket = new net.Socket()
+const options = {
   'host': 'localhost',
   'port': 8888
-})
+}
+const client = new modbus.client.TCP(socket)
 
-client.connect()
+let request = function () {
+  return client.readCoils(0, 13)
+}
 
-client.on('connect', function () {
+socket.connect(options)
+
+socket.on('connect', function () {
   let p = Promise.resolve()
 
   for (let i = 1; i < 1e5; i++) {
-    p = p.then(client.readCoils(0, 13))
+    p = p.then(request)
   }
 
   p.then(function () {
@@ -23,6 +28,6 @@ client.on('connect', function () {
 
     console.log('Heap:', usedHeapSize, 'MB')
 
-    client.close()
+    socket.end()
   })
 })

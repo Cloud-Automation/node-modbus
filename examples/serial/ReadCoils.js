@@ -1,18 +1,24 @@
 'use strict'
 
-var modbus = require('../..')
-var client = modbus.client.serial.complete({ 'portName': process.argv[2], 'baudRate': process.argv[3] })
+let modbus = require('../../')
+let SerialPort = require('serialport')
+let socket = new SerialPort('/dev/ttyUSB1', {
+  baudRate: 115200,
+  parity: 'even',
+  stopBits: 1,
+  dataBits: 8
+})
+let client = new modbus.client.RTU(socket, 0x01)
 
-client.on('connect', function () {
-  client.readCoils(process.argv[4], process.argv[5]).then(function (resp) {
-    console.log(resp)
-  }).fail(function (err) {
-    console.log(err)
-  }).done(function () {
-    client.close()
-  })
+socket.on('open', function () {
+  client.readCoils(process.argv[4], process.argv[5])
+    .then(function (resp) {
+      console.log(resp)
+      socket.end()
+    }).catch(function () {
+      console.error(arguments)
+      socket.end()
+    })
 })
 
-client.on('error', function (err) {
-  console.log(err)
-})
+socket.on('error', console.error)

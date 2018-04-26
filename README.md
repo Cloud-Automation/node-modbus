@@ -5,7 +5,7 @@ A simple an easy to use Modbus TCP client/server implementation.
 Modbus [![Build Status](https://travis-ci.org/Cloud-Automation/node-modbus.png)](https://travis-ci.org/Cloud-Automation/node-modbus)
 ========
 
-Modbus is a simple Modbus TCP Client with a simple API.
+Modbus is a simple Modbus TCP/RTU Client/Server with a simple API. It supports modbus function codes 1 - 6 and 15 and 16.
 
 Installation
 ------------
@@ -21,205 +21,99 @@ Simply `npm install -g mocha` and `npm install -g sinon`. To run the tests type 
 
 Please feel free to fork and add your own tests.
 
-TCP Client example
+New in Version 3.0.0
+--------------------
+
+We got rid of all the dependencies like stampit and serialport and make extensive use of es6 features like promisses. This way we, the developer do not have any restrictions on how to use this module. Unfortunatly this way the module probably won't work for nodejs versions lower than 6.0.
+
+For modbus rtu we recommend the serialport npm module, for tcp the net.Socket interface is needed. When you need to keep a connection alive with some reconnect logic, use the node-net-reconnect module from our github page https://github.com/cloud-automation/node-net-reconnect.
+
+Debugging
+---------
+If you want to see some debugging information, since Version 3 we use the debug module. You can filter the debug output by defining the DEBUG environment variable like so `export DEBUG=*`
+
+TCP Client Example
 --------------
 ```javascript
-var modbus = require('jsmodbus');
+// create a tcp modbus client
+let Modbus = require('jsmodbus')
+let net = require('net')
+let socket = new net.Socket()
+let client = new Modbus.client.TCP(socket, unitId)
+let options = {
+'host' : host
+'port' : port
+}
 
-// create a modbus client
-var client = modbus.client.tcp.complete({ 
-        'host'              : host, 
-        'port'              : port,
-        'autoReconnect'     : true,
-        'reconnectTimeout'  : 1000,
-        'timeout'           : 5000,
-        'unitId'            : 0
-    });
+```
 
-client.connect();
+RTU Client Example
+---------------------
+```javascript
 
-// reconnect with client.reconnect()
+// create a tcp modbus client
+let Modbus = require('jsmodbus')
+let SerialPort = require('serialport')
+let options = {
+baudRate: 57600
+}
+let socket = new SerialPort("/dev/tty-usbserial1", options)
+let client = new Modbus.client.RTU(socket, address)
+```
 
-client.on('connect', function () {
+Client API Example
+------------------
+```javascript
+// for reconnecting see node-net-reconnect npm module
 
-    // make some calls
+// use socket.on('open', ...) when using serialport
+socket.on('connect', function () {
 
-    client.readCoils(0, 13).then(function (resp) {
+// make some calls
 
-        // resp will look like { fc: 1, byteCount: 20, coils: [ values 0 - 13 ], payload: <Buffer> } 
-        console.log(resp);
+client.readCoils(0, 13).then(function (resp) {
 
-    }, console.error);
+// resp will look like { response : [TCP|RTU]Response, request: [TCP|RTU]Request }
+// the data will be located in resp.response.body.coils: <Array>, resp.response.body.payload: <Buffer>
 
-    client.readDiscreteInputs(0, 13).then(function (resp) {
+console.log(resp);
 
-        // resp will look like { fc: 2, byteCount: 20, coils: [ values 0 - 13 ], payload: <Buffer> } 
-        console.log(resp);
-
-    }, console.error);
-
-    client.readHoldingRegisters(0, 10).then(function (resp) {
-
-        // resp will look like { fc: 3, byteCount: 20, register: [ values 0 - 10 ], payload: <Buffer> }
-        console.log(resp); 
-
-    }, console.error);
-
-    client.readInputRegisters(0, 10).then(function (resp) {
-
-	    // resp will look like { fc: 4, byteCount: 20, register: [ values 0 - 10 ], payload: <Buffer> }
-	    console.log(resp);
-
-    }, console.error);
-
-    client.writeSingleCoil(5, true).then(function (resp) {
-
-	    // resp will look like { fc: 5, byteCount: 4, outputAddress: 5, outputValue: true }
-	    console.log(resp);
-
-    }, console.error);
-
-    client.writeSingleCoil(5, Buffer.from([0x01])).then(function (resp) {
-
-	    // resp will look like { fc: 5, byteCount: 4, outputAddress: 5, outputValue: true }
-	    console.log(resp);
-
-    }, console.error);
-
-    client.writeSingleRegister(13, 42).then(function (resp) {
-
-	    // resp will look like { fc: 6, byteCount: 4, registerAddress: 13, registerValue: 42 }
-	    console.log(resp);
-
-    }, console.error);
-
-    client.writeSingleRegister(13, Buffer.from([0x00, 0x2A])).then(function (resp) {
-
-	    // resp will look like { fc: 6, byteCount: 4, registerAddress: 13, registerValue: 42 }
-	    console.log(resp);
-
-    }, console.error);
-
-    client.writeMultipleCoils(3, [1, 0, 1, 0, 1, 1]).then(function (resp) {
-
-        // resp will look like { fc: 15, startAddress: 3, quantity: 6 }
-        console.log(resp); 
-
-    }, console.error);
-
-    client.writeMultipleCoils(3, Buffer.from([0x2B]), 6).then(function (resp) {
-
-        // resp will look like { fc: 15, startAddress: 3, quantity: 6 }
-        console.log(resp); 
-
-    }, console.error);
-
-    client.writeMultipleRegisters(4, [1, 2, 3, 4]).then(function (resp) {
-        
-        // resp will look like { fc : 16, startAddress: 4, quantity: 4 }
-        console.log(resp);
-        
-    }, console.error);
-
-    client.writeMultipleRegisters(4, Buffer.from([0x00, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00, 0x04]).then(function (resp) {
-        
-        // resp will look like { fc : 16, startAddress: 4, quantity: 4 }
-        console.log(resp);
-        
-    }, console.error);
+}, console.error);
 
 });
 
-client.on('error', function (err) {
-
-    console.log(err);
-    
-})
-
-// when using arrays as parameters, jsmodbus assumes that all elements inside
-// the array are 16bit values. If you want to send a bigger value (32 bit), you need
-// to send a buffer, instead of an array:
-
-var buf = Buffer.allocUnsafe(4); // 4 bytes == 32bit
-buf.writeInt32BE(77777);
-
-// now you can call any function normally, just sending a buffer instead of an
-// array
-client.writeMultipleRegisters(4, buf).then(function (resp) {
-    // resp will look like { fc : 16, startAddress: 4, quantity: 4 }
-    console.log(resp);
-}, console.error);
+socket.connect(options)
 
 ```
+
+Keeping TCP Connections alive
+----------------------------
+I've written a module to keep net.Socket connections alive by emitting TCP Keep-Alive messages. Have a look at the node-net-reconnect module.
 
 Server example
 --------------
 ```javascript
-    
-    var stampit = require('stampit'),
-        modbus = require('jsmodbus');
 
-    var customServer = stampit()
-        .refs({
-            'logEnabled'        : true,
-            'port'              : 8888,
-            'responseDelay'     : 10, // so we do not fry anything when someone is polling this server
-            'whiteListIPs'      : null, // filter connection only from these IPs (ex. ['127.0.0.1', '192.168.0.1'])
+let modbus = require('jsmodbus')
+let net = require('net')
+let server = new net.Server()
+let server = new modbus.server.TCP(server)
 
-            // specify coils, holding and input register here as buffer or leave it for them to be new Buffer(1024)
-            coils               : Buffer.alloc(1024, 0),
-            holding             : Buffer.alloc(1024, 0),
-            input               : Buffer.alloc(1024, 0)
-        })
-        .compose(modbus.server.tcp.complete)
-        .init(function () {
-        
-            var init = function () {
+server.listen(502)
 
-                // get the coils with this.getCoils() [ Buffer(1024) ]
-                // get the holding register with this.getHolding() [ Buffer(1024) ]
-                // get the input register with this.getInput() [ Buffer(1024) ]                
-              
-                // listen to requests 
-
-                this.on('readCoilsRequest', function (start, quantity) {
-                
-                    // do something, this will be executed in sync before the 
-                    // read coils request is executed 
-                    
-                });
-
-                // the write request have pre and post listener
-                this.on('[pre][post]WriteSingleCoilRequest', function (address, value) {
-                    
-                    
-                });
-
-            }.bind(this);    
-            
-            
-            init();
-            
-        });
-
-    customServer();
-
-    // you can of course always use a standard server like so
-
-    var server = modbus.server.tcp.complete({ port : 8888 });
-
-    // and interact with the register via the getCoils(), getHolding() and getInput() calls
-
-    server.getHolding().writeUInt16BE(123, 1);
-
-    // you can filter only certain IP addresses to connect
-
-    var server = modbus.server.tcp.complete({ port : 8888, whiteListIPs: ['127.0.0.1', '192.168.0.1'] });
 ````
+
+## Long Running Test Results
+
+We've got a munin server running some scripts. You can find detailed results on [jsmodbus.cloud-automation.de](jsmodbus.cloud-automation.de).
+
+![CPU usage per day](http://jsmodbus.cloud-automation.de/localdomain/localhost.localdomain/cpu_by_node_process-day.png)
+
+![Memory usage per day](http://jsmodbus.cloud-automation.de/localdomain/localhost.localdomain/memory_by_node_process-day.png)
 
 ## License
 
-Copyright (C) 2016 Stefan Poeter (Stefan.Poeter[at]cloud-automation.de)
+Copyright (C) 2017 Stefan Poeter (Stefan.Poeter[at]cloud-automation.de)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

@@ -1,31 +1,26 @@
 'use strict'
 
-var modbus = require('../..')
-var client = modbus.client.tcp.complete({
-  'host': process.argv[2],
-  'port': process.argv[3],
-  'logEnabled': true,
-  'logLevel': 'debug',
-  'logTimestamp': true
+let modbus = require('../..')
+let net = require('net')
+let socket = new net.Socket()
+let options = {
+  'host': '127.0.0.1',
+  'port': '8502'
+}
+let client = new modbus.client.TCP(socket)
+
+socket.on('connect', function () {
+  var values = Buffer.from([0xff])
+
+  client.writeMultipleCoils(13, values, 8)
+    .then(function (resp) {
+      console.log(resp)
+      socket.end()
+    }).catch(function () {
+      console.error(arguments)
+      socket.end()
+    })
 })
 
-// override logger function
-client.on('connect', function () {
-  var values = []
-
-  process.argv.forEach(function (v, i) {
-    if (i <= 3) {
-      return
-    }
-    values.push(parseInt(v))
-  })
-
-  client.writeMultipleCoils(0, values).then(function (resp) {
-    console.log(resp)
-  }, console.error).finally(function () {
-    client.close()
-  })
-})
-
-client.on('error', console.error)
-client.connect()
+socket.on('error', console.error)
+socket.connect(options)

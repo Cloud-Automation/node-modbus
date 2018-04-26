@@ -1,55 +1,71 @@
 'use strict'
 
-var stampit = require('stampit')
-var modbus = require('../..')
+let net = require('net')
+let modbus = require('../..')
+let netServer = new net.Server()
+let server = new modbus.server.TCP(netServer)
 
-var server = stampit()
-    .refs({
-      'logEnabled': false,
-      'logLevel': 'debug',
-      'port': 8888,
-      'responseDelay': 0,
-      'coils': new Buffer(100000),
-      'holding': new Buffer(100000),
-      'whiteListIPs': [
-        '127.0.0.1'
-      ]
-    }).compose(modbus.server.tcp.complete)
-    .init(function () {
-      var init = function () {
-        this.getCoils().writeUInt8(0)
+server.on('connection', function(client) {
+  console.log('New Connection')
+})
 
-        this.on('readCoilsRequest', function (start, quantity) {
-          console.log('readCoilsRequest', start, quantity)
+server.on('readCoils', function(request, response, send) {
+  /* Implement your own */
 
-/*
-                var oldValue = this.getCoils().readUInt8(start);
+  response.body.coils[0] = true
+  response.body.coils[1] = false
 
-                oldValue = (oldValue + 1) % 255;
+  send(response)
+})
 
-                this.getCoils().writeUInt8(oldValue, start);
-*/
-        })
+server.on('readHoldingRegisters', function(request, response, send) {
 
-        this.on('readHoldingRegistersRequest', function (start, quantity) {
-          console.log('readHoldingRegisters', start, quantity)
-        })
+  /* Implement your own */
 
-        this.on('writeSingleCoilRequest', function (adr, value) {
-          console.log('writeSingleCoil', adr, value)
-        })
+})
 
-        this.getHolding().writeUInt16BE(1, 0)
-        this.getHolding().writeUInt16BE(2, 2)
-        this.getHolding().writeUInt16BE(3, 4)
-        this.getHolding().writeUInt16BE(4, 6)
-        this.getHolding().writeUInt16BE(5, 8)
-        this.getHolding().writeUInt16BE(6, 10)
-        this.getHolding().writeUInt16BE(7, 12)
-        this.getHolding().writeUInt16BE(8, 14)
-      }.bind(this)
+server.on('preWriteSingleRegister', function(value, address) {
+  console.log('Write Single Register')
+  console.log('Original {register, value}: {', address, ',', server.holding.readUInt16BE(address), '}')
+})
 
-      init()
-    })
+server.on('WriteSingleRegister', function(value, address) {
+  console.log('New {register, value}: {', address, ',', server.holding.readUInt16BE(address), '}')
+})
 
-server()
+server.on('writeMultipleCoils', function(value) {
+  console.log('Write multiple coils - Existing: ', value)
+})
+
+server.on('postWriteMultipleCoils', function(value) {
+  console.log('Write multiple coils - Complete: ', value)
+})
+
+server.on('writeMultipleRegisters', function(value) {
+  console.log('Write multiple registers - Existing: ', value)
+})
+
+server.on('postWriteMultipleRegisters', function(value) {
+  console.log('Write multiple registers - Complete: ', value)
+})
+
+server.on('connection', function(client) {
+
+  /* work with the modbus tcp client */
+
+})
+
+server.coils.writeUInt16BE(0x0000, 0)
+server.coils.writeUInt16BE(0x0000, 2)
+server.coils.writeUInt16BE(0x0000, 4)
+server.coils.writeUInt16BE(0x0000, 6)
+
+server.discrete.writeUInt16BE(0x5678, 0)
+
+server.holding.writeUInt16BE(0x0000, 0)
+server.holding.writeUInt16BE(0x0000, 2)
+
+server.input.writeUInt16BE(0xff00, 0)
+server.input.writeUInt16BE(0xff00, 2)
+
+netServer.listen(8502)
