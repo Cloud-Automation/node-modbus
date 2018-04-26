@@ -85,7 +85,6 @@ module.exports = stampit()
       serialport.write(pkt, function (err) {
         if (err) {
           this.emit('error', err)
-          return
         }
       }.bind(this))
     }.bind(this)
