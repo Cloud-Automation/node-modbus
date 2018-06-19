@@ -21,7 +21,7 @@ class ModbusRTURequest {
   createPayload () {
     let bodyPayload = this._body.createPayload()
 
-    this._crc = CRC.crc16modbus(bodyPayload)
+    this._crc = CRC.crc16modbus(Buffer.concat([Buffer.from([this._address]), bodyPayload]))
 
     let payload = Buffer.alloc(1 + bodyPayload.length + 2)
     payload.writeUInt8(this._address, 0) // address
