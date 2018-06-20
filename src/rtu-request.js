@@ -22,11 +22,10 @@ class ModbusRTURequest {
     let bodyPayload = this._body.createPayload()
 
     this._crc = CRC.crc16modbus(Buffer.concat([Buffer.from([this._address]), bodyPayload]))
-
-    let payload = Buffer.alloc(1 + bodyPayload.length + 2)
-    payload.writeUInt8(this._address, 0) // address
-    bodyPayload.copy(payload, 1) // copy body
-    payload.writeUInt16BE(this._crc, 1 + bodyPayload.length) // crc
+    let crBu = Buffer.alloc(2)
+    crBu.writeUInt16LE(this._crc)
+    let idBuf = Buffer.from([this._address])
+    let payload = Buffer.from([idBuf, bodyPayload, crBu])
 
     return payload
   }
