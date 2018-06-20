@@ -19,7 +19,7 @@ class ModbusRTUResponse {
 
     let crc
     try {
-      crc = buffer.readUInt16BE(1 + body.bodyCount)
+      crc = buffer.readUInt16LE(1 + body.bodyCount)
     } catch (e) {
       debug('If NoSuchIndexException, it is probably serial and not all data has arrived')
       return null

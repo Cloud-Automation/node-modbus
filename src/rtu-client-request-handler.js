@@ -44,7 +44,7 @@ class ModbusRTUClientRequestHandler extends ModbusClientRequestHandler {
     }
 
     debug('create crc from response')
-    let crc = CRC.crc16modbus(response.body.createPayload())
+    let crc = CRC.crc16modbus(Buffer.concat([Buffer.from([response.address]), response.body.createPayload()]))
 
     if (response.crc !== crc) {
       debug('CRC does not match', response.crc, '!==', crc)
