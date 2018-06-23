@@ -45,18 +45,21 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
     super(0x03)
     this._byteCount = byteCount
     this._values = values
+    this._bufferLength = 2
 
     if (values instanceof Array) {
       this._valuesAsArray = values
+      this._bufferLength += values.length * 2
     }
 
     if (values instanceof Buffer) {
       this._valuesAsBuffer = values
+      this._bufferLength += values.length
     }
   }
 
   get byteCount () {
-    return this._values.length + 2
+    return this._bufferLength
   }
 
   get values () {
