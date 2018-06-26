@@ -4,13 +4,13 @@ let modbus = require('../..')
 let net = require('net')
 let socket = new net.Socket()
 let options = {
-  'host': '127.0.0.1',
-  'port': '8502'
+  'host': '192.168.56.101',
+  'port': '502'
 }
 let client = new modbus.client.TCP(socket)
 
 socket.on('connect', function () {
-  client.writeSingleRegister(2, 102)
+  client.writeSingleRegister(1002, 333)
     .then(function (resp) {
       console.log(resp)
       socket.end()

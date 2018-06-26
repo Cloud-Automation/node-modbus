@@ -4,8 +4,8 @@
 let assert = require('assert')
 let sinon = require('sinon')
 let EventEmitter = require('events')
-let ReadCoilsRequest = require('../src/request/read-coils.js')
-let ReadCoilsResponse = require('../src/response/read-coils.js')
+let ReadCoilsRequest = require('../src/request/read-holding-registers.js')
+let ReadHoldingRegistersResponseBody = require('../src/response/read-holding-registers.js')
 let ModbusRTUResponse = require('../src/rtu-response.js')
 let ExceptionResponse = require('../src/response/exception.js')
 let ModbusRTUClientRequestHandler = require('../src/rtu-client-request-handler.js')
@@ -16,7 +16,7 @@ describe('Modbus/RTU Client Request Tests', function () {
 
   beforeEach(function () {
     socket = new EventEmitter()
-    socket.write = function () { }
+    socket.write = function () {}
 
     socketMock = sinon.mock(socket)
   })
@@ -41,11 +41,11 @@ describe('Modbus/RTU Client Request Tests', function () {
 
   describe('Handle Data Tests.', function () {
     it('should register an rtu request and handle a response', function (done) {
-      let ReadCoilsRequest = require('../src/request/read-coils.js')
-      let handler = new ModbusRTUClientRequestHandler(socket, 4)
-      let request = new ReadCoilsRequest(0x0000, 0x0008)
-      let response = new ReadCoilsResponse([0, 1, 0, 1, 0, 1, 0, 1], 1)
-      let rtuResponse = new ModbusRTUResponse(4, 61345, response)
+      let ReadHoldingRegistersRequestBody = require('../src/request/read-holding-registers.js')
+      let handler = new ModbusRTUClientRequestHandler(socket, 1)
+      let request = new ReadHoldingRegistersRequestBody(1, 1)
+      let response = new ReadHoldingRegistersResponseBody(1, Buffer.from([0x00, 0x32]))
+      let rtuResponse = new ModbusRTUResponse(1, 0x9139, response)
 
       socket.emit('open')
 

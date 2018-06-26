@@ -6,10 +6,10 @@ let ModbusResponseBody = require('./response-body.js')
  */
 class ReadInputRegistersResponseBody extends ModbusResponseBody {
   /** Create ReadInputRegistersResponseBody from Request
- * @param {ReadInputRegistersRequestBody} request
- * @param {Buffer} inputRegisters
- * @returns ReadInputRegistersResponseBody
- */
+   * @param {ReadInputRegistersRequestBody} request
+   * @param {Buffer} inputRegisters
+   * @returns ReadInputRegistersResponseBody
+   */
   static fromRequest (requestBody, inputRegisters) {
     let startByte = requestBody.start
     let endByte = requestBody.start + (requestBody.count * 2)
@@ -20,10 +20,10 @@ class ReadInputRegistersResponseBody extends ModbusResponseBody {
     return new ReadInputRegistersResponseBody(buf.length, buf)
   }
 
-/** Create ReadInputRegistersResponseBody from Buffer
- * @param {Buffer} buffer
- * @returns ReadInputRegistersResponseBody
- */
+  /** Create ReadInputRegistersResponseBody from Buffer
+   * @param {Buffer} buffer
+   * @returns ReadInputRegistersResponseBody
+   */
   static fromBuffer (buffer) {
     let fc = buffer.readUInt8(0)
     let byteCount = buffer.readUInt8(1)
@@ -45,18 +45,21 @@ class ReadInputRegistersResponseBody extends ModbusResponseBody {
     super(0x04)
     this._byteCount = byteCount
     this._values = values
+    this._bufferLength = 2
 
     if (values instanceof Array) {
       this._valuesAsArray = values
+      this._bufferLength += values.length * 2
     }
 
     if (values instanceof Buffer) {
       this._valuesAsBuffer = values
+      this._bufferLength += values.length
     }
   }
 
   get byteCount () {
-    return this._values.length + 2
+    return this._bufferLength
   }
 
   get values () {

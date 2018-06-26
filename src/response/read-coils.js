@@ -1,6 +1,9 @@
 let debug = require('debug')('read-coils-response')
 let ModbusResponseBody = require('./response-body.js')
-const { bufferToArrayStatus, arrayStatusToBuffer } = require('../buffer-utils.js')
+const {
+  bufferToArrayStatus,
+  arrayStatusToBuffer
+} = require('../buffer-utils.js')
 
 /** Read Coils Response Body
  * @extends ModbusResponseBody
