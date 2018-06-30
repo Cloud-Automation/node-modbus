@@ -20,7 +20,7 @@ describe('Modbus/RTU Client Response Tests', function () {
       0x02,       // byte count
       0xdd,       // coils
       0x00,
-      0x00, 0x00 // crc
+      0xCD, 0xAB // crc
     ])
 
     handler.handleData(responseBuffer)
@@ -30,7 +30,7 @@ describe('Modbus/RTU Client Response Tests', function () {
     assert.ok(response !== null)
     assert.equal(1, response.address)
     assert.equal(1, response.body.fc)
-    assert.equal(257, response.crc)
+    assert.equal(0xABCD, response.crc)
     assert.equal(7, response.byteCount)
 
     assert.equal(1, response.body.fc)
