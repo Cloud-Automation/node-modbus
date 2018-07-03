@@ -1,10 +1,10 @@
 'use strict'
 
-let debug = require('debug')('tcp-server-request-handler')
-let TCPRequest = require('./tcp-request.js')
+let debug = require('debug')('modbus-server-request-handler')
 
-class TCPRequestHandler {
-  constructor () {
+class RequestHandler {
+  constructor (requestClass) {
+    this._requestClass = requestClass
     this._requests = []
     this._buffer = Buffer.alloc(0)
   }
@@ -18,18 +18,23 @@ class TCPRequestHandler {
     debug('this._buffer', this._buffer)
 
     do {
-      let request = TCPRequest.fromBuffer(this._buffer)
+      let request = this._requestClass.fromBuffer(this._buffer)
       debug('request', request)
 
       if (!request) {
         return
       }
 
-      this._requests.unshift(request)
+      if (request.corrupted) {
+        const corruptDataDump = this._buffer.slice(0, request.byteCount).toString('hex')
+        debug(`request message was corrupt: ${corruptDataDump}`)
+      } else {
+        this._requests.unshift(request)
+      }
 
       this._buffer = this._buffer.slice(request.byteCount)
     } while (1)
   }
 }
 
-module.exports = TCPRequestHandler
+module.exports = RequestHandler

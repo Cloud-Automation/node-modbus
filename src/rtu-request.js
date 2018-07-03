@@ -1,9 +1,51 @@
+let debug = require('debug')('rtu-request')
 let CRC = require('crc')
+let CommonRequestBody = require('./request/request-body.js')
 
 class ModbusRTURequest {
-  constructor (address, body) {
+  /** Convert a buffer into a new Modbus RTU Request. Returns null if the buffer
+   * does not contain enough data.
+   * @param {Buffer} buffer
+   * @return {ModbusRTURequest} A new Modbus RTU Request or null.
+   */
+  static fromBuffer (buffer) {
+    try {
+      if (buffer.length < 1 /* address */ + 2 /* CRC */) {
+        debug('not enough data in the buffer yet')
+        return null
+      }
+
+      const address = buffer.readUInt8(0)
+
+      debug(`rtu header complete, address, ${address}`)
+      debug('buffer', buffer)
+
+      // NOTE: This is potentially more than the body; the body length isn't know at this point...
+      const body = CommonRequestBody.fromBuffer(buffer.slice(1))
+
+      if (!body) {
+        return null
+      }
+
+      const payloadLength = 1 /* address */ + body.byteCount
+      const expectedCrc = CRC.crc16modbus(buffer.slice(0, payloadLength))
+      const actualCrc = buffer.readUInt16LE(payloadLength)
+      const corrupted = (expectedCrc !== actualCrc)
+
+      return new ModbusRTURequest(address, body, corrupted)
+    } catch (e) {
+      debug('not enough data to create a rtu request', e)
+      return null
+    }
+  }
+  constructor (address, body, corrupted) {
     this._address = address
     this._body = body
+    this._corrupted = corrupted
+  }
+
+  get address () {
+    return this._address
   }
 
   get crc () {
@@ -16,6 +58,10 @@ class ModbusRTURequest {
 
   get name () {
     return this._body.name
+  }
+
+  get corrupted () {
+    return (this._corrupted === true)
   }
 
   createPayload () {

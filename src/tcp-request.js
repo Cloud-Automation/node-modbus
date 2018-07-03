@@ -81,6 +81,12 @@ class ModbusTCPRequest {
     return this._body.name
   }
 
+  /** For interface compatibility with ModbusRTURequest where data
+   * integrity checking happens as part of the Modbus protocol **/
+  get corrupted () {
+    return false
+  }
+
   /** Creates a buffer object representing the modbus tcp request.
    * @returns {Buffer} */
   createPayload () {

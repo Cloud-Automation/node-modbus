@@ -40,6 +40,13 @@ class ExceptionRequestBody extends ModbusRequestBody {
 
     return payload
   }
+
+  /** Returns the byte count of this request for the byte representation.
+   * @returns {Number}
+   */
+  get byteCount () {
+    return 2
+  }
 }
 
 module.exports = ExceptionRequestBody
