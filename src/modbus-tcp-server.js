@@ -1,44 +1,24 @@
 'use strict'
 
 let debug = require('debug')('modbus tcp server')
-let EventEmitter = require('events')
-let ModbusTCPClient = require('./tcp-server-client.js')
+let ModbusServer = require('./modbus-server')
+let ModbusServerClient = require('./modbus-server-client.js')
+let Request = require('./tcp-request.js')
+let Response = require('./tcp-response.js')
 
-class ModbusTCPServer extends EventEmitter {
+class ModbusTCPServer extends ModbusServer {
   constructor (server, options) {
-    super()
+    super(options)
     this._server = server
-    this._options = options || {}
-
-    this._coils = this._options.coils || Buffer.alloc(1024)
-    this._discrete = this._options.discrete || Buffer.alloc(1024)
-    this._holding = this._options.holding || Buffer.alloc(1024)
-    this._input = this._options.input || Buffer.alloc(1024)
 
     server.on('connection', this._onConnection.bind(this))
   }
 
   _onConnection (socket) {
     debug('new connection coming in')
-    let client = new ModbusTCPClient(this, socket)
+    let client = new ModbusServerClient(this, socket, Request, Response)
 
     this.emit('connection', client)
-  }
-
-  get coils () {
-    return this._coils
-  }
-
-  get discrete () {
-    return this._discrete
-  }
-
-  get holding () {
-    return this._holding
-  }
-
-  get input () {
-    return this._input
   }
 }
 

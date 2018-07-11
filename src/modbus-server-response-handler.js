@@ -1,16 +1,11 @@
 'use strict'
 
 let debug = require('debug')('modbus tcp response handler')
-let ModbusTCPResponse = require('./tcp-response.js')
 
-class TCPResponseHandler {
-  constructor (server) {
+class ModbusServerResponseHandler {
+  constructor (server, Response) {
     this._server = server
-    this._server.setMaxListeners(1)
-  }
-
-  _handleReadCoilsRequest (request, cb) {
-    cb(new ModbusTCPResponse())
+    this._responseClass = Response
   }
 
   handle (request, cb) {
@@ -27,7 +22,7 @@ class TCPResponseHandler {
       }
       let ReadCoilsResponseBody = require('./response/read-coils.js')
       let responseBody = ReadCoilsResponseBody.fromRequest(request.body, this._server.coils)
-      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let response = this._responseClass.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
 
@@ -43,7 +38,7 @@ class TCPResponseHandler {
 
       let ReadDiscreteInputsResponseBody = require('./response/read-discrete-inputs.js')
       let responseBody = ReadDiscreteInputsResponseBody.fromRequest(request.body, this._server.discrete)
-      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let response = this._responseClass.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
 
@@ -59,7 +54,7 @@ class TCPResponseHandler {
 
       let ReadHoldingRegistersResponseBody = require('./response/read-holding-registers.js')
       let responseBody = ReadHoldingRegistersResponseBody.fromRequest(request.body, this._server.holding)
-      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let response = this._responseClass.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
 
@@ -75,7 +70,7 @@ class TCPResponseHandler {
 
       let ReadInputRegistersResponseBody = require('./response/read-input-registers.js')
       let responseBody = ReadInputRegistersResponseBody.fromRequest(request.body, this._server.input)
-      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let response = this._responseClass.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
 
@@ -105,7 +100,7 @@ class TCPResponseHandler {
         let ExceptionResponseBody = require('./response/exception.js')
         /* illegal data value */
         let responseBody = new ExceptionResponseBody(request.body.fc, 0x03)
-        let response = ModbusTCPResponse.fromRequest(request, responseBody)
+        let response = this._responseClass.fromRequest(request, responseBody)
         cb(response.createPayload())
         return response
       }
@@ -123,14 +118,14 @@ class TCPResponseHandler {
         let ExceptionResponseBody = require('./response/exception.js')
         /* illegal data address */
         let responseBody = new ExceptionResponseBody(request.body.fc, 0x02)
-        let response = ModbusTCPResponse.fromRequest(request, responseBody)
+        let response = this._responseClass.fromRequest(request, responseBody)
         cb(response.createPayload())
         return response
       } else {
         this._server.coils.writeUInt8(newValue, Math.floor(address / 8))
       }
 
-      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let response = this._responseClass.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
 
@@ -152,14 +147,14 @@ class TCPResponseHandler {
         let ExceptionResponseBody = require('./response/exception.js')
         /* illegal data address */
         let responseBody = new ExceptionResponseBody(request.body.fc, 0x02)
-        let response = ModbusTCPResponse.fromRequest(request, responseBody)
+        let response = this._responseClass.fromRequest(request, responseBody)
         cb(response.createPayload())
         return response
       } else {
         this._server.holding.writeUInt16BE(responseBody.value, responseBody.address * 2)
       }
 
-      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let response = this._responseClass.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
 
@@ -191,7 +186,7 @@ class TCPResponseHandler {
       this._server.coils.fill(arrayStatusToBuffer(newStatus))
       this._server.emit('postWriteMultipleCoils', this._server.coils, newStatus)
 
-      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let response = this._responseClass.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
 
@@ -214,7 +209,7 @@ class TCPResponseHandler {
         let ExceptionResponseBody = require('./response/exception.js')
         /* illegal data address */
         let responseBody = new ExceptionResponseBody(request.body.fc, 0x10)
-        let response = ModbusTCPResponse.fromRequest(request, responseBody)
+        let response = this._responseClass.fromRequest(request, responseBody)
         cb(response.createPayload())
         return response
       } else {
@@ -225,7 +220,7 @@ class TCPResponseHandler {
         this._server.emit('postWriteMultipleRegisters', this._server.holding)
       }
 
-      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let response = this._responseClass.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
 
@@ -237,11 +232,11 @@ class TCPResponseHandler {
 
       let ExceptionResponseBody = require('./response/exception.js')
       let responseBody = ExceptionResponseBody.fromRequest(request.body)
-      let response = ModbusTCPResponse.fromRequest(request, responseBody)
+      let response = this._responseClass.fromRequest(request, responseBody)
       cb(response.createPayload())
       return response
     }
   }
 }
 
-module.exports = TCPResponseHandler
+module.exports = ModbusServerResponseHandler

@@ -1,3 +1,5 @@
+'use strict'
+
 let debug = require('debug')('rtu-client-request-handler')
 let ModbusRTURequest = require('./rtu-request.js')
 let ModbusClientRequestHandler = require('./client-request-handler.js')
