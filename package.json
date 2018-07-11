@@ -12,7 +12,8 @@
     "node": ">=6.0.0"
   },
   "dependencies": {
-    "crc": "3.4.0"
+    "crc": "3.4.0",
+    "debug": "^3.1.0"
   },
   "devDependencies": {
     "mocha": "^3.3.0",
