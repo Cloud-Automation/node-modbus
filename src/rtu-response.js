@@ -1,7 +1,21 @@
 let debug = require('debug')('rtu-response')
+let CRC = require('crc')
 let ResponseFactory = require('./response/response-factory.js')
 
 class ModbusRTUResponse {
+  /** Create Modbus/RTU Response from a Modbus/RTU Request including
+   * the modbus function body.
+   * @param {ModbusRTURequest} request
+   * @param {ModbusResponseBody} body
+   * @returns {ModbusRTUResponse}
+   */
+  static fromRequest (rtuRequest, modbusBody) {
+    return new ModbusRTUResponse(
+      rtuRequest.address,
+      undefined,  // CRC is calculated when createPayload () is called
+      modbusBody)
+  }
+
   static fromBuffer (buffer) {
     if (buffer.length < 1) {
       return null
@@ -19,7 +33,7 @@ class ModbusRTUResponse {
 
     let crc
     try {
-      crc = buffer.readUInt16LE(1 + body.bodyCount)
+      crc = buffer.readUInt16LE(1 + body.byteCount)
     } catch (e) {
       debug('If NoSuchIndexException, it is probably serial and not all data has arrived')
       return null
@@ -48,6 +62,21 @@ class ModbusRTUResponse {
 
   get byteCount () {
     return this._body.byteCount + 3
+  }
+
+  createPayload () {
+    /* Payload is a buffer with:
+     * Address/Unit ID = 1 Byte
+     * Body = N Bytes
+     * CRC = 2 Bytes
+     */
+    let payload = Buffer.alloc(this.byteCount)
+    payload.writeUInt8(this._address, 0)
+    const bodyPayload = this._body.createPayload()
+    bodyPayload.copy(payload, 1)
+    this._crc = CRC.crc16modbus(payload.slice(0, this.byteCount - 2 /* CRC bytes */))
+    payload.writeUInt16LE(this._crc, this.byteCount - 2)
+    return payload
   }
 }
 

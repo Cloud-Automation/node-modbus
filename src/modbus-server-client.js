@@ -1,16 +1,16 @@
 'use strict'
 
 let debug = require('debug')('modbus tcp client socket')
-let RequestHandler = require('./tcp-server-request-handler.js')
-let ResponseHandler = require('./tcp-server-response-handler.js')
+let RequestHandler = require('./modbus-server-request-handler.js')
+let ResponseHandler = require('./modbus-server-response-handler.js')
 
-class ModbusTCPClient {
-  constructor (server, socket) {
+class ModbusServerClient {
+  constructor (server, socket, Request, Response) {
     this._server = server
     this._socket = socket
 
-    this._requestHandler = new RequestHandler()
-    this._responseHandler = new ResponseHandler(this._server)
+    this._requestHandler = new RequestHandler(Request)
+    this._responseHandler = new ResponseHandler(this._server, Response)
 
     this._socket.on('data', this._onData.bind(this))
   }
@@ -45,4 +45,4 @@ class ModbusTCPClient {
   }
 }
 
-module.exports = ModbusTCPClient
+module.exports = ModbusServerClient
