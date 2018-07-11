@@ -11,11 +11,10 @@ class ReadInputRegistersResponseBody extends ModbusResponseBody {
    * @returns ReadInputRegistersResponseBody
    */
   static fromRequest (requestBody, inputRegisters) {
-    let startByte = requestBody.start
-    let endByte = requestBody.start + (requestBody.count * 2)
+    let startByte = requestBody.start * 2
+    let endByte = startByte + (requestBody.count * 2)
 
-    let bufferSegment = inputRegisters.slice(startByte, endByte)
-    let buf = Buffer.from(bufferSegment)
+    let buf = inputRegisters.slice(startByte, endByte)
 
     return new ReadInputRegistersResponseBody(buf.length, buf)
   }

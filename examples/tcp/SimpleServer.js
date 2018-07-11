@@ -3,7 +3,10 @@
 let net = require('net')
 let modbus = require('../..')
 let netServer = new net.Server()
-let server = new modbus.server.TCP(netServer)
+let holding = Buffer.alloc(10000)
+let server = new modbus.server.TCP(netServer, {
+  holding: holding
+})
 
 server.on('connection', function (client) {
   console.log('New Connection')
@@ -41,12 +44,12 @@ server.on('postWriteMultipleCoils', function (value) {
   console.log('Write multiple coils - Complete: ', value)
 })
 
-server.on('writeMultipleRegisters', function (value) {
+/* server.on('writeMultipleRegisters', function (value) {
   console.log('Write multiple registers - Existing: ', value)
-})
+}) */
 
 server.on('postWriteMultipleRegisters', function (value) {
-  console.log('Write multiple registers - Complete: ', value)
+  console.log('Write multiple registers - Complete: ', holding.readUInt16BE(0))
 })
 
 server.on('connection', function (client) {
@@ -68,4 +71,5 @@ server.holding.writeUInt16BE(0x0000, 2)
 server.input.writeUInt16BE(0xff00, 0)
 server.input.writeUInt16BE(0xff00, 2)
 
-netServer.listen(8502)
+console.log(process.argv[2])
+netServer.listen(process.argv[2] || 8502)

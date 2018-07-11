@@ -15,9 +15,10 @@ class TCPRequestHandler {
 
   handle (data) {
     this._buffer = Buffer.concat([this._buffer, data])
-    debug('this._buffer', this._buffer)
 
     do {
+      debug('this._buffer', this._buffer)
+
       let request = TCPRequest.fromBuffer(this._buffer)
       debug('request', request)
 

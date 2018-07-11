@@ -23,7 +23,7 @@ class ModbusTCPRequest {
       debug('tcp header complete, id', id, 'protocol', protocol, 'length', length, 'unitId', unitId)
       debug('buffer', buffer)
 
-      let body = CommonRequestBody.fromBuffer(buffer.slice(7, 7 + length - 1))
+      let body = CommonRequestBody.fromBuffer(buffer.slice(7, 6 + length))
 
       if (!body) {
         return null
@@ -99,7 +99,7 @@ class ModbusTCPRequest {
 
   /** The calculated byte count of the byte representation */
   get byteCount () {
-    return this._length + 6 + 1
+    return this._length + 6
   }
 }
 
