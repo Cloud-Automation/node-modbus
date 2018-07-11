@@ -43,9 +43,9 @@ describe('Modbus/RTU Client Request Tests', function () {
     it('should register an rtu request and handle a response', function (done) {
       let ReadHoldingRegistersRequestBody = require('../src/request/read-holding-registers.js')
       let handler = new ModbusRTUClientRequestHandler(socket, 1)
-      let request = new ReadHoldingRegistersRequestBody(1, 1)
+      let request = new ReadHoldingRegistersRequestBody(0, 1)
       let response = new ReadHoldingRegistersResponseBody(1, Buffer.from([0x00, 0x32]))
-      let rtuResponse = new ModbusRTUResponse(1, 0x9139, response)
+      let rtuResponse = new ModbusRTUResponse(1, 0x91C9, response)
 
       socket.emit('open')
 
