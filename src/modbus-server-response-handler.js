@@ -20,11 +20,16 @@ class ModbusServerResponseHandler {
         this._server.emit('readCoils', request, cb)
         return
       }
+
+      this._server.emit('preReadCoils', request, cb)
+
       let ReadCoilsResponseBody = require('./response/read-coils.js')
       let responseBody = ReadCoilsResponseBody.fromRequest(request.body, this._server.coils)
       let response = this._responseClass.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
+
+      this._server.emit('postReadCoils', request, cb)
 
       return response
     }
@@ -36,11 +41,15 @@ class ModbusServerResponseHandler {
         return
       }
 
+      this._server.emit('preReadDiscreteInputs', request, cb)
+
       let ReadDiscreteInputsResponseBody = require('./response/read-discrete-inputs.js')
       let responseBody = ReadDiscreteInputsResponseBody.fromRequest(request.body, this._server.discrete)
       let response = this._responseClass.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
+
+      this._server.emit('postReadDiscreteInputs', request, cb)
 
       return response
     }
@@ -52,11 +61,15 @@ class ModbusServerResponseHandler {
         return
       }
 
+      this._server.emit('preReadHoldingRegisters', request, cb)
+
       let ReadHoldingRegistersResponseBody = require('./response/read-holding-registers.js')
       let responseBody = ReadHoldingRegistersResponseBody.fromRequest(request.body, this._server.holding)
       let response = this._responseClass.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
+
+      this._server.emit('postReadHoldingRegisters', request, cb)
 
       return response
     }
@@ -68,11 +81,15 @@ class ModbusServerResponseHandler {
         return
       }
 
+      this._server.emit('preReadInputRegisters', request, cb)
+
       let ReadInputRegistersResponseBody = require('./response/read-input-registers.js')
       let responseBody = ReadInputRegistersResponseBody.fromRequest(request.body, this._server.input)
       let response = this._responseClass.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
+
+      this._server.emit('postReadInputRegisters', request, cb)
 
       return response
     }
@@ -83,6 +100,8 @@ class ModbusServerResponseHandler {
         this._server.emit('writeSingleCoil', request, cb)
         return
       }
+
+      this._server.emit('preWriteSingleCoil', request, cb)
 
       let WriteSingleCoilResponseBody = require('./response/write-single-coil.js')
       let responseBody = WriteSingleCoilResponseBody.fromRequest(request.body)
@@ -129,6 +148,8 @@ class ModbusServerResponseHandler {
       let payload = response.createPayload()
       cb(payload)
 
+      this._server.emit('postWriteSingleCoil', request, cb)
+
       return response
     }
     /* write single register request */
@@ -138,6 +159,8 @@ class ModbusServerResponseHandler {
         this._server.emit('writeSingleRegister', request, cb)
         return
       }
+
+      this._server.emit('preWriteSingleRegister', request, cb)
 
       let WriteSingleRegisterResponseBody = require('./response/write-single-register.js')
       let responseBody = WriteSingleRegisterResponseBody.fromRequest(request.body)
@@ -158,6 +181,8 @@ class ModbusServerResponseHandler {
       let payload = response.createPayload()
       cb(payload)
 
+      this._server.emit('postWriteSingleRegister', request, cb)
+
       return response
     }
 
@@ -169,7 +194,12 @@ class ModbusServerResponseHandler {
         return
       }
 
-      let { bufferToArrayStatus, arrayStatusToBuffer } = require('./buffer-utils.js')
+      this._server.emit('preWriteMultipleCoils', request, cb)
+
+      let {
+        bufferToArrayStatus,
+        arrayStatusToBuffer
+      } = require('./buffer-utils.js')
       let WriteMultipleCoilsResponseBody = require('./response/write-multiple-coils.js')
 
       let responseBody = WriteMultipleCoilsResponseBody.fromRequest(request.body)
@@ -190,6 +220,8 @@ class ModbusServerResponseHandler {
       let payload = response.createPayload()
       cb(payload)
 
+      this._server.emit('postWriteMultipleCoils', request, cb)
+
       return response
     }
 
@@ -200,6 +232,8 @@ class ModbusServerResponseHandler {
         this._server.emit('writeMultipleRegisters', request, cb)
         return
       }
+
+      this._server.emit('preWriteMultipleRegisters', request, cb)
 
       let WriteMultipleRegistersResponseBody = require('./response/write-multiple-registers.js')
       let responseBody = WriteMultipleRegistersResponseBody.fromRequest(request.body)
@@ -215,14 +249,16 @@ class ModbusServerResponseHandler {
       } else {
         this._server.emit('writeMultipleRegisters', this._server.holding)
         this._server.holding.fill(request.body.values,
-                                request.body.address * 2,
-                                request.body.address * 2 + request.body.values.length)
+          request.body.address * 2,
+          request.body.address * 2 + request.body.values.length)
         this._server.emit('postWriteMultipleRegisters', this._server.holding)
       }
 
       let response = this._responseClass.fromRequest(request, responseBody)
       let payload = response.createPayload()
       cb(payload)
+
+      this._server.emit('postWriteMultipleRegisters', request, cb)
 
       return response
     }
