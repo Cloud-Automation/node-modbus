@@ -1,18 +1,27 @@
 'use strict'
 
-var ModbusClient = require('../..')
-var client = ModbusClient.createSerialClient('/dev/tty0', 9600)
+let modbus = require('../..')
+let Serialport = require('serialport')
+let socket = new Serialport('COM6', {
+  baudRate: 19200,
+  Parity: 'none',
+  stopBits: 1,
+  dataBits: 8
+})
 
-client.on('connect', function () {
+// set Slave PLC ID
+let client = new modbus.client.RTU(socket, 1)
+
+socket.on('connect', function () {
   client.readInputRegister(0, 12).then(function (resp) {
     console.log(resp)
-  }).fail(function (err) {
+    socket.close()
+  }, function (err) {
     console.log(err)
-  }).done(function () {
-    client.close()
+    socket.close()
   })
 })
 
-client.on('error', function (err) {
+socket.on('error', function (err) {
   console.log(err)
 })
