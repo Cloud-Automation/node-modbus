@@ -1,4 +1,5 @@
 let ModbusResponseBody = require('./response-body.js')
+let debug = require('debug')('ReadHoldingRegistersResponseBody')
 
 /** Read Holding Registers ResponseBody (Function Code 0x03)
  * @extends ModbusResponseBody
@@ -11,13 +12,14 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
    * @returns ReadHoldingRegistersResponseBody
    */
   static fromRequest (requestBody, holdingRegisters) {
-    let startByte = requestBody.start
-    let endByte = requestBody.start + (requestBody.count * 2)
+    let startByte = requestBody.start * 2
+    let endByte = (requestBody.start * 2) + (requestBody.count * 2)
 
     let bufferSegment = holdingRegisters.slice(startByte, endByte)
-    let buf = Buffer.from(bufferSegment)
 
-    return new ReadHoldingRegistersResponseBody(buf.length, buf)
+    /* TODO: check wheather holdingRegisters is big enough for this request */
+
+    return new ReadHoldingRegistersResponseBody(bufferSegment.length, bufferSegment)
   }
 
   /** Create ReadHoldingRegistersResponseBody from Buffer
@@ -45,6 +47,8 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
     super(0x03)
     this._byteCount = byteCount
     this._values = values
+
+    debug('ReadHoldingRegistersResponseBody values', values)
 
     if (values instanceof Array) {
       this._valuesAsArray = values
@@ -76,15 +80,24 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
   }
 
   createPayload () {
-    let payload = Buffer.alloc(this.byteCount)
+    if (this._values instanceof Buffer) {
+      let payload = Buffer.alloc(2)
+      payload.writeUInt8(this._fc, 0)
+      payload.writeUInt8(this._byteCount, 1)
+      payload = Buffer.concat([payload, this._values])
+      return payload
+    }
 
-    payload.writeUInt8(this._fc, 0)
-    payload.writeUInt8(this.length, 1)
-    this._values.forEach(function (value, i) {
-      payload.writeUInt8(value, 2 + i)
-    })
+    if (this._values instanceof Array) {
+      let payload = Buffer.alloc(this.byteCount)
+      payload.writeUInt8(this._fc, 0)
+      payload.writeUInt8(this._byteCount, 1)
+      this._values.forEach(function (value, i) {
+        payload.writeUInt8(value, 2 + i)
+      })
 
-    return payload
+      return payload
+    }
   }
 }
 

@@ -6,24 +6,23 @@ let ModbusResponseBody = require('./response-body.js')
  */
 class ReadInputRegistersResponseBody extends ModbusResponseBody {
   /** Create ReadInputRegistersResponseBody from Request
- * @param {ReadInputRegistersRequestBody} request
- * @param {Buffer} inputRegisters
- * @returns ReadInputRegistersResponseBody
- */
+   * @param {ReadInputRegistersRequestBody} request
+   * @param {Buffer} inputRegisters
+   * @returns ReadInputRegistersResponseBody
+   */
   static fromRequest (requestBody, inputRegisters) {
-    let startByte = requestBody.start
-    let endByte = requestBody.start + (requestBody.count * 2)
+    let startByte = requestBody.start * 2
+    let endByte = startByte + (requestBody.count * 2)
 
-    let bufferSegment = inputRegisters.slice(startByte, endByte)
-    let buf = Buffer.from(bufferSegment)
+    let buf = inputRegisters.slice(startByte, endByte)
 
     return new ReadInputRegistersResponseBody(buf.length, buf)
   }
 
-/** Create ReadInputRegistersResponseBody from Buffer
- * @param {Buffer} buffer
- * @returns ReadInputRegistersResponseBody
- */
+  /** Create ReadInputRegistersResponseBody from Buffer
+   * @param {Buffer} buffer
+   * @returns ReadInputRegistersResponseBody
+   */
   static fromBuffer (buffer) {
     let fc = buffer.readUInt8(0)
     let byteCount = buffer.readUInt8(1)
