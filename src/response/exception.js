@@ -57,7 +57,7 @@ class ExceptionResponseBody extends ModbusResponseBody {
 
   createPayload () {
     let payload = Buffer.alloc(2)
-    payload.writeUInt8(this._fc, 0)
+    payload.writeUInt8(this._fc | 0x80, 0)
     payload.writeUInt8(this._code, 1)
     return payload
   }

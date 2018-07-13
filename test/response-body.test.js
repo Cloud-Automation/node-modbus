@@ -3,6 +3,7 @@
 /* global describe, it */
 
 let assert = require('assert')
+const ExceptionResponseBody = require('../src/response/exception.js')
 let ResponseBody = require('../src/response/response-body.js')
 let ReadCoilsResponseBody = require('../src/response/read-coils.js')
 
@@ -53,6 +54,12 @@ describe('Modbus Response Tests.', function () {
       let response = ReadCoilsResponseBody.fromBuffer(buffer)
 
       assert.ok(response === null)
+    })
+  })
+  describe('Exception Responses', function () {
+    it('should set the MSB to 1 on the function field', function () {
+      const response = new ExceptionResponseBody(0x01, 0x04)
+      assert.deepEqual(response.createPayload(), Buffer.from([0x81, 0x04]))
     })
   })
 })
