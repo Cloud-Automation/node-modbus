@@ -111,7 +111,7 @@ We've got a munin server running some scripts. You can find detailed results on 
 
 ![Memory usage per day](http://jsmodbus.cloud-automation.de/localdomain/localhost.localdomain/memory_by_node_process-day.png)
 
-## License
+## License (MIT)
 
 Copyright (C) 2017 Stefan Poeter (Stefan.Poeter[at]cloud-automation.de)
 
