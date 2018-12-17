@@ -43,7 +43,7 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
     return new ReadHoldingRegistersResponseBody(byteCount, values, payload)
   }
 
-  constructor (byteCount, values) {
+  constructor (byteCount, values, payload) {
     super(0x03)
     this._byteCount = byteCount
     this._values = values
