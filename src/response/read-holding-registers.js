@@ -61,7 +61,7 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
       this._bufferLength += values.length
     }
     
-    if (payload != undefined && payload instanceof Buffer) {
+    if (payload !== undefined && payload instanceof Buffer) {
       this._valuesAsBuffer = payload;
     }
   }
