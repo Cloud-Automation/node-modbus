@@ -37,7 +37,7 @@ class ReadInputRegistersResponseBody extends ModbusResponseBody {
       values.push(payload.readUInt16BE(i))
     }
 
-    return new ReadInputRegistersResponseBody(byteCount, values)
+    return new ReadInputRegistersResponseBody(byteCount, values, payload)
   }
 
   constructor (byteCount, values, payload) {
@@ -54,6 +54,10 @@ class ReadInputRegistersResponseBody extends ModbusResponseBody {
     if (values instanceof Buffer) {
       this._valuesAsBuffer = values
       this._bufferLength += values.length
+    }
+
+    if (payload !== undefined && payload instanceof Buffer) {
+      this._valuesAsBuffer = payload
     }
   }
 
