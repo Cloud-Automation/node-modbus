@@ -238,7 +238,7 @@ class ModbusServerResponseHandler {
       let WriteMultipleRegistersResponseBody = require('./response/write-multiple-registers.js')
       let responseBody = WriteMultipleRegistersResponseBody.fromRequest(request.body)
 
-      if (responseBody.start * 2 > this._server.holding.length) {
+      if (((request.body.address * 2) + request.body.values.length) > this._server.holding.length) {
         debug('illegal data address')
         let ExceptionResponseBody = require('./response/exception.js')
         /* illegal data address */
@@ -248,9 +248,10 @@ class ModbusServerResponseHandler {
         return response
       } else {
         this._server.emit('writeMultipleRegisters', this._server.holding)
+        console.log(request.body)
         this._server.holding.fill(request.body.values,
-          request.body.start * 2,
-          request.body.start * 2 + request.body.values.length)
+          request.body.address * 2,
+          request.body.address * 2 + request.body.values.length)
         this._server.emit('postWriteMultipleRegisters', this._server.holding)
       }
 
