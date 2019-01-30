@@ -1,5 +1,5 @@
-let debug = require('debug')('tcp-response')
-let ResponseFactory = require('./response/response-factory.js')
+const debug = require('debug')('tcp-response')
+const ResponseFactory = require('./response/response-factory.js')
 
 /** Modbus/TCP Response
  * @class
@@ -26,15 +26,15 @@ class ModbusTCPResponse {
    */
   static fromBuffer (buffer) {
     try {
-      let id = buffer.readUInt16BE(0)
-      let protocol = buffer.readUInt16BE(2)
-      let length = buffer.readUInt16BE(4)
-      let unitId = buffer.readUInt8(6)
+      const id = buffer.readUInt16BE(0)
+      const protocol = buffer.readUInt16BE(2)
+      const length = buffer.readUInt16BE(4)
+      const unitId = buffer.readUInt8(6)
 
       debug('tcp header complete, id', id, 'protocol', protocol, 'length', length, 'unitId', unitId)
       debug('buffer', buffer)
 
-      let body = ResponseFactory.fromBuffer(buffer.slice(7, 7 + length - 1))
+      const body = ResponseFactory.fromBuffer(buffer.slice(7, 7 + length - 1))
 
       if (!body) {
         debug('not enough data for a response body')
@@ -105,7 +105,7 @@ class ModbusTCPResponse {
      * Byte count = 1 Byte
      * Coil status = n Bytes
      */
-    let payload = Buffer.alloc(this.byteCount)
+    const payload = Buffer.alloc(this.byteCount)
     payload.writeUInt16BE(this._id, 0)
     payload.writeUInt16BE(this._protocol, 2)
     payload.writeUInt16BE(this._bodyLength, 4)

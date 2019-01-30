@@ -5,10 +5,10 @@
  */
 class ModbusResponseBody {
   static fromBuffer (buffer) {
-    let ReadCoilsResponse = require('./read-coils.js')
+    const ReadCoilsResponse = require('./read-coils.js')
 
     try {
-      let fc = buffer.readUInt8(0)
+      const fc = buffer.readUInt8(0)
 
       if (fc === 0x01) {
         return ReadCoilsResponse.fromBuffer(buffer)

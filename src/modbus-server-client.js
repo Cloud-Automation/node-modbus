@@ -1,8 +1,8 @@
 'use strict'
 
-let debug = require('debug')('modbus tcp client socket')
-let RequestHandler = require('./modbus-server-request-handler.js')
-let ResponseHandler = require('./modbus-server-response-handler.js')
+const debug = require('debug')('modbus tcp client socket')
+const RequestHandler = require('./modbus-server-request-handler.js')
+const ResponseHandler = require('./modbus-server-response-handler.js')
 
 class ModbusServerClient {
   constructor (server, socket, Request, Response) {
@@ -28,7 +28,7 @@ class ModbusServerClient {
     this._requestHandler.handle(data)
 
     do {
-      let request = this._requestHandler.shift()
+      const request = this._requestHandler.shift()
 
       if (!request) {
         debug('no request to process')

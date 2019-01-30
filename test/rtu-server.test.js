@@ -1,9 +1,9 @@
 /* global describe, it, beforeEach */
 'use strict'
 
-let assert = require('assert')
-let Modbus = require('../')
-let EventEmitter = require('events')
+const assert = require('assert')
+const Modbus = require('../')
+const EventEmitter = require('events')
 
 describe('RTU Server Tests.', function () {
   let socket, server

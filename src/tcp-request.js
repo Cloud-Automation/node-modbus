@@ -1,5 +1,5 @@
-let debug = require('debug')('tcp-request')
-let CommonRequestBody = require('./request/request-body.js')
+const debug = require('debug')('tcp-request')
+const CommonRequestBody = require('./request/request-body.js')
 
 /** Class representing a Modbus TCP Request */
 class ModbusTCPRequest {
@@ -15,15 +15,15 @@ class ModbusTCPRequest {
         return null
       }
 
-      let id = buffer.readUInt16BE(0)
-      let protocol = buffer.readUInt16BE(2)
-      let length = buffer.readUInt16BE(4)
-      let unitId = buffer.readUInt8(6)
+      const id = buffer.readUInt16BE(0)
+      const protocol = buffer.readUInt16BE(2)
+      const length = buffer.readUInt16BE(4)
+      const unitId = buffer.readUInt8(6)
 
       debug('tcp header complete, id', id, 'protocol', protocol, 'length', length, 'unitId', unitId)
       debug('buffer', buffer)
 
-      let body = CommonRequestBody.fromBuffer(buffer.slice(7, 6 + length))
+      const body = CommonRequestBody.fromBuffer(buffer.slice(7, 6 + length))
 
       if (!body) {
         return null
@@ -90,8 +90,8 @@ class ModbusTCPRequest {
   /** Creates a buffer object representing the modbus tcp request.
    * @returns {Buffer} */
   createPayload () {
-    let body = this._body.createPayload()
-    let payload = Buffer.alloc(7 + this._body.byteCount)
+    const body = this._body.createPayload()
+    const payload = Buffer.alloc(7 + this._body.byteCount)
 
     payload.writeUInt16BE(this._id, 0) // transaction id
     payload.writeUInt16BE(0x0000, 2) // protocol version

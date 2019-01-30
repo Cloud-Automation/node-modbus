@@ -2,23 +2,23 @@
 
 /* global describe, it */
 
-let assert = require('assert')
-let ReadCoilsResponseBody = require('../src/response/read-coils.js')
-let ReadDiscreteInputsResponseBody = require('../src/response/read-discrete-inputs.js')
-let ReadHoldingRegistersResponseBody = require('../src/response/read-holding-registers.js')
-let ReadInputRegistersResponseBody = require('../src/response/read-input-registers.js')
-let WriteSingleCoilResponseBody = require('../src/response/write-single-coil.js')
-let WriteSingleRegisterResponseBody = require('../src/response/write-single-register.js')
-let WriteMultipleCoilsResponseBody = require('../src/response/write-multiple-coils.js')
-let WriteMultipleRegistersResponseBody = require('../src/response/write-multiple-registers.js')
-let ModbusTCPResponse = require('../src/tcp-response.js')
-let ModbusTCPRequest = require('../src/tcp-request.js')
+const assert = require('assert')
+const ReadCoilsResponseBody = require('../src/response/read-coils.js')
+const ReadDiscreteInputsResponseBody = require('../src/response/read-discrete-inputs.js')
+const ReadHoldingRegistersResponseBody = require('../src/response/read-holding-registers.js')
+const ReadInputRegistersResponseBody = require('../src/response/read-input-registers.js')
+const WriteSingleCoilResponseBody = require('../src/response/write-single-coil.js')
+const WriteSingleRegisterResponseBody = require('../src/response/write-single-register.js')
+const WriteMultipleCoilsResponseBody = require('../src/response/write-multiple-coils.js')
+const WriteMultipleRegistersResponseBody = require('../src/response/write-multiple-registers.js')
+const ModbusTCPResponse = require('../src/tcp-response.js')
+const ModbusTCPRequest = require('../src/tcp-request.js')
 
 describe('Modbus/TCP Server Response Handler Tests', function () {
   /* we are using the read coils function to test the modbus/tcp specifics */
 
   it('should handle a valid read coils request', function () {
-    let requestBuffer = Buffer.from([
+    const requestBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
@@ -28,15 +28,15 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x00, 0x08 // quantity
     ])
 
-    let coils = Buffer.from([
+    const coils = Buffer.from([
       0x01
     ])
 
-    let request = ModbusTCPRequest.fromBuffer(requestBuffer)
-    let responseBody = ReadCoilsResponseBody.fromRequest(request.body, coils)
-    let response = ModbusTCPResponse.fromRequest(request, responseBody)
-    let payload = response.createPayload()
-    let responseBuffer = Buffer.from([
+    const request = ModbusTCPRequest.fromBuffer(requestBuffer)
+    const responseBody = ReadCoilsResponseBody.fromRequest(request.body, coils)
+    const response = ModbusTCPResponse.fromRequest(request, responseBody)
+    const payload = response.createPayload()
+    const responseBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x04, // byte count
@@ -50,7 +50,7 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
   })
 
   it('should handle a valid read discrete inputs request', function () {
-    let requestBuffer = Buffer.from([
+    const requestBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
@@ -60,15 +60,15 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x00, 0x03 // quantity
     ])
 
-    let discreteInputs = Buffer.from([
+    const discreteInputs = Buffer.from([
       0xff
     ])
 
-    let request = ModbusTCPRequest.fromBuffer(requestBuffer)
-    let responseBody = ReadDiscreteInputsResponseBody.fromRequest(request.body, discreteInputs)
-    let response = ModbusTCPResponse.fromRequest(request, responseBody)
-    let payload = response.createPayload()
-    let responseBuffer = Buffer.from([
+    const request = ModbusTCPRequest.fromBuffer(requestBuffer)
+    const responseBody = ReadDiscreteInputsResponseBody.fromRequest(request.body, discreteInputs)
+    const response = ModbusTCPResponse.fromRequest(request, responseBody)
+    const payload = response.createPayload()
+    const responseBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x04, // byte count
@@ -82,7 +82,7 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
   })
 
   it('should handle a valid read holding registers request', function () {
-    let requestBuffer = Buffer.from([
+    const requestBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
@@ -92,18 +92,18 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x00, 0x03 // quantity
     ])
 
-    let holdingRegisters = Buffer.from([
+    const holdingRegisters = Buffer.from([
       0xff, 0x10,
       0x07, 0x08,
       0x01, 0x10,
       0xff, 0x88
     ])
 
-    let request = ModbusTCPRequest.fromBuffer(requestBuffer)
-    let responseBody = ReadHoldingRegistersResponseBody.fromRequest(request.body, holdingRegisters)
-    let response = ModbusTCPResponse.fromRequest(request, responseBody)
-    let payload = response.createPayload()
-    let responseBuffer = Buffer.from([
+    const request = ModbusTCPRequest.fromBuffer(requestBuffer)
+    const responseBody = ReadHoldingRegistersResponseBody.fromRequest(request.body, holdingRegisters)
+    const response = ModbusTCPResponse.fromRequest(request, responseBody)
+    const payload = response.createPayload()
+    const responseBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x09, // byte count
@@ -118,7 +118,7 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
   })
 
   it('should handle a valid read input registers request', function () {
-    let requestBuffer = Buffer.from([
+    const requestBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
@@ -128,18 +128,18 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x00, 0x03 // quantity
     ])
 
-    let inputRegisters = Buffer.from([
+    const inputRegisters = Buffer.from([
       0xff, 0x10,
       0x07, 0x08,
       0x01, 0x10,
       0xff, 0x88
     ])
 
-    let request = ModbusTCPRequest.fromBuffer(requestBuffer)
-    let responseBody = ReadInputRegistersResponseBody.fromRequest(request.body, inputRegisters)
-    let response = ModbusTCPResponse.fromRequest(request, responseBody)
-    let payload = response.createPayload()
-    let responseBuffer = Buffer.from([
+    const request = ModbusTCPRequest.fromBuffer(requestBuffer)
+    const responseBody = ReadInputRegistersResponseBody.fromRequest(request.body, inputRegisters)
+    const response = ModbusTCPResponse.fromRequest(request, responseBody)
+    const payload = response.createPayload()
+    const responseBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x09, // byte count
@@ -154,7 +154,7 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
   })
 
   it('should handle a valid write coil request', function () {
-    let requestBuffer = Buffer.from([
+    const requestBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
@@ -164,11 +164,11 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0xff, 0x00 // output value
     ])
 
-    let request = ModbusTCPRequest.fromBuffer(requestBuffer)
-    let responseBody = WriteSingleCoilResponseBody.fromRequest(request.body)
-    let response = ModbusTCPResponse.fromRequest(request, responseBody)
-    let payload = response.createPayload()
-    let responseBuffer = Buffer.from([
+    const request = ModbusTCPRequest.fromBuffer(requestBuffer)
+    const responseBody = WriteSingleCoilResponseBody.fromRequest(request.body)
+    const response = ModbusTCPResponse.fromRequest(request, responseBody)
+    const payload = response.createPayload()
+    const responseBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
@@ -181,7 +181,7 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
   })
 
   it('should handle a valid write register request', function () {
-    let requestBuffer = Buffer.from([
+    const requestBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
@@ -191,11 +191,11 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0xff, 0xff  // output value
     ])
 
-    let request = ModbusTCPRequest.fromBuffer(requestBuffer)
-    let responseBody = WriteSingleRegisterResponseBody.fromRequest(request.body)
-    let response = ModbusTCPResponse.fromRequest(request, responseBody)
-    let payload = response.createPayload()
-    let responseBuffer = Buffer.from([
+    const request = ModbusTCPRequest.fromBuffer(requestBuffer)
+    const responseBody = WriteSingleRegisterResponseBody.fromRequest(request.body)
+    const response = ModbusTCPResponse.fromRequest(request, responseBody)
+    const payload = response.createPayload()
+    const responseBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
@@ -208,7 +208,7 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
   })
 
   it('should handle a valid write multiple coils request', function () {
-    let requestBuffer = Buffer.from([
+    const requestBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x09, // byte count
@@ -220,11 +220,11 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0xff, 0xff  // outputs value
     ])
 
-    let request = ModbusTCPRequest.fromBuffer(requestBuffer)
-    let responseBody = WriteMultipleCoilsResponseBody.fromRequest(request.body)
-    let response = ModbusTCPResponse.fromRequest(request, responseBody)
-    let payload = response.createPayload()
-    let responseBuffer = Buffer.from([
+    const request = ModbusTCPRequest.fromBuffer(requestBuffer)
+    const responseBody = WriteMultipleCoilsResponseBody.fromRequest(request.body)
+    const response = ModbusTCPResponse.fromRequest(request, responseBody)
+    const payload = response.createPayload()
+    const responseBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count
@@ -237,7 +237,7 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
   })
 
   it('should handle a valid write multiple registers request', function () {
-    let requestBuffer = Buffer.from([
+    const requestBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x0b, // byte count
@@ -250,11 +250,11 @@ describe('Modbus/TCP Server Response Handler Tests', function () {
       0x01, 0x02  // outputs value
     ])
 
-    let request = ModbusTCPRequest.fromBuffer(requestBuffer)
-    let responseBody = WriteMultipleRegistersResponseBody.fromRequest(request.body)
-    let response = ModbusTCPResponse.fromRequest(request, responseBody)
-    let payload = response.createPayload()
-    let responseBuffer = Buffer.from([
+    const request = ModbusTCPRequest.fromBuffer(requestBuffer)
+    const responseBody = WriteMultipleRegistersResponseBody.fromRequest(request.body)
+    const response = ModbusTCPResponse.fromRequest(request, responseBody)
+    const payload = response.createPayload()
+    const responseBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x06, // byte count

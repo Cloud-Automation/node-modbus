@@ -1,6 +1,6 @@
 'use strict'
 
-let debug = require('debug')('modbus-server-request-handler')
+const debug = require('debug')('modbus-server-request-handler')
 
 class RequestHandler {
   constructor (requestClass) {
@@ -18,7 +18,7 @@ class RequestHandler {
     debug('this._buffer', this._buffer)
 
     do {
-      let request = this._requestClass.fromBuffer(this._buffer)
+      const request = this._requestClass.fromBuffer(this._buffer)
       debug('request', request)
 
       if (!request) {

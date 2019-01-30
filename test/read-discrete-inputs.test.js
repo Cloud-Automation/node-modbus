@@ -2,22 +2,22 @@
 
 /* global describe, it */
 
-let assert = require('assert')
-let ReadDiscreteInputsRequest = require('../src/request/read-discrete-inputs.js')
-let ReadDiscreteInputsResponse = require('../src/response/read-discrete-inputs.js')
+const assert = require('assert')
+const ReadDiscreteInputsRequest = require('../src/request/read-discrete-inputs.js')
+const ReadDiscreteInputsResponse = require('../src/response/read-discrete-inputs.js')
 
 describe('ReadDiscreteInputs Tests.', function () {
   describe('ReadDiscreteInputs Response', function () {
     it('should create a buffer from a read discrete inputs message', function () {
-      let response = new ReadDiscreteInputsResponse([1, 0, 1, 0, 1, 0, 1, 0, 1, 0], 2)
-      let buffer = response.createPayload()
-      let expected = Buffer.from([0x02, 0x02, 0x55, 0x01])
+      const response = new ReadDiscreteInputsResponse([1, 0, 1, 0, 1, 0, 1, 0, 1, 0], 2)
+      const buffer = response.createPayload()
+      const expected = Buffer.from([0x02, 0x02, 0x55, 0x01])
 
       assert.deepEqual(expected, buffer)
     })
     it('should create a message object from a buffer', function () {
-      let buffer = Buffer.from([0x02, 0x02, 0x55, 0x01])
-      let message = ReadDiscreteInputsResponse.fromBuffer(buffer)
+      const buffer = Buffer.from([0x02, 0x02, 0x55, 0x01])
+      const message = ReadDiscreteInputsResponse.fromBuffer(buffer)
 
       assert.equal(0x02, message.fc)
       assert.equal(0x02, message.numberOfBytes)
@@ -25,14 +25,14 @@ describe('ReadDiscreteInputs Tests.', function () {
       assert.deepEqual(Buffer.from([0x55, 0x01]), message.valuesAsBuffer)
     })
     it('should return null on not enough buffer data', function () {
-      let buffer = Buffer.from([0x02])
-      let message = ReadDiscreteInputsResponse.fromBuffer(buffer)
+      const buffer = Buffer.from([0x02])
+      const message = ReadDiscreteInputsResponse.fromBuffer(buffer)
 
       assert.ok(message === null)
     })
     it('should return null on wrong function code', function () {
-      let buffer = Buffer.from([0x03, 0x03, 0x0a, 0x00, 0x0c])
-      let message = ReadDiscreteInputsResponse.fromBuffer(buffer)
+      const buffer = Buffer.from([0x03, 0x03, 0x0a, 0x00, 0x0c])
+      const message = ReadDiscreteInputsResponse.fromBuffer(buffer)
 
       assert.ok(message === null)
     })
@@ -40,15 +40,15 @@ describe('ReadDiscreteInputs Tests.', function () {
 
   describe('ReadDiscreteInputs Requests', function () {
     it('should create a buffer from a discrete inputs message', function () {
-      let readDiscreteInputsRequest = new ReadDiscreteInputsRequest(22, 33)
-      let buffer = readDiscreteInputsRequest.createPayload()
-      let expected = Buffer.from([0x02, 0x00, 0x16, 0x00, 0x21])
+      const readDiscreteInputsRequest = new ReadDiscreteInputsRequest(22, 33)
+      const buffer = readDiscreteInputsRequest.createPayload()
+      const expected = Buffer.from([0x02, 0x00, 0x16, 0x00, 0x21])
 
       assert.deepEqual(expected, buffer)
     })
     it('should create a message from a buffer', function () {
-      let buffer = Buffer.from([0x02, 0x00, 0x16, 0x00, 0x21])
-      let message = ReadDiscreteInputsRequest.fromBuffer(buffer)
+      const buffer = Buffer.from([0x02, 0x00, 0x16, 0x00, 0x21])
+      const message = ReadDiscreteInputsRequest.fromBuffer(buffer)
 
       assert.ok(message !== null)
       assert.equal(0x02, message.fc)
@@ -56,14 +56,14 @@ describe('ReadDiscreteInputs Tests.', function () {
       assert.equal(33, message.count)
     })
     it('should return null on not enough buffer data', function () {
-      let buffer = Buffer.from([0x02, 0x00])
-      let message = ReadDiscreteInputsRequest.fromBuffer(buffer)
+      const buffer = Buffer.from([0x02, 0x00])
+      const message = ReadDiscreteInputsRequest.fromBuffer(buffer)
 
       assert.ok(message === null)
     })
     it('should return null on wrong function code', function () {
-      let buffer = Buffer.from([0x03, 0x00, 0x0a, 0x00, 0x0c])
-      let message = ReadDiscreteInputsRequest.fromBuffer(buffer)
+      const buffer = Buffer.from([0x03, 0x00, 0x0a, 0x00, 0x0c])
+      const message = ReadDiscreteInputsRequest.fromBuffer(buffer)
 
       assert.ok(message === null)
     })

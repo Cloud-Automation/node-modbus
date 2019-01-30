@@ -1,9 +1,9 @@
 'use strict'
 
-let debug = require('debug')('rtu-client-request-handler')
-let ModbusRTURequest = require('./rtu-request.js')
-let ModbusClientRequestHandler = require('./client-request-handler.js')
-let CRC = require('crc')
+const debug = require('debug')('rtu-client-request-handler')
+const ModbusRTURequest = require('./rtu-request.js')
+const ModbusClientRequestHandler = require('./client-request-handler.js')
+const CRC = require('crc')
 
 /** Modbus/RTU Client Request Handler
  * Implements behaviour for Client Requests for Modbus/RTU
@@ -27,7 +27,7 @@ class ModbusRTUClientRequestHandler extends ModbusClientRequestHandler {
   register (requestBody) {
     debug('registrating new request')
 
-    let request = new ModbusRTURequest(this._address, requestBody)
+    const request = new ModbusRTURequest(this._address, requestBody)
 
     return super.register(request)
   }
@@ -38,17 +38,17 @@ class ModbusRTUClientRequestHandler extends ModbusClientRequestHandler {
       return
     }
 
-    let userRequest = this._currentRequest
+    const userRequest = this._currentRequest
 
     if (!userRequest) {
       debug('something is strange, received a respone without a request')
       return
     }
 
-    let buf = Buffer.concat([Buffer.from([response.address]), response.body.createPayload()])
+    const buf = Buffer.concat([Buffer.from([response.address]), response.body.createPayload()])
     debug('create crc from response', buf)
 
-    let crc = CRC.crc16modbus(buf)
+    const crc = CRC.crc16modbus(buf)
 
     if (response.crc !== crc) {
       debug('CRC does not match', response.crc, '!==', crc)

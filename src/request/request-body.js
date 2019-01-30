@@ -1,6 +1,6 @@
 'use strict'
 
-let debug = require('debug')('request-body')
+const debug = require('debug')('request-body')
 
 /** Common Modbus Request Body
  * @abstract
@@ -16,44 +16,44 @@ class ModbusRequestBody {
      * of this kind should lead to disconnecting the client. This way we can make sure that
      * unintendet messages do not harm the server */
     try {
-      let fc = buffer.readUInt8(0)
+      const fc = buffer.readUInt8(0)
 
       if (fc === 0x01) {
-        let ReadCoilsRequest = require('./read-coils.js')
+        const ReadCoilsRequest = require('./read-coils.js')
         return ReadCoilsRequest.fromBuffer(buffer)
       }
       if (fc === 0x02) {
-        let ReadDiscreteInputsRequest = require('./read-discrete-inputs.js')
+        const ReadDiscreteInputsRequest = require('./read-discrete-inputs.js')
         return ReadDiscreteInputsRequest.fromBuffer(buffer)
       }
       if (fc === 0x03) {
-        let ReadHoldingRegistersRequest = require('./read-holding-registers.js')
+        const ReadHoldingRegistersRequest = require('./read-holding-registers.js')
         return ReadHoldingRegistersRequest.fromBuffer(buffer)
       }
       if (fc === 0x04) {
-        let ReadInputRegistersRequest = require('./read-input-registers.js')
+        const ReadInputRegistersRequest = require('./read-input-registers.js')
         return ReadInputRegistersRequest.fromBuffer(buffer)
       }
       if (fc === 0x05) {
-        let WriteSingleCoilRequest = require('./write-single-coil.js')
+        const WriteSingleCoilRequest = require('./write-single-coil.js')
         return WriteSingleCoilRequest.fromBuffer(buffer)
       }
       if (fc === 0x06) {
-        let WriteSingleRegisterRequest = require('./write-single-register.js')
+        const WriteSingleRegisterRequest = require('./write-single-register.js')
         return WriteSingleRegisterRequest.fromBuffer(buffer)
       }
       if (fc === 0x0f) {
-        let WriteMultipleCoilsResponse = require('./write-multiple-coils.js')
+        const WriteMultipleCoilsResponse = require('./write-multiple-coils.js')
         return WriteMultipleCoilsResponse.fromBuffer(buffer)
       }
       if (fc === 0x10) {
-        let WriteMultipleRegistersResponse = require('./write-multiple-registers.js')
+        const WriteMultipleRegistersResponse = require('./write-multiple-registers.js')
         return WriteMultipleRegistersResponse.fromBuffer(buffer)
       }
 
       if (fc <= 0x2B) {
         debug('Illegal Function (fc %d)', fc)
-        let ExceptionRequest = require('./exception.js')
+        const ExceptionRequest = require('./exception.js')
         return new ExceptionRequest(fc, 0x01)
       }
     } catch (e) {

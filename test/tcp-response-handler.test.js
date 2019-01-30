@@ -2,8 +2,8 @@
 
 /* global describe, it, beforeEach */
 
-let assert = require('assert')
-let TCPResponseHandler = require('../src/tcp-client-response-handler.js')
+const assert = require('assert')
+const TCPResponseHandler = require('../src/tcp-client-response-handler.js')
 
 describe('Modbus/TCP Client Response Handler Tests', function () {
   let handler
@@ -15,7 +15,7 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
   /* we are using the read coils function to test the modbus/tcp specifics */
 
   it('should handle a valid read coils response', function () {
-    let responseBuffer = Buffer.from([
+    const responseBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x05, // byte count
@@ -28,7 +28,7 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
 
     handler.handleData(responseBuffer)
 
-    let response = handler.shift()
+    const response = handler.shift()
 
     assert.ok(response !== null)
     assert.equal(1, response.id)
@@ -40,7 +40,7 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
     assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
   })
   it('should handle a exception', function () {
-    let responseBuffer = Buffer.from([
+    const responseBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x03, // byte count
@@ -51,7 +51,7 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
 
     handler.handleData(responseBuffer)
 
-    let response = handler.shift()
+    const response = handler.shift()
 
     assert.ok(response !== undefined)
     assert.equal(0x01, response.id)
@@ -64,12 +64,12 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
     assert.equal('ILLEGAL FUNCTION', response.body.message)
   })
   it('should handle a chopped response', function () {
-    let responseBufferA = Buffer.from([
+    const responseBufferA = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x05  // byte count
     ])
-    let responseBufferB = Buffer.from([
+    const responseBufferB = Buffer.from([
       0x03,       // unit id
       0x01,       // function code
       0x02,       // byte count

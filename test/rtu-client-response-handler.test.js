@@ -2,8 +2,8 @@
 
 /* global describe, it, beforeEach */
 
-let assert = require('assert')
-let ModbusRTUClientResponseHandler = require('../src/rtu-client-response-handler.js')
+const assert = require('assert')
+const ModbusRTUClientResponseHandler = require('../src/rtu-client-response-handler.js')
 
 describe('Modbus/RTU Client Response Tests', function () {
   let handler
@@ -14,7 +14,7 @@ describe('Modbus/RTU Client Response Tests', function () {
 
   /* we are using the read coils function to test rtu specifics */
   it('should handle a valid read coils response', function () {
-    let responseBuffer = Buffer.from([
+    const responseBuffer = Buffer.from([
       0x01,       // address
       0x01,       // function code
       0x02,       // byte count
@@ -25,7 +25,7 @@ describe('Modbus/RTU Client Response Tests', function () {
 
     handler.handleData(responseBuffer)
 
-    let response = handler.shift()
+    const response = handler.shift()
 
     assert.ok(response !== null)
     assert.equal(1, response.address)
@@ -37,7 +37,7 @@ describe('Modbus/RTU Client Response Tests', function () {
     assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
   })
   it('should handle a exception', function () {
-    let responseBuffer = Buffer.from([
+    const responseBuffer = Buffer.from([
       0x01,       // address
       0x81,       // exception code for fc 0x01
       0x01,       // exception code ILLEGAL FUNCTION
@@ -46,7 +46,7 @@ describe('Modbus/RTU Client Response Tests', function () {
 
     handler.handleData(responseBuffer)
 
-    let response = handler.shift()
+    const response = handler.shift()
 
     assert.ok(response !== undefined)
     assert.equal(0x01, response.address)
@@ -55,10 +55,10 @@ describe('Modbus/RTU Client Response Tests', function () {
     assert.equal('ILLEGAL FUNCTION', response.body.message)
   })
   it('should handle a chopped response', function () {
-    let responseBufferA = Buffer.from([
+    const responseBufferA = Buffer.from([
       0x01       // address
     ])
-    let responseBufferB = Buffer.from([
+    const responseBufferB = Buffer.from([
       0x01,       // function code
       0x02,       // byte count
       0xdd,       // coils

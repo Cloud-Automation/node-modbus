@@ -1,6 +1,6 @@
-let debug = require('debug')('rtu-request')
-let CRC = require('crc')
-let CommonRequestBody = require('./request/request-body.js')
+const debug = require('debug')('rtu-request')
+const CRC = require('crc')
+const CommonRequestBody = require('./request/request-body.js')
 
 class ModbusRTURequest {
   /** Convert a buffer into a new Modbus RTU Request. Returns null if the buffer
@@ -65,13 +65,13 @@ class ModbusRTURequest {
   }
 
   createPayload () {
-    let bodyPayload = this._body.createPayload()
+    const bodyPayload = this._body.createPayload()
 
     this._crc = CRC.crc16modbus(Buffer.concat([Buffer.from([this._address]), bodyPayload]))
-    let crBu = Buffer.alloc(2)
+    const crBu = Buffer.alloc(2)
     crBu.writeUInt16LE(this._crc)
-    let idBuf = Buffer.from([this._address])
-    let payload = Buffer.concat([idBuf, bodyPayload, crBu])
+    const idBuf = Buffer.from([this._address])
+    const payload = Buffer.concat([idBuf, bodyPayload, crBu])
 
     return payload
   }

@@ -1,4 +1,4 @@
-let EventEmitter = require('events')
+const EventEmitter = require('events')
 
 class ModbusServer extends EventEmitter {
   constructor (options) {

@@ -1,4 +1,4 @@
-let Messages = {
+const Messages = {
   0x01: 'ILLEGAL FUNCTION',
   0x02: 'ILLEGAL DATA ADDRESS',
   0x03: 'ILLEGAL DATA VALUE',
@@ -10,7 +10,7 @@ let Messages = {
   0x0B: 'GATEWAY TARGET DEVICE FAILED TO RESPOND'
 }
 
-let ModbusResponseBody = require('./response-body.js')
+const ModbusResponseBody = require('./response-body.js')
 
 /** Modbus Excepiton Response Body
  * @extends ModbusResponseBody
@@ -23,8 +23,8 @@ class ExceptionResponseBody extends ModbusResponseBody {
    * @returns {ExceptionResponseBody}
    */
   static fromBuffer (buffer) {
-    let fc = buffer.readUInt8(0)
-    let code = buffer.readUInt8(1)
+    const fc = buffer.readUInt8(0)
+    const code = buffer.readUInt8(1)
     return new ExceptionResponseBody(fc - 0x80, code)
   }
 
@@ -56,7 +56,7 @@ class ExceptionResponseBody extends ModbusResponseBody {
   }
 
   createPayload () {
-    let payload = Buffer.alloc(2)
+    const payload = Buffer.alloc(2)
     payload.writeUInt8(this._fc, 0)
     payload.writeUInt8(this._code, 1)
     return payload

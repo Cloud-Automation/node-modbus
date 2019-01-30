@@ -1,14 +1,14 @@
-let debug = require('debug')('response-factory')
+const debug = require('debug')('response-factory')
 
-let ExceptionResponseBody = require('./exception.js')
-let ReadCoilsResponseBody = require('./read-coils.js')
-let ReadDiscreteInputsBody = require('./read-discrete-inputs.js')
-let ReadHoldingRegistersBody = require('./read-holding-registers.js')
-let ReadInputRegistersBody = require('./read-input-registers.js')
-let WriteSingleCoilBody = require('./write-single-coil.js')
-let WriteSingleRegisterBody = require('./write-single-register.js')
-let WriteMultipleCoilsBody = require('./write-multiple-coils.js')
-let WriteMultipleRegistersBody = require('./write-multiple-registers.js')
+const ExceptionResponseBody = require('./exception.js')
+const ReadCoilsResponseBody = require('./read-coils.js')
+const ReadDiscreteInputsBody = require('./read-discrete-inputs.js')
+const ReadHoldingRegistersBody = require('./read-holding-registers.js')
+const ReadInputRegistersBody = require('./read-input-registers.js')
+const WriteSingleCoilBody = require('./write-single-coil.js')
+const WriteSingleRegisterBody = require('./write-single-register.js')
+const WriteMultipleCoilsBody = require('./write-multiple-coils.js')
+const WriteMultipleRegistersBody = require('./write-multiple-registers.js')
 
 /** Response Factory
  * @factory
@@ -16,7 +16,7 @@ let WriteMultipleRegistersBody = require('./write-multiple-registers.js')
 class ResponseFactory {
   static fromBuffer (buffer) {
     try {
-      let fc = buffer.readUInt8(0)
+      const fc = buffer.readUInt8(0)
 
       debug('fc', fc, 'payload', buffer)
 

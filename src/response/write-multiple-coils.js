@@ -1,4 +1,4 @@
-let ModbusResponseBody = require('./response-body.js')
+const ModbusResponseBody = require('./response-body.js')
 
 /** WriteMultipleCoils Response Body (Function Code 0x0f)
  * @extends ModbusResponseBody
@@ -11,16 +11,16 @@ class WriteMultipleCoilsResponseBody extends ModbusResponseBody {
   * @returns WriteMultipleCoilsResponseBody
   */
   static fromRequest (requestBody) {
-    let start = requestBody.address
-    let quantity = requestBody.quantity
+    const start = requestBody.address
+    const quantity = requestBody.quantity
 
     return new WriteMultipleCoilsResponseBody(start, quantity)
   }
 
   static fromBuffer (buffer) {
-    let fc = buffer.readUInt8(0)
-    let start = buffer.readUInt16BE(1)
-    let quantity = buffer.readUInt16BE(3)
+    const fc = buffer.readUInt8(0)
+    const start = buffer.readUInt16BE(1)
+    const quantity = buffer.readUInt16BE(3)
 
     if (fc !== 0x0f) {
       return null
@@ -48,7 +48,7 @@ class WriteMultipleCoilsResponseBody extends ModbusResponseBody {
   }
 
   createPayload () {
-    let payload = Buffer.alloc(this.byteCount)
+    const payload = Buffer.alloc(this.byteCount)
 
     payload.writeUInt8(this._fc, 0)
     payload.writeUInt16BE(this._start, 1)

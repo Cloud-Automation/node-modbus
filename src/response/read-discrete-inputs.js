@@ -1,4 +1,4 @@
-let ModbusResponseBody = require('./response-body.js')
+const ModbusResponseBody = require('./response-body.js')
 const {
   bufferToArrayStatus,
   arrayStatusToBuffer
@@ -15,13 +15,13 @@ class ReadDiscreteInputsResponseBody extends ModbusResponseBody {
    * @returns ReadDiscreteInputsResponseBody
    */
   static fromRequest (requestBody, discreteInputs) {
-    let discreteStatus = bufferToArrayStatus(discreteInputs)
+    const discreteStatus = bufferToArrayStatus(discreteInputs)
 
-    let start = requestBody.start
-    let end = start + requestBody.count
+    const start = requestBody.start
+    const end = start + requestBody.count
 
     // Extract the segment of coils status
-    let segmentStatus = discreteStatus.slice(start, end)
+    const segmentStatus = discreteStatus.slice(start, end)
 
     return new ReadDiscreteInputsResponseBody(segmentStatus, Math.ceil(segmentStatus.length / 8))
   }
@@ -32,9 +32,9 @@ class ReadDiscreteInputsResponseBody extends ModbusResponseBody {
    */
   static fromBuffer (buffer) {
     try {
-      let fc = buffer.readUInt8(0)
-      let byteCount = buffer.readUInt8(1)
-      let coilStatus = buffer.slice(2, 2 + byteCount)
+      const fc = buffer.readUInt8(0)
+      const byteCount = buffer.readUInt8(1)
+      const coilStatus = buffer.slice(2, 2 + byteCount)
 
       if (coilStatus.length !== byteCount) {
         return null
@@ -93,7 +93,7 @@ class ReadDiscreteInputsResponseBody extends ModbusResponseBody {
   }
 
   createPayload () {
-    let payload = Buffer.alloc(this.byteCount)
+    const payload = Buffer.alloc(this.byteCount)
 
     payload.writeUInt8(this._fc, 0)
     payload.writeUInt8(this._numberOfBytes, 1)

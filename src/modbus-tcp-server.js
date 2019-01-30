@@ -1,10 +1,10 @@
 'use strict'
 
-let debug = require('debug')('modbus tcp server')
-let ModbusServer = require('./modbus-server')
-let ModbusServerClient = require('./modbus-server-client.js')
-let Request = require('./tcp-request.js')
-let Response = require('./tcp-response.js')
+const debug = require('debug')('modbus tcp server')
+const ModbusServer = require('./modbus-server')
+const ModbusServerClient = require('./modbus-server-client.js')
+const Request = require('./tcp-request.js')
+const Response = require('./tcp-response.js')
 
 class ModbusTCPServer extends ModbusServer {
   constructor (server, options) {
@@ -16,7 +16,7 @@ class ModbusTCPServer extends ModbusServer {
 
   _onConnection (socket) {
     debug('new connection coming in')
-    let client = new ModbusServerClient(this, socket, Request, Response)
+    const client = new ModbusServerClient(this, socket, Request, Response)
 
     this.emit('connection', client)
   }

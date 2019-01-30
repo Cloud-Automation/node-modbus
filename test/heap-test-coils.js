@@ -10,7 +10,7 @@ const options = {
 }
 const client = new modbus.client.TCP(socket)
 
-let request = function () {
+const request = function () {
   return client.readCoils(0, 13)
 }
 
@@ -24,7 +24,7 @@ socket.on('connect', function () {
   }
 
   p.then(function () {
-    let usedHeapSize = Math.floor(v8.getHeapStatistics().used_heap_size / 1e6)
+    const usedHeapSize = Math.floor(v8.getHeapStatistics().used_heap_size / 1e6)
 
     console.log('Heap:', usedHeapSize, 'MB')
 

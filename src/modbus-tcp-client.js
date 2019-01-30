@@ -1,8 +1,8 @@
 'use strict'
 
-let ModbusClient = require('./modbus-client.js')
-let ModbusTCPClientRequestHandler = require('./tcp-client-request-handler.js')
-let ModbusTCPClientResponseHandler = require('./tcp-client-response-handler.js')
+const ModbusClient = require('./modbus-client.js')
+const ModbusTCPClientRequestHandler = require('./tcp-client-request-handler.js')
+const ModbusTCPClientResponseHandler = require('./tcp-client-response-handler.js')
 
 /** This client must be initiated with a net.Socket object. The module does not handle reconnections
  * or anything related to keep the connection up in case of an unplugged cable or a closed server. See
@@ -10,9 +10,9 @@ let ModbusTCPClientResponseHandler = require('./tcp-client-response-handler.js')
  * @extends ModbusClient
  * @class
  * @example <caption>Create new Modbus/TCP Client</caption>
- * let net = require('net')
- * let socket = new net.Socket()
- * let client = new Modbus.tcp.Client(socket)
+ * const net = require('net')
+ * const socket = new net.Socket()
+ * const client = new Modbus.tcp.Client(socket)
  *
  * socket.connect({'host' : hostname, 'port' : 502 })
  *

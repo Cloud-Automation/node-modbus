@@ -1,6 +1,6 @@
-let debug = require('debug')('rtu-response-handler')
-let ModbusRTUResponse = require('./rtu-response.js')
-let ModbusClientResponseHandler = require('./client-response-handler.js')
+const debug = require('debug')('rtu-response-handler')
+const ModbusRTUResponse = require('./rtu-response.js')
+const ModbusClientResponseHandler = require('./client-response-handler.js')
 
 /** Modbus/RTU Client Response Handler
  * @extends ModbusClientResponseHandler
@@ -14,7 +14,7 @@ class ModbusRTUClientResponseHandler extends ModbusClientResponseHandler {
     debug('buffer', this._buffer)
 
     do {
-      let response = ModbusRTUResponse.fromBuffer(this._buffer)
+      const response = ModbusRTUResponse.fromBuffer(this._buffer)
 
       if (!response) {
         debug('not enough data available to parse')
