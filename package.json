@@ -17,12 +17,14 @@
   },
   "devDependencies": {
     "mocha": "^3.3.0",
+    "nyc": "^13.1.0",
     "sinon": "2.2.0",
     "standard": "^8.5.0"
   },
   "scripts": {
     "test": "standard && mocha test/*.test.js",
-    "watch": "standard && mocha --watch test/*.test.js"
+    "watch": "standard && mocha --watch test/*.test.js",
+    "cov": "nyc mocha test/*.test.js"
   },
   "license": "MIT",
   "keywords": [
