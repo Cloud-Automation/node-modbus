@@ -7,11 +7,11 @@ const client = modbus.client.tcp.complete({
   'autoReconnect': false,
   'logEnabled': true
 }).connect()
-const successCount = 0
-const errorCount = 0
-const reconnectCount = 0
-const closedOnPurpose = false
-const firstTime = true
+let successCount = 0
+let errorCount = 0
+let reconnectCount = 0
+let closedOnPurpose = false
+let firstTime = true
 
 const start = function () {
   console.log('Starting request...')
