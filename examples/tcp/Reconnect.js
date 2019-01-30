@@ -1,19 +1,19 @@
 'use strict'
 
-var modbus = require('../..')
-var client = modbus.client.tcp.complete({
+const modbus = require('../..')
+const client = modbus.client.tcp.complete({
   'host': process.argv[2],
   'port': process.argv[3],
   'autoReconnect': false,
   'logEnabled': true
 }).connect()
-var successCount = 0
-var errorCount = 0
-var reconnectCount = 0
-var closedOnPurpose = false
-var firstTime = true
+const successCount = 0
+const errorCount = 0
+const reconnectCount = 0
+const closedOnPurpose = false
+const firstTime = true
 
-var start = function () {
+const start = function () {
   console.log('Starting request...')
 
   client.readHoldingRegisters(process.argv[4], process.argv[5]).then(function (resp) {
@@ -48,7 +48,7 @@ client.on('connect', function () {
   start()
 })
 
-var shutdown = function () {
+const shutdown = function () {
   closedOnPurpose = true
 
   client.close()

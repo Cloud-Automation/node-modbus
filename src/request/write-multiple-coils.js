@@ -78,7 +78,7 @@ class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
       let cntr = 0
       const bytes = Buffer.allocUnsafe(this._numberOfBytes)
 
-      for (var i = 0; i < len; i += 1) {
+      for (let i = 0; i < len; i += 1) {
         curByte += this._values[i] ? Math.pow(2, cntr) : 0
 
         cntr = (cntr + 1) % 8

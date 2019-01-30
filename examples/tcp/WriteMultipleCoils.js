@@ -10,7 +10,7 @@ const options = {
 const client = new modbus.client.TCP(socket)
 
 socket.on('connect', function () {
-  var values = Buffer.from([0xff])
+  const values = Buffer.from([0xff])
 
   client.writeMultipleCoils(13, values, 8)
     .then(function (resp) {
