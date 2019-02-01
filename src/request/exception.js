@@ -1,4 +1,4 @@
-let ModbusRequestBody = require('./request-body.js')
+const ModbusRequestBody = require('./request-body.js')
 
 /** Write Single Coil Request Body
  * @extends ModbusRequestBody
@@ -6,7 +6,7 @@ let ModbusRequestBody = require('./request-body.js')
 class ExceptionRequestBody extends ModbusRequestBody {
   static fromBuffer (buffer) {
     try {
-      let fc = buffer.readUInt8(0)
+      const fc = buffer.readUInt8(0)
 
       if (fc > 0x2B) {
         return null
@@ -33,7 +33,7 @@ class ExceptionRequestBody extends ModbusRequestBody {
   }
 
   createPayload () {
-    let payload = Buffer.alloc(2)
+    const payload = Buffer.alloc(2)
 
     payload.writeUInt8(this._fc, 0) // function code
     payload.writeUInt8(this._code, 1) // code address

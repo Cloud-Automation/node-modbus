@@ -1,13 +1,13 @@
 'use strict'
 
-let modbus = require('../..')
-let net = require('net')
-let socket = new net.Socket()
-let options = {
+const modbus = require('../..')
+const net = require('net')
+const socket = new net.Socket()
+const options = {
   'host': '192.168.56.101',
   'port': '502'
 }
-let client = new modbus.client.TCP(socket)
+const client = new modbus.client.TCP(socket)
 
 socket.on('connect', function () {
   client.writeSingleRegister(1002, 333)

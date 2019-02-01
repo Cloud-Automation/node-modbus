@@ -4,9 +4,9 @@ const OUT_OF_SYNC = 'OutOfSync'
 const OFFLINE = 'Offline'
 const MODBUS_EXCEPTION = 'ModbusException'
 
-let debug = require('debug')('client-request-handler')
-let UserRequest = require('./user-request.js')
-let ExceptionResponseBody = require('./response/exception.js')
+const debug = require('debug')('client-request-handler')
+const UserRequest = require('./user-request.js')
+const ExceptionResponseBody = require('./response/exception.js')
 
 /** Common Request Handler
  * @abstract
@@ -39,7 +39,7 @@ class ModbusClientRequestHandler {
     this._clearCurrentRequest()
 
     while (this._requests.length > 0) {
-      let req = this._requests.shift()
+      const req = this._requests.shift()
       req.reject({
         'err': OUT_OF_SYNC,
         'message': 'rejecting because of earlier OutOfSync error'
@@ -61,7 +61,7 @@ class ModbusClientRequestHandler {
    * @returns {Promise} A promise to handle the request outcome.
    */
   register (request) {
-    let userRequest = new UserRequest(request, this._timeout)
+    const userRequest = new UserRequest(request, this._timeout)
 
     this._requests.push(userRequest)
     this._flush()
@@ -79,14 +79,14 @@ class ModbusClientRequestHandler {
       return
     }
 
-    let userRequest = this._currentRequest
+    const userRequest = this._currentRequest
 
     if (!userRequest) {
       debug('no current request, no idea where this came from')
       return
     }
 
-    let request = userRequest.request
+    const request = userRequest.request
 
     /* check that response fc equals request id */
     if (response.body.fc < 0x80 && response.body.fc !== request.body.fc) {
@@ -149,7 +149,7 @@ class ModbusClientRequestHandler {
       return
     }
 
-    let payload = this._currentRequest.createPayload()
+    const payload = this._currentRequest.createPayload()
 
     debug('flushing new request', payload)
 

@@ -1,5 +1,5 @@
-let ModbusResponseBody = require('./response-body.js')
-let debug = require('debug')('ReadHoldingRegistersResponseBody')
+const ModbusResponseBody = require('./response-body.js')
+const debug = require('debug')('ReadHoldingRegistersResponseBody')
 
 /** Read Holding Registers ResponseBody (Function Code 0x03)
  * @extends ModbusResponseBody
@@ -12,10 +12,10 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
    * @returns ReadHoldingRegistersResponseBody
    */
   static fromRequest (requestBody, holdingRegisters) {
-    let startByte = requestBody.start * 2
-    let endByte = (requestBody.start * 2) + (requestBody.count * 2)
+    const startByte = requestBody.start * 2
+    const endByte = (requestBody.start * 2) + (requestBody.count * 2)
 
-    let bufferSegment = holdingRegisters.slice(startByte, endByte)
+    const bufferSegment = holdingRegisters.slice(startByte, endByte)
 
     /* TODO: check wheather holdingRegisters is big enough for this request */
 
@@ -27,15 +27,15 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
    * @returns ReadHoldingRegistersResponseBody
    */
   static fromBuffer (buffer) {
-    let fc = buffer.readUInt8(0)
-    let byteCount = buffer.readUInt8(1)
-    let payload = buffer.slice(2, 2 + byteCount)
+    const fc = buffer.readUInt8(0)
+    const byteCount = buffer.readUInt8(1)
+    const payload = buffer.slice(2, 2 + byteCount)
 
     if (fc !== 0x03) {
       return null
     }
 
-    let values = []
+    const values = []
     for (let i = 0; i < byteCount; i += 2) {
       values.push(payload.readUInt16BE(i))
     }
@@ -96,7 +96,7 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
     }
 
     if (this._values instanceof Array) {
-      let payload = Buffer.alloc(this.byteCount)
+      const payload = Buffer.alloc(this.byteCount)
       payload.writeUInt8(this._fc, 0)
       payload.writeUInt8(this._byteCount, 1)
       this._values.forEach(function (value, i) {

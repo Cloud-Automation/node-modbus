@@ -1,6 +1,6 @@
 'use strict'
 
-let debug = require('debug')('modbus tcp response handler')
+const debug = require('debug')('modbus tcp response handler')
 
 class ModbusServerResponseHandler {
   constructor (server, Response) {
@@ -23,10 +23,10 @@ class ModbusServerResponseHandler {
 
       this._server.emit('preReadCoils', request, cb)
 
-      let ReadCoilsResponseBody = require('./response/read-coils.js')
-      let responseBody = ReadCoilsResponseBody.fromRequest(request.body, this._server.coils)
-      let response = this._responseClass.fromRequest(request, responseBody)
-      let payload = response.createPayload()
+      const ReadCoilsResponseBody = require('./response/read-coils.js')
+      const responseBody = ReadCoilsResponseBody.fromRequest(request.body, this._server.coils)
+      const response = this._responseClass.fromRequest(request, responseBody)
+      const payload = response.createPayload()
       cb(payload)
 
       this._server.emit('postReadCoils', request, cb)
@@ -43,10 +43,10 @@ class ModbusServerResponseHandler {
 
       this._server.emit('preReadDiscreteInputs', request, cb)
 
-      let ReadDiscreteInputsResponseBody = require('./response/read-discrete-inputs.js')
-      let responseBody = ReadDiscreteInputsResponseBody.fromRequest(request.body, this._server.discrete)
-      let response = this._responseClass.fromRequest(request, responseBody)
-      let payload = response.createPayload()
+      const ReadDiscreteInputsResponseBody = require('./response/read-discrete-inputs.js')
+      const responseBody = ReadDiscreteInputsResponseBody.fromRequest(request.body, this._server.discrete)
+      const response = this._responseClass.fromRequest(request, responseBody)
+      const payload = response.createPayload()
       cb(payload)
 
       this._server.emit('postReadDiscreteInputs', request, cb)
@@ -63,10 +63,10 @@ class ModbusServerResponseHandler {
 
       this._server.emit('preReadHoldingRegisters', request, cb)
 
-      let ReadHoldingRegistersResponseBody = require('./response/read-holding-registers.js')
-      let responseBody = ReadHoldingRegistersResponseBody.fromRequest(request.body, this._server.holding)
-      let response = this._responseClass.fromRequest(request, responseBody)
-      let payload = response.createPayload()
+      const ReadHoldingRegistersResponseBody = require('./response/read-holding-registers.js')
+      const responseBody = ReadHoldingRegistersResponseBody.fromRequest(request.body, this._server.holding)
+      const response = this._responseClass.fromRequest(request, responseBody)
+      const payload = response.createPayload()
       cb(payload)
 
       this._server.emit('postReadHoldingRegisters', request, cb)
@@ -83,10 +83,10 @@ class ModbusServerResponseHandler {
 
       this._server.emit('preReadInputRegisters', request, cb)
 
-      let ReadInputRegistersResponseBody = require('./response/read-input-registers.js')
-      let responseBody = ReadInputRegistersResponseBody.fromRequest(request.body, this._server.input)
-      let response = this._responseClass.fromRequest(request, responseBody)
-      let payload = response.createPayload()
+      const ReadInputRegistersResponseBody = require('./response/read-input-registers.js')
+      const responseBody = ReadInputRegistersResponseBody.fromRequest(request.body, this._server.input)
+      const response = this._responseClass.fromRequest(request, responseBody)
+      const payload = response.createPayload()
       cb(payload)
 
       this._server.emit('postReadInputRegisters', request, cb)
@@ -103,23 +103,23 @@ class ModbusServerResponseHandler {
 
       this._server.emit('preWriteSingleCoil', request, cb)
 
-      let WriteSingleCoilResponseBody = require('./response/write-single-coil.js')
-      let responseBody = WriteSingleCoilResponseBody.fromRequest(request.body)
+      const WriteSingleCoilResponseBody = require('./response/write-single-coil.js')
+      const responseBody = WriteSingleCoilResponseBody.fromRequest(request.body)
 
-      let address = request.body.address
+      const address = request.body.address
 
       debug('Writing value %d to address %d', request.body.value, address)
 
       // find the byte that contains the coil to be written
-      let oldValue = this._server.coils.readUInt8(Math.floor(address / 8))
+      const oldValue = this._server.coils.readUInt8(Math.floor(address / 8))
       let newValue
 
       if (request.body.value !== 0xFF00 && request.body.value !== 0x0000) {
         debug('illegal data value')
-        let ExceptionResponseBody = require('./response/exception.js')
+        const ExceptionResponseBody = require('./response/exception.js')
         /* illegal data value */
-        let responseBody = new ExceptionResponseBody(request.body.fc, 0x03)
-        let response = this._responseClass.fromRequest(request, responseBody)
+        const responseBody = new ExceptionResponseBody(request.body.fc, 0x03)
+        const response = this._responseClass.fromRequest(request, responseBody)
         cb(response.createPayload())
         return response
       }
@@ -134,18 +134,18 @@ class ModbusServerResponseHandler {
 
       if (responseBody.address / 8 > this._server.coils.length) {
         debug('illegal data address')
-        let ExceptionResponseBody = require('./response/exception.js')
+        const ExceptionResponseBody = require('./response/exception.js')
         /* illegal data address */
-        let responseBody = new ExceptionResponseBody(request.body.fc, 0x02)
-        let response = this._responseClass.fromRequest(request, responseBody)
+        const responseBody = new ExceptionResponseBody(request.body.fc, 0x02)
+        const response = this._responseClass.fromRequest(request, responseBody)
         cb(response.createPayload())
         return response
       } else {
         this._server.coils.writeUInt8(newValue, Math.floor(address / 8))
       }
 
-      let response = this._responseClass.fromRequest(request, responseBody)
-      let payload = response.createPayload()
+      const response = this._responseClass.fromRequest(request, responseBody)
+      const payload = response.createPayload()
       cb(payload)
 
       this._server.emit('postWriteSingleCoil', request, cb)
@@ -162,23 +162,23 @@ class ModbusServerResponseHandler {
 
       this._server.emit('preWriteSingleRegister', request, cb)
 
-      let WriteSingleRegisterResponseBody = require('./response/write-single-register.js')
-      let responseBody = WriteSingleRegisterResponseBody.fromRequest(request.body)
+      const WriteSingleRegisterResponseBody = require('./response/write-single-register.js')
+      const responseBody = WriteSingleRegisterResponseBody.fromRequest(request.body)
 
       if (responseBody.address * 2 > this._server.holding.length) {
         debug('illegal data address')
-        let ExceptionResponseBody = require('./response/exception.js')
+        const ExceptionResponseBody = require('./response/exception.js')
         /* illegal data address */
-        let responseBody = new ExceptionResponseBody(request.body.fc, 0x02)
-        let response = this._responseClass.fromRequest(request, responseBody)
+        const responseBody = new ExceptionResponseBody(request.body.fc, 0x02)
+        const response = this._responseClass.fromRequest(request, responseBody)
         cb(response.createPayload())
         return response
       } else {
         this._server.holding.writeUInt16BE(responseBody.value, responseBody.address * 2)
       }
 
-      let response = this._responseClass.fromRequest(request, responseBody)
-      let payload = response.createPayload()
+      const response = this._responseClass.fromRequest(request, responseBody)
+      const payload = response.createPayload()
       cb(payload)
 
       this._server.emit('postWriteSingleRegister', request, cb)
@@ -196,19 +196,19 @@ class ModbusServerResponseHandler {
 
       this._server.emit('preWriteMultipleCoils', request, cb)
 
-      let {
+      const {
         bufferToArrayStatus,
         arrayStatusToBuffer
       } = require('./buffer-utils.js')
-      let WriteMultipleCoilsResponseBody = require('./response/write-multiple-coils.js')
+      const WriteMultipleCoilsResponseBody = require('./response/write-multiple-coils.js')
 
-      let responseBody = WriteMultipleCoilsResponseBody.fromRequest(request.body)
-      let oldStatus = bufferToArrayStatus(this._server.coils)
-      let requestCoilValues = bufferToArrayStatus(request.body.valuesAsBuffer)
-      let start = request.body.address
-      let end = start + request.body.quantity
+      const responseBody = WriteMultipleCoilsResponseBody.fromRequest(request.body)
+      const oldStatus = bufferToArrayStatus(this._server.coils)
+      const requestCoilValues = bufferToArrayStatus(request.body.valuesAsBuffer)
+      const start = request.body.address
+      const end = start + request.body.quantity
 
-      let newStatus = oldStatus.map((byte, i) => {
+      const newStatus = oldStatus.map((byte, i) => {
         return (i >= start && i < end) ? requestCoilValues.shift() : byte
       })
 
@@ -216,8 +216,8 @@ class ModbusServerResponseHandler {
       this._server.coils.fill(arrayStatusToBuffer(newStatus))
       this._server.emit('postWriteMultipleCoils', this._server.coils, newStatus)
 
-      let response = this._responseClass.fromRequest(request, responseBody)
-      let payload = response.createPayload()
+      const response = this._responseClass.fromRequest(request, responseBody)
+      const payload = response.createPayload()
       cb(payload)
 
       this._server.emit('postWriteMultipleCoils', request, cb)
@@ -235,15 +235,15 @@ class ModbusServerResponseHandler {
 
       this._server.emit('preWriteMultipleRegisters', request, cb)
 
-      let WriteMultipleRegistersResponseBody = require('./response/write-multiple-registers.js')
-      let responseBody = WriteMultipleRegistersResponseBody.fromRequest(request.body)
+      const WriteMultipleRegistersResponseBody = require('./response/write-multiple-registers.js')
+      const responseBody = WriteMultipleRegistersResponseBody.fromRequest(request.body)
 
       if (((request.body.address * 2) + request.body.values.length) > this._server.holding.length) {
         debug('illegal data address')
-        let ExceptionResponseBody = require('./response/exception.js')
+        const ExceptionResponseBody = require('./response/exception.js')
         /* illegal data address */
-        let responseBody = new ExceptionResponseBody(request.body.fc, 0x10)
-        let response = this._responseClass.fromRequest(request, responseBody)
+        const responseBody = new ExceptionResponseBody(request.body.fc, 0x10)
+        const response = this._responseClass.fromRequest(request, responseBody)
         cb(response.createPayload())
         return response
       } else {
@@ -255,8 +255,8 @@ class ModbusServerResponseHandler {
         this._server.emit('postWriteMultipleRegisters', this._server.holding)
       }
 
-      let response = this._responseClass.fromRequest(request, responseBody)
-      let payload = response.createPayload()
+      const response = this._responseClass.fromRequest(request, responseBody)
+      const payload = response.createPayload()
       cb(payload)
 
       this._server.emit('postWriteMultipleRegisters', request, cb)
@@ -267,9 +267,9 @@ class ModbusServerResponseHandler {
     if (request.body.fc > 0x80) {
       /* exception request */
 
-      let ExceptionResponseBody = require('./response/exception.js')
-      let responseBody = ExceptionResponseBody.fromRequest(request.body)
-      let response = this._responseClass.fromRequest(request, responseBody)
+      const ExceptionResponseBody = require('./response/exception.js')
+      const responseBody = ExceptionResponseBody.fromRequest(request.body)
+      const response = this._responseClass.fromRequest(request, responseBody)
       cb(response.createPayload())
       return response
     }

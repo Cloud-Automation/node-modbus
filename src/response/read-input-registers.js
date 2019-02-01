@@ -1,4 +1,4 @@
-let ModbusResponseBody = require('./response-body.js')
+const ModbusResponseBody = require('./response-body.js')
 
 /** Read Input Registers Response Body (Function Code 0x04)
  * @extends ModbusResponseBody
@@ -11,10 +11,10 @@ class ReadInputRegistersResponseBody extends ModbusResponseBody {
    * @returns ReadInputRegistersResponseBody
    */
   static fromRequest (requestBody, inputRegisters) {
-    let startByte = requestBody.start * 2
-    let endByte = startByte + (requestBody.count * 2)
+    const startByte = requestBody.start * 2
+    const endByte = startByte + (requestBody.count * 2)
 
-    let buf = inputRegisters.slice(startByte, endByte)
+    const buf = inputRegisters.slice(startByte, endByte)
 
     return new ReadInputRegistersResponseBody(buf.length, buf)
   }
@@ -24,15 +24,15 @@ class ReadInputRegistersResponseBody extends ModbusResponseBody {
    * @returns ReadInputRegistersResponseBody
    */
   static fromBuffer (buffer) {
-    let fc = buffer.readUInt8(0)
-    let byteCount = buffer.readUInt8(1)
-    let payload = buffer.slice(2, 2 + byteCount)
+    const fc = buffer.readUInt8(0)
+    const byteCount = buffer.readUInt8(1)
+    const payload = buffer.slice(2, 2 + byteCount)
 
     if (fc !== 0x04) {
       return null
     }
 
-    let values = []
+    const values = []
     for (let i = 0; i < byteCount; i += 2) {
       values.push(payload.readUInt16BE(i))
     }
@@ -82,7 +82,7 @@ class ReadInputRegistersResponseBody extends ModbusResponseBody {
   }
 
   createPayload () {
-    let payload = Buffer.alloc(this.byteCount)
+    const payload = Buffer.alloc(this.byteCount)
 
     payload.writeUInt8(this._fc, 0)
     payload.writeUInt8(this.length, 1)

@@ -2,10 +2,10 @@
 
 'use strict'
 
-let net = require('net')
-let modbus = require('../..')
-let netServer = new net.Server()
-let server = new modbus.server.TCP(netServer)
+const net = require('net')
+const modbus = require('../..')
+const netServer = new net.Server()
+const server = new modbus.server.TCP(netServer)
 
 server.on('connection', function () {
 

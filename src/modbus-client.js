@@ -1,13 +1,13 @@
-let debug = require('debug')('modbus-client')
+const debug = require('debug')('modbus-client')
 
-let ReadCoilsRequestBody = require('./request/read-coils.js')
-let ReadDiscreteInputsRequestBody = require('./request/read-discrete-inputs.js')
-let ReadHoldingRegistersRequestBody = require('./request/read-holding-registers.js')
-let ReadInputRegistersRequestBody = require('./request/read-input-registers.js')
-let WriteSingleCoilRequestBody = require('./request/write-single-coil.js')
-let WriteSingleRegisterRequestBody = require('./request/write-single-register.js')
-let WriteMultipleCoilsRequestBody = require('./request/write-multiple-coils.js')
-let WriteMultipleRegistersRequestBody = require('./request/write-multiple-registers.js')
+const ReadCoilsRequestBody = require('./request/read-coils.js')
+const ReadDiscreteInputsRequestBody = require('./request/read-discrete-inputs.js')
+const ReadHoldingRegistersRequestBody = require('./request/read-holding-registers.js')
+const ReadInputRegistersRequestBody = require('./request/read-input-registers.js')
+const WriteSingleCoilRequestBody = require('./request/write-single-coil.js')
+const WriteSingleRegisterRequestBody = require('./request/write-single-register.js')
+const WriteMultipleCoilsRequestBody = require('./request/write-multiple-coils.js')
+const WriteMultipleRegistersRequestBody = require('./request/write-multiple-registers.js')
 
 /** Common Modbus Client
  * @abstract
@@ -39,7 +39,7 @@ class ModbusClient {
     /* get latest message from message handler */
 
     do {
-      let response = this._responseHandler.shift()
+      const response = this._responseHandler.shift()
 
       /* no message was parsed by now, come back later */
       if (!response) {

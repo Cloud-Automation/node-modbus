@@ -1,4 +1,4 @@
-let ModbusRequestBody = require('./request-body.js')
+const ModbusRequestBody = require('./request-body.js')
 
 /** Read Coils Request Body
  * @extends ModbusRequestBody
@@ -6,14 +6,14 @@ let ModbusRequestBody = require('./request-body.js')
 class ReadCoilsRequestBody extends ModbusRequestBody {
   static fromBuffer (buffer) {
     try {
-      let fc = buffer.readUInt8(0)
+      const fc = buffer.readUInt8(0)
 
       if (fc !== 0x01) {
         return null
       }
 
-      let start = buffer.readUInt16BE(1)
-      let quantity = buffer.readUInt16BE(3)
+      const start = buffer.readUInt16BE(1)
+      const quantity = buffer.readUInt16BE(3)
 
       return new ReadCoilsRequestBody(start, quantity)
     } catch (e) {
@@ -56,7 +56,7 @@ class ReadCoilsRequestBody extends ModbusRequestBody {
   }
 
   createPayload () {
-    let payload = Buffer.alloc(5)
+    const payload = Buffer.alloc(5)
 
     payload.writeUInt8(this._fc, 0) // function code
     payload.writeUInt16BE(this._start, 1) // start address

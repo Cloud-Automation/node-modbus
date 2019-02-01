@@ -1,8 +1,8 @@
 'use strict'
 
-let modbus = require('../..')
-let Serialport = require('serialport')
-let socket = new Serialport('COM6', {
+const modbus = require('../..')
+const Serialport = require('serialport')
+const socket = new Serialport('COM6', {
   baudRate: 19200,
   Parity: 'none',
   stopBits: 1,
@@ -10,7 +10,7 @@ let socket = new Serialport('COM6', {
 })
 
 // set Slave PLC ID
-let client = new modbus.client.RTU(socket, 1)
+const client = new modbus.client.RTU(socket, 1)
 
 socket.on('connect', function () {
   client.writeSingleCoil(4, true).then(function (resp) {

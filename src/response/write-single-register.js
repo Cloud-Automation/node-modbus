@@ -1,4 +1,4 @@
-let ModbusResponseBody = require('./response-body.js')
+const ModbusResponseBody = require('./response-body.js')
 
 /** WriteSingleRegister Resonse Body (Function code 0x05)
  * @extends ModbusResponseBody
@@ -11,16 +11,16 @@ class WriteSingleRegisterResponseBody extends ModbusResponseBody {
  * @returns WriteSingleRegisterResponseBody
  */
   static fromRequest (requestBody) {
-    let address = requestBody.address
-    let value = requestBody.value
+    const address = requestBody.address
+    const value = requestBody.value
 
     return new WriteSingleRegisterResponseBody(address, value)
   }
 
   static fromBuffer (buffer) {
-    let fc = buffer.readUInt8(0)
-    let address = buffer.readUInt16BE(1)
-    let value = buffer.readUInt16BE(3)
+    const fc = buffer.readUInt8(0)
+    const address = buffer.readUInt16BE(1)
+    const value = buffer.readUInt16BE(3)
 
     if (fc !== 0x06) {
       return null
@@ -48,7 +48,7 @@ class WriteSingleRegisterResponseBody extends ModbusResponseBody {
   }
 
   createPayload () {
-    let payload = Buffer.alloc(5)
+    const payload = Buffer.alloc(5)
 
     payload.writeUInt8(this._fc, 0)
     payload.writeUInt16BE(this._address, 1)

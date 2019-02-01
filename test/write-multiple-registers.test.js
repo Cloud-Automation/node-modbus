@@ -2,8 +2,8 @@
 
 /* global describe, it */
 
-let assert = require('assert')
-let WriteMultipleRegistersRequest = require('../src/request/write-multiple-registers.js')
+const assert = require('assert')
+const WriteMultipleRegistersRequest = require('../src/request/write-multiple-registers.js')
 
 describe('WriteMultipleRegisters Tests.', function () {
   describe('WriteMultipleRegisters Response', function () {
@@ -12,9 +12,9 @@ describe('WriteMultipleRegisters Tests.', function () {
 
   describe('WriteMultipleRegisters Request', function () {
     it('should create a buffer from a write multiple registers message', function () {
-      let request = new WriteMultipleRegistersRequest(10, [0x0001, 0x0002, 0x1234, 0x4321])
-      let buffer = request.createPayload()
-      let expected = Buffer.from([0x10, 0x00, 0x0a, 0x00, 0x04, 0x08, 0x00, 0x01, 0x00, 0x02, 0x12, 0x34, 0x43, 0x21])
+      const request = new WriteMultipleRegistersRequest(10, [0x0001, 0x0002, 0x1234, 0x4321])
+      const buffer = request.createPayload()
+      const expected = Buffer.from([0x10, 0x00, 0x0a, 0x00, 0x04, 0x08, 0x00, 0x01, 0x00, 0x02, 0x12, 0x34, 0x43, 0x21])
 
       assert.ok(request !== null)
       assert.ok(request.numberOfBytes, 8)
@@ -22,8 +22,8 @@ describe('WriteMultipleRegisters Tests.', function () {
       assert.deepEqual(expected, buffer)
     })
     it('should create a message from a buffer', function () {
-      let buffer = Buffer.from([0x10, 0x00, 0x0a, 0x00, 0x04, 0x08, 0x00, 0x01, 0x00, 0x02, 0x12, 0x34, 0x43, 0x21])
-      let message = WriteMultipleRegistersRequest.fromBuffer(buffer)
+      const buffer = Buffer.from([0x10, 0x00, 0x0a, 0x00, 0x04, 0x08, 0x00, 0x01, 0x00, 0x02, 0x12, 0x34, 0x43, 0x21])
+      const message = WriteMultipleRegistersRequest.fromBuffer(buffer)
 
       assert.ok(message !== null)
       assert.equal(0x10, message.fc)
@@ -33,14 +33,14 @@ describe('WriteMultipleRegisters Tests.', function () {
       assert.deepEqual(Buffer.from([0x00, 0x01, 0x00, 0x02, 0x12, 0x34, 0x43, 0x21]), message.valuesAsBuffer)
     })
     it('should return null on not enough buffer data', function () {
-      let buffer = Buffer.from([0x0f, 0x00])
-      let message = WriteMultipleRegistersRequest.fromBuffer(buffer)
+      const buffer = Buffer.from([0x0f, 0x00])
+      const message = WriteMultipleRegistersRequest.fromBuffer(buffer)
 
       assert.ok(message === null)
     })
     it('should return null on wrong function code', function () {
-      let buffer = Buffer.from([0x11, 0x00, 0x0a, 0xff, 0x00])
-      let message = WriteMultipleRegistersRequest.fromBuffer(buffer)
+      const buffer = Buffer.from([0x11, 0x00, 0x0a, 0xff, 0x00])
+      const message = WriteMultipleRegistersRequest.fromBuffer(buffer)
 
       assert.ok(message === null)
     })

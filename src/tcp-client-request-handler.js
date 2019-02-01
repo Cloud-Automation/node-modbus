@@ -1,8 +1,8 @@
 'use strict'
 
-let debug = require('debug')('tcp-client-request-handler')
-let TCPRequest = require('./tcp-request.js')
-let ModbusClientRequestHandler = require('./client-request-handler.js')
+const debug = require('debug')('tcp-client-request-handler')
+const TCPRequest = require('./tcp-request.js')
+const ModbusClientRequestHandler = require('./client-request-handler.js')
 
 const OUT_OF_SYNC = 'OutOfSync'
 const PROTOCOL = 'Protocol'
@@ -31,7 +31,7 @@ class ModbusTCPClientRequestHandler extends ModbusClientRequestHandler {
     this._requestId = (this._requestId + 1) % 0xFFFF
     debug('registrating new request', 'transaction id', this._requestId, 'unit id', this._unitId, 'length', requestBody.byteCount)
 
-    let tcpRequest = new TCPRequest(this._requestId, 0x00, requestBody.byteCount + 1, this._unitId, requestBody)
+    const tcpRequest = new TCPRequest(this._requestId, 0x00, requestBody.byteCount + 1, this._unitId, requestBody)
 
     return super.register(tcpRequest)
   }
@@ -41,14 +41,14 @@ class ModbusTCPClientRequestHandler extends ModbusClientRequestHandler {
       return
     }
 
-    let userRequest = this._currentRequest
+    const userRequest = this._currentRequest
 
     if (!userRequest) {
       debug('something is strange, received a respone without a request')
       return
     }
 
-    let request = userRequest.request
+    const request = userRequest.request
 
     /* check if response id equals request id */
     if (response.id !== request.id) {

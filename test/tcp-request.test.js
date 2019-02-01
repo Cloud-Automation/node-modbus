@@ -1,12 +1,12 @@
 /* globals describe, it */
 'use strict'
 
-let assert = require('assert')
-let TCPRequest = require('../src/tcp-request.js')
+const assert = require('assert')
+const TCPRequest = require('../src/tcp-request.js')
 
 describe('TCP Request Tests', function () {
   it('should return a valid TCPRequest object for function 15', function () {
-    let requestBuffer = Buffer.from([
+    const requestBuffer = Buffer.from([
       0x00, 0x01, // transaction id
       0x00, 0x00, // protocol
       0x00, 0x09, // byte count
@@ -18,7 +18,7 @@ describe('TCP Request Tests', function () {
       0x55, 0x55 // values
     ])
 
-    let request = TCPRequest.fromBuffer(requestBuffer)
+    const request = TCPRequest.fromBuffer(requestBuffer)
     assert.ok(request)
     assert.equal(request.id, 0x0001)
     assert.equal(request.protocol, 0x0000)

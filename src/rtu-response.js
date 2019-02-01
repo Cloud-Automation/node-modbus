@@ -1,6 +1,6 @@
-let debug = require('debug')('rtu-response')
-let CRC = require('crc')
-let ResponseFactory = require('./response/response-factory.js')
+const debug = require('debug')('rtu-response')
+const CRC = require('crc')
+const ResponseFactory = require('./response/response-factory.js')
 
 class ModbusRTUResponse {
   /** Create Modbus/RTU Response from a Modbus/RTU Request including
@@ -21,11 +21,11 @@ class ModbusRTUResponse {
       return null
     }
 
-    let address = buffer.readUInt8(0)
+    const address = buffer.readUInt8(0)
 
     debug('address', address, 'buffer', buffer)
 
-    let body = ResponseFactory.fromBuffer(buffer.slice(1))
+    const body = ResponseFactory.fromBuffer(buffer.slice(1))
 
     if (!body) {
       return null
@@ -70,7 +70,7 @@ class ModbusRTUResponse {
      * Body = N Bytes
      * CRC = 2 Bytes
      */
-    let payload = Buffer.alloc(this.byteCount)
+    const payload = Buffer.alloc(this.byteCount)
     payload.writeUInt8(this._address, 0)
     const bodyPayload = this._body.createPayload()
     bodyPayload.copy(payload, 1)

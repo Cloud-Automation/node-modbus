@@ -1,12 +1,12 @@
-let modbus = require('../../')
-let SerialPort = require('serialport')
-let socket = new SerialPort('/dev/ttyUSB0', {
+const modbus = require('../../')
+const SerialPort = require('serialport')
+const socket = new SerialPort('/dev/ttyUSB0', {
   baudrate: 115200,
   parity: 'even',
   stopbits: 1
 })
 
-let client = new modbus.client.RTU(socket, 1)
+const client = new modbus.client.RTU(socket, 1)
 
 socket.on('close', function () {
   console.log(arguments)

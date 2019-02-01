@@ -8,34 +8,34 @@
 
 /** module:jsmodbus.client.TCP
  * @example <caption>Create new Modbus/TCP Client.</caption>
- * let Modbus = require('jsmodbus')
- * let net = require('net')
- * let socket = new new.Socket()
- * let client = new Modbus.client.TCP(socket, unitId)
- * let options = {
+ * const Modbus = require('jsmodbus')
+ * const net = require('net')
+ * const socket = new new.Socket()
+ * const client = new Modbus.client.TCP(socket, unitId)
+ * const options = {
  *   'host' : host
  *   'port' : port
  *   }
  *
  *  socket.connect(options)
  */
-let ModbusTCPClient = require('./modbus-tcp-client.js')
+const ModbusTCPClient = require('./modbus-tcp-client.js')
 
 /** module:jsmodbus.client.RTU
  * @example <caption>Create new Modbus/RTU Client.</caption>
- * let Modbus = require('jsmodbus')
- * let SerialPort = require('serialport')
- * let socket = new SerialPort('/dev/tty/ttyUSB0', { baudRate: 57600 })
- * let client = new Modbus.client.TCP(socket, address)
+ * const Modbus = require('jsmodbus')
+ * const SerialPort = require('serialport')
+ * const socket = new SerialPort('/dev/tty/ttyUSB0', { baudRate: 57600 })
+ * const client = new Modbus.client.TCP(socket, address)
  */
 
-let ModbusRTUClient = require('./modbus-rtu-client.js')
+const ModbusRTUClient = require('./modbus-rtu-client.js')
 
 /** module:jsmodbus.server.TCP */
-let ModbusTCPServer = require('./modbus-tcp-server.js')
+const ModbusTCPServer = require('./modbus-tcp-server.js')
 
 /** module:jsmodbus.server.RTU */
-let ModbusRTUServer = require('./modbus-rtu-server.js')
+const ModbusRTUServer = require('./modbus-rtu-server.js')
 
 module.exports = {
   'client': {

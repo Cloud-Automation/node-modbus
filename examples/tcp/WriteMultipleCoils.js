@@ -1,16 +1,16 @@
 'use strict'
 
-let modbus = require('../..')
-let net = require('net')
-let socket = new net.Socket()
-let options = {
+const modbus = require('../..')
+const net = require('net')
+const socket = new net.Socket()
+const options = {
   'host': '127.0.0.1',
   'port': '8502'
 }
-let client = new modbus.client.TCP(socket)
+const client = new modbus.client.TCP(socket)
 
 socket.on('connect', function () {
-  var values = Buffer.from([0xff])
+  const values = Buffer.from([0xff])
 
   client.writeMultipleCoils(13, values, 8)
     .then(function (resp) {

@@ -1,4 +1,4 @@
-let ModbusRequestBody = require('./request-body.js')
+const ModbusRequestBody = require('./request-body.js')
 
 /** Write Single Coil Request Body
  * @extends ModbusRequestBody
@@ -6,9 +6,9 @@ let ModbusRequestBody = require('./request-body.js')
 class WriteSingleCoilRequestBody extends ModbusRequestBody {
   static fromBuffer (buffer) {
     try {
-      let fc = buffer.readUInt8(0)
-      let address = buffer.readUInt16BE(1)
-      let value = buffer.readUInt16BE(3) === 0xff00
+      const fc = buffer.readUInt8(0)
+      const address = buffer.readUInt16BE(1)
+      const value = buffer.readUInt16BE(3) === 0xff00
 
       if (fc !== 0x05) {
         return null
@@ -53,7 +53,7 @@ class WriteSingleCoilRequestBody extends ModbusRequestBody {
   }
 
   createPayload () {
-    let payload = Buffer.alloc(5)
+    const payload = Buffer.alloc(5)
 
     payload.writeUInt8(this._fc, 0) // function code
     payload.writeUInt16BE(this._address, 1) // output address

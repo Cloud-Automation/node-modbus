@@ -1,4 +1,4 @@
-let ModbusResponseBody = require('./response-body.js')
+const ModbusResponseBody = require('./response-body.js')
 
 /** WriteMultipleRegisters Respone Body (Function code 0x10)
  * @extends ModbusResponseBody
@@ -11,16 +11,16 @@ class WriteMultipleRegistersResponseBody extends ModbusResponseBody {
 * @returns WriteMultipleRegisterResponseBody
 */
   static fromRequest (requestBody) {
-    let start = requestBody.address
-    let quantity = requestBody.quantity
+    const start = requestBody.address
+    const quantity = requestBody.quantity
 
     return new WriteMultipleRegistersResponseBody(start, quantity)
   }
 
   static fromBuffer (buffer) {
-    let fc = buffer.readUInt8(0)
-    let start = buffer.readUInt16BE(1)
-    let quantity = buffer.readUInt16BE(3)
+    const fc = buffer.readUInt8(0)
+    const start = buffer.readUInt16BE(1)
+    const quantity = buffer.readUInt16BE(3)
 
     if (fc !== 0x10) {
       return null
@@ -48,7 +48,7 @@ class WriteMultipleRegistersResponseBody extends ModbusResponseBody {
   }
 
   createPayload () {
-    let payload = Buffer.alloc(this.byteCount)
+    const payload = Buffer.alloc(this.byteCount)
 
     payload.writeUInt8(this._fc, 0)
     payload.writeUInt16BE(this._start, 1)

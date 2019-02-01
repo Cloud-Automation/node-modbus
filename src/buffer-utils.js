@@ -1,6 +1,6 @@
 'use strict'
 
-let debug = require('debug')('buffer-utils')
+const debug = require('debug')('buffer-utils')
 
 // Buffer utilities to make simplify writing multiple coils
 /*
@@ -28,19 +28,19 @@ let debug = require('debug')('buffer-utils')
 class BufferUtils {
   static bufferShift (startAddress, endAddress, outputs) {
     startAddress = startAddress - 1
-    let startShift = startAddress % 8
-    let startByte = Math.floor(startAddress / 8)
-    let endByte = Math.floor(endAddress / 8)
+    const startShift = startAddress % 8
+    const startByte = Math.floor(startAddress / 8)
+    const endByte = Math.floor(endAddress / 8)
 
-    let size = endByte - startByte + 1
+    const size = endByte - startByte + 1
 
     // Define a new buffer
-    let buffer = Buffer.allocUnsafe(size)
+    const buffer = Buffer.allocUnsafe(size)
 
     buffer[0] = outputs[0] << startShift
     debug('buffer[0] = %s ( %s << %d )', buffer[0].toString(2), outputs[0].toString(2), startShift)
 
-    let paddedBuffer = Buffer.concat([outputs, Buffer.alloc(1)], outputs.length + 1)
+    const paddedBuffer = Buffer.concat([outputs, Buffer.alloc(1)], outputs.length + 1)
 
     for (let i = 1; i < size; i++) {
       buffer[i] = (paddedBuffer[i] << startShift) + (paddedBuffer[i - 1] >> (8 - startShift))
@@ -65,9 +65,9 @@ class BufferUtils {
    */
   static firstByte (startAddress, originalByte, outputByte) {
     startAddress = startAddress - 1
-    let startShift = startAddress % 8
-    let mask = 0xff >> (8 - startShift)
-    let maskedOriginalByte = originalByte & mask
+    const startShift = startAddress % 8
+    const mask = 0xff >> (8 - startShift)
+    const maskedOriginalByte = originalByte & mask
 
     return outputByte + maskedOriginalByte
   }
@@ -79,15 +79,15 @@ class BufferUtils {
    * @returns correct last byte to be written to coils buffer
    */
   static lastByte (endAddress, originalByte, outputByte) {
-    let endShift = endAddress % 8
-    let mask = 0xff << endShift
-    let maskedOriginalByte = originalByte & mask
+    const endShift = endAddress % 8
+    const mask = 0xff << endShift
+    const maskedOriginalByte = originalByte & mask
 
     return outputByte + maskedOriginalByte
   }
 
   static bufferToArrayStatus (buffer) {
-    let statusArray = []
+    const statusArray = []
     let pos, curByteIdx, curByte
     if (!(buffer instanceof Buffer)) {
       return statusArray
@@ -104,8 +104,8 @@ class BufferUtils {
   }
 
   static arrayStatusToBuffer (array) {
-    let byteCount = array instanceof Array ? Math.ceil(array.length / 8) : 0
-    let buffer = Buffer.alloc(byteCount)
+    const byteCount = array instanceof Array ? Math.ceil(array.length / 8) : 0
+    const buffer = Buffer.alloc(byteCount)
 
     if (!(array instanceof Array)) {
       return buffer

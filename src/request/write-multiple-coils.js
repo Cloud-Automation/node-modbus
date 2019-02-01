@@ -1,4 +1,4 @@
-let ModbusRequestBody = require('./request-body.js')
+const ModbusRequestBody = require('./request-body.js')
 
 /** Write Multiple Coils Request Body
  * @extends ModbusRequestBody
@@ -6,16 +6,16 @@ let ModbusRequestBody = require('./request-body.js')
 class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
   static fromBuffer (buffer) {
     try {
-      let fc = buffer.readUInt8(0)
+      const fc = buffer.readUInt8(0)
 
       if (fc !== 0x0F) {
         return null
       }
 
-      let address = buffer.readUInt16BE(1)
-      let quantity = buffer.readUInt16BE(3)
-      let numberOfBytes = buffer.readUInt8(5)
-      let values = buffer.slice(6, 6 + numberOfBytes)
+      const address = buffer.readUInt16BE(1)
+      const quantity = buffer.readUInt16BE(3)
+      const numberOfBytes = buffer.readUInt8(5)
+      const values = buffer.slice(6, 6 + numberOfBytes)
 
       return new WriteMultipleCoilsRequestBody(address, values, quantity)
     } catch (e) {
@@ -59,9 +59,9 @@ class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
       this._byteCount = Math.ceil(this._quantity / 8) + 6
       this._valuesAsArray = []
       for (let i = 0; i < this._quantity; i += 1) {
-        let pos = i % 8
-        let curByteIdx = Math.floor(i / 8)
-        let curByte = this._values.readUInt8(curByteIdx)
+        const pos = i % 8
+        const curByteIdx = Math.floor(i / 8)
+        const curByte = this._values.readUInt8(curByteIdx)
 
         this._valuesAsArray.push((curByte & Math.pow(2, pos)) > 0)
       }
@@ -71,14 +71,14 @@ class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
       this._byteCount = Math.ceil(this._values.length / 8) + 6
 
       this._valuesAsArray = this._values
-      let len = Math.min(1968, this._values.length)
+      const len = Math.min(1968, this._values.length)
 
       let curByte = 0
       let curByteIdx = 0
       let cntr = 0
-      let bytes = Buffer.allocUnsafe(this._numberOfBytes)
+      const bytes = Buffer.allocUnsafe(this._numberOfBytes)
 
-      for (var i = 0; i < len; i += 1) {
+      for (let i = 0; i < len; i += 1) {
         curByte += this._values[i] ? Math.pow(2, cntr) : 0
 
         cntr = (cntr + 1) % 8
@@ -131,7 +131,7 @@ class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
 
   createPayload () {
     if (this._values instanceof Buffer) {
-      let payload = Buffer.alloc(this._byteCount)
+      const payload = Buffer.alloc(this._byteCount)
       payload.writeUInt8(this._fc, 0) // function code
       payload.writeUInt16BE(this._address, 1) // start address
       payload.writeUInt16BE(this._quantity, 3) // quantity of coils
@@ -140,10 +140,10 @@ class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
 
       return payload
     } else if (this._values instanceof Array) {
-      let len = Math.min(1968, this._values.length)
+      const len = Math.min(1968, this._values.length)
 
-      let payload = Buffer.alloc(6 + this._numberOfBytes)
-      let bytes = this._valuesAsBuffer
+      const payload = Buffer.alloc(6 + this._numberOfBytes)
+      const bytes = this._valuesAsBuffer
 
       payload.writeUInt8(this._fc, 0) // function code
       payload.writeUInt16BE(this._address, 1) // start address

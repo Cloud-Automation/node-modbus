@@ -1,10 +1,10 @@
 'use strict'
 
-let net = require('net')
-let modbus = require('../..')
-let netServer = new net.Server()
-let holding = Buffer.alloc(10000)
-let server = new modbus.server.TCP(netServer, {
+const net = require('net')
+const modbus = require('../..')
+const netServer = new net.Server()
+const holding = Buffer.alloc(10000)
+const server = new modbus.server.TCP(netServer, {
   holding: holding
 })
 

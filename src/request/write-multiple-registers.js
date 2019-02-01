@@ -1,4 +1,4 @@
-let ModbusRequestBody = require('./request-body.js')
+const ModbusRequestBody = require('./request-body.js')
 
 /** Write Multiple Registers Request Body
  * @extends ModbusRequestBody
@@ -6,10 +6,10 @@ let ModbusRequestBody = require('./request-body.js')
 class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
   static fromBuffer (buffer) {
     try {
-      let fc = buffer.readUInt8(0)
-      let address = buffer.readUInt16BE(1)
-      let numberOfBytes = buffer.readUInt8(5)
-      let values = buffer.slice(6, 6 + numberOfBytes)
+      const fc = buffer.readUInt8(0)
+      const address = buffer.readUInt16BE(1)
+      const numberOfBytes = buffer.readUInt8(5)
+      const values = buffer.slice(6, 6 + numberOfBytes)
 
       if (fc !== 0x10) {
         return null
@@ -101,7 +101,7 @@ class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
   }
 
   createPayload () {
-    let payload = Buffer.alloc(6 + this._numberOfBytes)
+    const payload = Buffer.alloc(6 + this._numberOfBytes)
     payload.writeUInt8(this._fc, 0) // function code
     payload.writeUInt16BE(this._address, 1) // start address
     payload.writeUInt16BE(this._quantity, 3)

@@ -1,6 +1,6 @@
 'use strict'
 
-var SerialPort = require('serialport')
+const SerialPort = require('serialport')
 
 SerialPort.list(function (err, ports) {
   if (err) {

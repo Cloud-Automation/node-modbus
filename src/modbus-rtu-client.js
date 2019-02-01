@@ -1,18 +1,18 @@
 'use strict'
 
-let ModbusClient = require('./modbus-client.js')
-let ModbusRTUClientRequestHandler = require('./rtu-client-request-handler.js')
-let ModbusRTUClientResponseHandler = require('./rtu-client-response-handler.js')
+const ModbusClient = require('./modbus-client.js')
+const ModbusRTUClientRequestHandler = require('./rtu-client-request-handler.js')
+const ModbusRTUClientResponseHandler = require('./rtu-client-response-handler.js')
 
 /** This Client musst be initiated with a socket object that implements the event emitter
  * interface and fires a 'data' event with a buffer as a parameter. It also needs to
  * implement the 'write' method to send data to the socket.
  *
  * @example <caption>Create new Modbus/RTU Client</caption>
- * let Modbus = require('jsmodbus')
- * let SerialPort = require('serialport')
- * let socket = new SerialPort("/dev/tty/ttyUSB0", { "baudRate: 57600" })
- * let client = new Modbus.client.RTU(socket, address)
+ * const Modbus = require('jsmodbus')
+ * const SerialPort = require('serialport')
+ * const socket = new SerialPort("/dev/tty/ttyUSB0", { "baudRate: 57600" })
+ * const client = new Modbus.client.RTU(socket, address)
  *
  * @extends ModbusClient
  * @class

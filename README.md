@@ -36,11 +36,11 @@ TCP Client Example
 --------------
 ```javascript
 // create a tcp modbus client
-let Modbus = require('jsmodbus')
-let net = require('net')
-let socket = new net.Socket()
-let client = new Modbus.client.TCP(socket, unitId)
-let options = {
+const Modbus = require('jsmodbus')
+const net = require('net')
+const socket = new net.Socket()
+const client = new Modbus.client.TCP(socket, unitId)
+const options = {
 'host' : host
 'port' : port
 }
@@ -52,13 +52,13 @@ RTU Client Example
 ```javascript
 
 // create a tcp modbus client
-let Modbus = require('jsmodbus')
-let SerialPort = require('serialport')
-let options = {
+const Modbus = require('jsmodbus')
+const SerialPort = require('serialport')
+const options = {
 baudRate: 57600
 }
-let socket = new SerialPort("/dev/tty-usbserial1", options)
-let client = new Modbus.client.RTU(socket, address)
+const socket = new SerialPort("/dev/tty-usbserial1", options)
+const client = new Modbus.client.RTU(socket, address)
 ```
 
 Client API Example
@@ -94,10 +94,10 @@ Server example
 --------------
 ```javascript
 
-let modbus = require('jsmodbus')
-let net = require('net')
-let server = new net.Server()
-let server = new modbus.server.TCP(server)
+const modbus = require('jsmodbus')
+const net = require('net')
+const server = new net.Server()
+const server = new modbus.server.TCP(server)
 
 server.listen(502)
 

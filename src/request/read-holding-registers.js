@@ -1,4 +1,4 @@
-let ModbusRequestBody = require('./request-body.js')
+const ModbusRequestBody = require('./request-body.js')
 
 /** Read Holding Registers Request Body
  * @extends ModbusRequestBody
@@ -6,9 +6,9 @@ let ModbusRequestBody = require('./request-body.js')
 class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
   static fromBuffer (buffer) {
     try {
-      let fc = buffer.readUInt8(0)
-      let start = buffer.readUInt16BE(1)
-      let count = buffer.readUInt16BE(3)
+      const fc = buffer.readUInt8(0)
+      const start = buffer.readUInt16BE(1)
+      const count = buffer.readUInt16BE(3)
 
       if (fc !== 0x03) {
         return null
@@ -57,7 +57,7 @@ class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
   }
 
   createPayload () {
-    let payload = Buffer.alloc(5)
+    const payload = Buffer.alloc(5)
     payload.writeUInt8(this._fc, 0) // function code
     payload.writeUInt16BE(this._start, 1) // start address
     payload.writeUInt16BE(this._count, 3) // quantitiy of coils

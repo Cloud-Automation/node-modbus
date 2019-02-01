@@ -1,4 +1,4 @@
-let ModbusResponseBody = require('./response-body.js')
+const ModbusResponseBody = require('./response-body.js')
 
 /** Write Single Coil Response Body
  * @extends ModbusResponseBody
@@ -11,8 +11,8 @@ class WriteSingleCoilResponseBody extends ModbusResponseBody {
  * @returns WriteSingleCoilResponseBody
  */
   static fromRequest (requestBody) {
-    let address = requestBody.address
-    let value = requestBody.value
+    const address = requestBody.address
+    const value = requestBody.value
 
     return new WriteSingleCoilResponseBody(address, value)
   }
@@ -22,9 +22,9 @@ class WriteSingleCoilResponseBody extends ModbusResponseBody {
    * @returns New WriteSingleResponseBody Object
    */
   static fromBuffer (buffer) {
-    let fc = buffer.readUInt8(0)
-    let address = buffer.readUInt16BE(1)
-    let value = buffer.readUInt16BE(3) === 0xFF00
+    const fc = buffer.readUInt8(0)
+    const address = buffer.readUInt16BE(1)
+    const value = buffer.readUInt16BE(3) === 0xFF00
 
     if (fc !== 0x05) {
       return null
@@ -52,7 +52,7 @@ class WriteSingleCoilResponseBody extends ModbusResponseBody {
   }
 
   createPayload () {
-    let payload = Buffer.alloc(this.byteCount)
+    const payload = Buffer.alloc(this.byteCount)
 
     payload.writeUInt8(this._fc, 0)
     payload.writeUInt16BE(this._address, 1)
