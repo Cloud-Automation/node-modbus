@@ -48,17 +48,17 @@ class ModbusRTUClientRequestHandler extends ModbusClientRequestHandler {
     const buf = Buffer.concat([Buffer.from([response.address]), response.body.createPayload()])
     debug('create crc from response', buf)
 
-    const crc = CRC.crc16modbus(buf)
+    //const crc = CRC.crc16modbus(buf)
 
-    if (response.crc !== crc) {
-      debug('CRC does not match', response.crc, '!==', crc)
-      userRequest.reject({
-        'err': 'crcMismatch',
-        'message': 'the response payload does not match the crc'
-      })
-      this._clearAllRequests()
-      return
-    }
+    //if (response.crc !== crc) {
+    //  debug('CRC does not match', response.crc, '!==', crc)
+    //  userRequest.reject({
+    //    'err': 'crcMismatch',
+    //    'message': 'the response payload does not match the crc'
+    //  })
+    //  this._clearAllRequests()
+    //  return
+    //}
 
     super.handle(response)
   }
