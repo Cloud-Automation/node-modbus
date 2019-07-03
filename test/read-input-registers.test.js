@@ -3,7 +3,7 @@
 /* global describe, it */
 
 const assert = require('assert')
-const ReadInputRegistersRequest = require('../src/request/read-input-registers.js')
+const ReadInputRegistersRequest = require('../dist/request/read-input-registers.js').default
 
 describe('ReadInputRegisters Tests.', function () {
   describe('ReadInputRegisters Response', function () {

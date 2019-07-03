@@ -4,11 +4,11 @@
 
 const assert = require('assert')
 
-const ModbusTCPRequest = require('../src/tcp-request.js')
-const ModbusTCPResponse = require('../src/tcp-response.js')
-const ReadCoilsRequest = require('../src/request/read-coils.js')
-const ReadCoilsResponse = require('../src/response/read-coils.js')
-const ModbusRequestBody = require('../src/request/request-body.js')
+const ModbusTCPRequest = require('../dist/tcp-request.js').default
+const ModbusTCPResponse = require('../dist/tcp-response.js').default
+const ReadCoilsRequest = require('../dist/request/read-coils.js').default
+const ReadCoilsResponse = require('../dist/response/read-coils.js').default
+const ModbusRequestBody = require('../dist/request/request-factory.js').default
 
 describe('ReadCoils Tests.', function () {
   describe('ReadCoils Response', function () {

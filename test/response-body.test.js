@@ -3,8 +3,8 @@
 /* global describe, it */
 
 const assert = require('assert')
-const ResponseBody = require('../src/response/response-body.js')
-const ReadCoilsResponseBody = require('../src/response/read-coils.js')
+const ResponseFactory = require('../dist/response/response-factory.js').default
+const ReadCoilsResponseBody = require('../dist/response/read-coils.js').default
 
 describe('Modbus Response Tests.', function () {
   /* with the read coils tests we test most of the common errors
@@ -18,7 +18,7 @@ describe('Modbus Response Tests.', function () {
         0x00
       ])
 
-      const response = ResponseBody.fromBuffer(buffer)
+      const response = ResponseFactory.fromBuffer(buffer)
 
       assert.ok(response !== null)
       assert.ok(response instanceof ReadCoilsResponseBody)

@@ -3,7 +3,7 @@
 /* global describe, it */
 
 const assert = require('assert')
-const ReadHoldingRegistersRequest = require('../src/request/read-holding-registers.js')
+const ReadHoldingRegistersRequest = require('../dist/request/read-holding-registers.js').default
 
 describe('ReadHoldingRegisters Tests.', function () {
   describe('ReadHoldingRegisters Response', function () {

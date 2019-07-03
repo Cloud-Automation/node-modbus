@@ -4,11 +4,13 @@
 const assert = require('assert')
 const sinon = require('sinon')
 const EventEmitter = require('events')
-const ReadCoilsRequest = require('../src/request/read-holding-registers.js')
-const ReadHoldingRegistersResponseBody = require('../src/response/read-holding-registers.js')
-const ModbusRTUResponse = require('../src/rtu-response.js')
-const ExceptionResponse = require('../src/response/exception.js')
-const ModbusRTUClientRequestHandler = require('../src/rtu-client-request-handler.js')
+const ReadCoilsRequest = require('../dist/request/read-holding-registers.js').default
+const ReadHoldingRegistersResponseBody = require('../dist/response/read-holding-registers.js').default
+const ReadHoldingRegistersRequestBody = require('../dist/request/read-holding-registers.js').default
+const ModbusRTUResponse = require('../dist/rtu-response.js').default
+const ExceptionResponse = require('../dist/response/exception.js').default
+const ModbusRTUClientRequestHandler = require('../dist/rtu-client-request-handler.js').default
+
 
 describe('Modbus/RTU Client Request Tests', function () {
   let socket
@@ -41,7 +43,6 @@ describe('Modbus/RTU Client Request Tests', function () {
 
   describe('Handle Data Tests.', function () {
     it('should register an rtu request and handle a response', function (done) {
-      const ReadHoldingRegistersRequestBody = require('../src/request/read-holding-registers.js')
       const handler = new ModbusRTUClientRequestHandler(socket, 1)
       const request = new ReadHoldingRegistersRequestBody(0, 1)
       const response = new ReadHoldingRegistersResponseBody(1, Buffer.from([0x00, 0x32]))
@@ -65,7 +66,6 @@ describe('Modbus/RTU Client Request Tests', function () {
       handler.handle(rtuResponse)
     })
     it('should register an rtu request and handle a exception response', function (done) {
-      const ReadCoilsRequest = require('../src/request/read-coils.js')
       const handler = new ModbusRTUClientRequestHandler(socket, 4)
       const request = new ReadCoilsRequest(0x0000, 0x0008)
       const response = new ExceptionResponse(0x81, 0x01)

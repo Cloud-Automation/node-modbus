@@ -29,8 +29,8 @@
     "typescript": "^3.5.2"
   },
   "scripts": {
-    "test": "standard && mocha test/*.test.js",
-    "watch": "standard && mocha --watch test/*.test.js",
+    "test": "tsc && mocha test/*.test.js",
+    "watch": "tsc && mocha --watch test/*.test.js",
     "cov": "nyc mocha test/*.test.js"
   },
   "license": "MIT",

@@ -3,7 +3,7 @@
 /* global describe, it */
 
 const assert = require('assert')
-const WriteMultipleRegistersRequest = require('../src/request/write-multiple-registers.js')
+const WriteMultipleRegistersRequest = require('../dist/request/write-multiple-registers.js').default
 
 describe('WriteMultipleRegisters Tests.', function () {
   describe('WriteMultipleRegisters Response', function () {

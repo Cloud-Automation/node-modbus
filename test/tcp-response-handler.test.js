@@ -3,7 +3,7 @@
 /* global describe, it, beforeEach */
 
 const assert = require('assert')
-const TCPResponseHandler = require('../src/tcp-client-response-handler.js')
+const TCPResponseHandler = require('../dist/tcp-client-response-handler.js').default
 
 describe('Modbus/TCP Client Response Handler Tests', function () {
   let handler

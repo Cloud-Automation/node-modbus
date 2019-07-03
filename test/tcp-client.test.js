@@ -6,6 +6,7 @@ const assert = require('assert')
 const Modbus = require('../')
 const sinon = require('sinon')
 const EventEmitter = require('events')
+const ReadCoilsResponseBody = require('../dist/response/read-coils.js').default
 
 describe('TCP Client Tests.', function () {
   let socket
@@ -21,7 +22,6 @@ describe('TCP Client Tests.', function () {
   /* with the read coils tests we test most of the common errors
    * like modbus exceptions, outOfSync errors, timeouts and so on */
   describe('Read Coils Tests.', function () {
-    const ReadCoilsResponseBody = require('../src/response/read-coils.js')
     it('should create request from buffer', function () {
       const buffer = Buffer.from([
         0x01, // fc
