@@ -1,18 +1,18 @@
-const ModbusRequestBody = require('./request-body.js')
+import ModbusRequestBody from './request-body.js';
+import { FC } from '../codes/index.js';
 
 /** Read Coils Request Body
  * @extends ModbusRequestBody
  */
-class ReadCoilsRequestBody extends ModbusRequestBody {
-	public _start: any;
-	public _count: any;
-	public _fc: any;
+export default class ReadCoilsRequestBody extends ModbusRequestBody {
+  private _start: number;
+  private _count: number;
 
-  static fromBuffer (buffer) {
+  static fromBuffer(buffer: Buffer) {
     try {
       const fc = buffer.readUInt8(0)
 
-      if (fc !== 0x01) {
+      if (fc !== FC.READ_COIL) {
         return null
       }
 
@@ -26,13 +26,13 @@ class ReadCoilsRequestBody extends ModbusRequestBody {
   }
 
   /** Create a new Read Coils Request Body.
-   * @param {Number} start Start Address.
-   * @param {Number} count Quantity of coils to be read.
+   * @param {number} start Start Address.
+   * @param {number} count Quantity of coils to be read.
    * @throws {InvalidStartAddressException} When Start address is larger than 0xFFFF.
    * @throws {InvalidQuantityException} When count is larger than 0x7D0.
    */
-  constructor (start, count) {
-    super(0x01)
+  constructor(start: number, count: number) {
+    super(FC.READ_COIL)
     this._start = start
     this._count = count
 
@@ -46,20 +46,20 @@ class ReadCoilsRequestBody extends ModbusRequestBody {
   }
 
   /** Start Address. */
-  get start () {
+  get start() {
     return this._start
   }
 
   /** Coil Quantity. */
-  get count () {
+  get count() {
     return this._count
   }
 
-  get name () {
-    return 'ReadCoils'
+  get name() {
+    return 'ReadCoils' as const
   }
 
-  createPayload () {
+  createPayload() {
     const payload = Buffer.alloc(5)
 
     payload.writeUInt8(this._fc, 0) // function code
@@ -72,9 +72,15 @@ class ReadCoilsRequestBody extends ModbusRequestBody {
   /** Returns the byte count of this request for the byte representation.
    * @returns {Number}
    */
-  get byteCount () {
+  get byteCount() {
     return 5
   }
 }
 
-module.exports = ReadCoilsRequestBody
+export function isReadCoilsRequestBody(x: any): x is ReadCoilsRequestBody {
+  if (x instanceof ReadCoilsRequestBody) {
+    return true;
+  } else {
+    return false;
+  }
+}

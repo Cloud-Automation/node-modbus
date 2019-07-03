@@ -1,23 +1,24 @@
-const ModbusRequestBody = require('./request-body.js')
+import { FC } from "../codes";
+
+import ModbusRequestBody from './request-body.js'
 
 /** Write Multiple Coils Request Body
  * @extends ModbusRequestBody
  */
-class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
-	public _address: any;
-	public _values: any;
-	public _quantity: any;
-	public _numberOfBytes: any;
-	public _valuesAsBuffer: any;
-	public _byteCount: any;
-	public _valuesAsArray: any;
-	public _fc: any;
+export default class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
+  private _address: number;
+  private _values: boolean[] | Buffer;
+  private _quantity: number;
+  private _numberOfBytes: number;
+  private _valuesAsBuffer!: Buffer;
+  private _byteCount!: number;
+  private _valuesAsArray!: boolean[];
 
-  static fromBuffer (buffer) {
+  static fromBuffer(buffer: Buffer) {
     try {
       const fc = buffer.readUInt8(0)
 
-      if (fc !== 0x0F) {
+      if (fc !== FC.WRITE_MULTIPLE_COILS) {
         return null
       }
 
@@ -33,15 +34,18 @@ class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
   }
 
   /** Create a new Write Multiple Coils Request Body.
-   * @param {Number} address Write address.
-   * @param {Array|Buffer} values Values to be written. Either a Array of Boolean values or a Buffer.
-   * @param {Number} quantity In case of values being a Buffer, specify the number of coils that needs to be written.
+   * @param {number} address Write address.
+   * @param {boolean[] | Buffer} values Values to be written. Either a Array of Boolean values or a Buffer.
+   * @param {number} [quantity] In case of values being a Buffer, specify the number of coils that needs to be written.
    * @throws {InvalidStartAddressException} When address is larger than 0xFFFF.
    * @throws {InvalidArraySizeException}
    * @throws {InvalidBufferSizeException}
    */
-  constructor (address, values, quantity) {
-    super(0x0F)
+  constructor(address: number, values: boolean[])
+  constructor(address: number, values: Buffer, quantity: number)
+  constructor(address: number, values: boolean[] | Buffer, quantity?: number) {
+    super(FC.WRITE_MULTIPLE_COILS)
+
     if (address > 0xFFFF) {
       throw new Error('InvalidStartAddress')
     }
@@ -50,11 +54,14 @@ class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
       throw new Error('InvalidArraySize')
     }
 
-    if (values instanceof Buffer && values.length > 0x07b0) {
-      throw new Error('InvalidBufferSize')
-    }
-    if (values instanceof Buffer && (values.length * 8) < quantity) {
-      throw new Error('InvalidBufferSize')
+    if (values instanceof Buffer) {
+      if (values.length > 0x07b0) {
+        throw new Error('InvalidBufferSize')
+      }
+
+      if (quantity !== undefined && (values.length * 8) < quantity) {
+        throw new Error('InvalidBufferSize')
+      }
     }
 
     this._address = address
@@ -104,66 +111,77 @@ class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
   }
 
   /** Address to be written to. */
-  get address () {
+  get address() {
     return this._address
   }
 
   /** Values */
-  get values () {
+  get values() {
     return this._values
   }
 
-  get valuesAsArray () {
+  get valuesAsArray() {
     return this._valuesAsArray
   }
 
-  get valuesAsBuffer () {
+  get valuesAsBuffer() {
     return this._valuesAsBuffer
   }
 
   /** Quantity of coils */
-  get quantity () {
+  get quantity() {
     return this._quantity
   }
 
-  get byteCount () {
+  get count() {
+    return this.quantity
+  }
+
+  get byteCount() {
     return this._byteCount
   }
 
-  get numberOfBytes () {
+  get numberOfBytes() {
     return this._numberOfBytes
   }
 
-  get name () {
-    return 'WriteMultipleCoils'
+  get name() {
+    return 'WriteMultipleCoils' as const
   }
 
-  createPayload () {
-    if (this._values instanceof Buffer) {
-      const payload = Buffer.alloc(this._byteCount)
-      payload.writeUInt8(this._fc, 0) // function code
-      payload.writeUInt16BE(this._address, 1) // start address
-      payload.writeUInt16BE(this._quantity, 3) // quantity of coils
-      payload.writeUInt8(this._numberOfBytes, 5) // byte count
-      this._values.copy(payload, 6, 0, this._byteCount) // values
+  public createPayload() {
+    const payload = Buffer.alloc(this._byteCount)
+    payload.writeUInt8(this._fc, 0) // function code
+    payload.writeUInt16BE(this._address, 1) // start address
+    payload.writeUInt16BE(this._quantity, 3) // quantity of coils
+    payload.writeUInt8(this._numberOfBytes, 5) // byte count
+    this._valuesAsBuffer.copy(payload, 6, 0, this._byteCount) // values
 
-      return payload
-    } else if (this._values instanceof Array) {
-      const len = Math.min(1968, this._values.length)
+    return payload
+    // if (this._values instanceof Buffer) {
 
-      const payload = Buffer.alloc(6 + this._numberOfBytes)
-      const bytes = this._valuesAsBuffer
+    // } else if (this._values instanceof Array) {
+    //   const len = Math.min(1968, this._values.length)
 
-      payload.writeUInt8(this._fc, 0) // function code
-      payload.writeUInt16BE(this._address, 1) // start address
-      payload.writeUInt16BE(len, 3) // quantity of coils
-      payload.writeUInt8(this._numberOfBytes, 5) // byte count
+    //   payload = Buffer.alloc(6 + this._numberOfBytes)
+    //   const bytes = this._valuesAsBuffer
 
-      bytes.copy(payload, 6) // values
+    //   payload.writeUInt8(this._fc, 0) // function code
+    //   payload.writeUInt16BE(this._address, 1) // start address
+    //   payload.writeUInt16BE(len, 3) // quantity of coils
+    //   payload.writeUInt8(this._numberOfBytes, 5) // byte count
 
-      return payload
-    }
+    //   bytes.copy(payload, 6) // values
+
+    //   return payload
+    // }
   }
 }
 
-module.exports = WriteMultipleCoilsRequestBody
+export function isWriteMultipleCoilsRequestBody(x: any): x is WriteMultipleCoilsRequestBody {
+  if (x instanceof WriteMultipleCoilsRequestBody) {
+    return true;
+  } else {
+    return false;
+  }
+}

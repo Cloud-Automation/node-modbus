@@ -1,73 +1,34 @@
-'use strict'
 
-const debug = require('debug')('request-body')
 
+import { FunctionCode } from "../codes";
+
+import Debug from 'debug';
+const debug = Debug('request-body')
+
+export type ModbusRequestTypeName =
+  | 'ReadCoils'
+  | 'ReadDiscreteInput'
+  | 'ReadHoldingRegisters'
+  | 'ReadInputRegisters'
+  | 'WriteMultipleCoils'
+  | 'WriteMultipleRegisters'
+  | 'WriteSingleCoil'
+  | 'WriteSingleRegister'
+  | 'ExceptionRequest'
 /** Common Modbus Request Body
+ *
+ *
  * @abstract
+ * @class ModbusRequestBody
  */
-class ModbusRequestBody {
-	public _fc: any;
+export default abstract class ModbusRequestBody {
+  protected _fc: FunctionCode;
 
-  /** Create a Modbus Request Body from a buffer object. Depending on the function code
-   * in the buffer the request body could by any function codes request body.
-   * @param {Buffer} buffer The buffer to be parsed.
-   * @returns {ModbusRequestBody} The actual request body or null if there is not enough data in the buffer.
+  /** Creates a new Common Modbus Request Body. Do not use this,
+   * use the actual request body
+   * @param {FunctionCode} fc Function Code
    */
-  static fromBuffer (buffer) {
-    /* TODO:detect non modbus requests and return a InvalidProtocolRequest. Requests
-     * of this kind should lead to disconnecting the client. This way we can make sure that
-     * unintendet messages do not harm the server */
-    try {
-      const fc = buffer.readUInt8(0)
-
-      if (fc === 0x01) {
-        const ReadCoilsRequest = require('./read-coils.js')
-        return ReadCoilsRequest.fromBuffer(buffer)
-      }
-      if (fc === 0x02) {
-        const ReadDiscreteInputsRequest = require('./read-discrete-inputs.js')
-        return ReadDiscreteInputsRequest.fromBuffer(buffer)
-      }
-      if (fc === 0x03) {
-        const ReadHoldingRegistersRequest = require('./read-holding-registers.js')
-        return ReadHoldingRegistersRequest.fromBuffer(buffer)
-      }
-      if (fc === 0x04) {
-        const ReadInputRegistersRequest = require('./read-input-registers.js')
-        return ReadInputRegistersRequest.fromBuffer(buffer)
-      }
-      if (fc === 0x05) {
-        const WriteSingleCoilRequest = require('./write-single-coil.js')
-        return WriteSingleCoilRequest.fromBuffer(buffer)
-      }
-      if (fc === 0x06) {
-        const WriteSingleRegisterRequest = require('./write-single-register.js')
-        return WriteSingleRegisterRequest.fromBuffer(buffer)
-      }
-      if (fc === 0x0f) {
-        const WriteMultipleCoilsResponse = require('./write-multiple-coils.js')
-        return WriteMultipleCoilsResponse.fromBuffer(buffer)
-      }
-      if (fc === 0x10) {
-        const WriteMultipleRegistersResponse = require('./write-multiple-registers.js')
-        return WriteMultipleRegistersResponse.fromBuffer(buffer)
-      }
-
-      if (fc <= 0x2B) {
-        debug('Illegal Function (fc %d)', fc)
-        const ExceptionRequest = require('./exception.js')
-        return new ExceptionRequest(fc, 0x01)
-      }
-    } catch (e) {
-      debug('Exception while reading function code', e)
-      return null
-    }
-  }
-
-  /** Creates a new Common Modbus Request Body. Do not use this, use the actual request body
-   * @param {Number} fc Function Code
-   */
-  constructor (fc) {
+  constructor(fc: FunctionCode) {
     if (new.target === ModbusRequestBody) {
       throw new TypeError('Cannot construct ModbusRequestBody directly.')
     }
@@ -76,23 +37,51 @@ class ModbusRequestBody {
   }
 
   /** Function Code */
-  get fc () {
+  get fc() {
     return this._fc
   }
 
   /** Create byte representation.
    * @returns {Buffer}
    */
-  createPayload () {
-    throw new Error('Not implemented yet.')
-  }
+  abstract createPayload(): Buffer
 
-  /** Returns the byte count of this request for the byte representation.
+  /** Returns the byte count of the `request` for the byte representation.
    * @returns {Number}
    */
-  get byteCount () {
-    throw new Error('No implemented yet.')
+  abstract get byteCount(): number
+
+  /**
+   * Name of the request body
+   *
+   * @memberof ModbusRequestBody
+   */
+  abstract get name(): ModbusRequestTypeName;
+
+  /**
+   * Returns the count of the quantity
+   * of registers, coils, etc.
+   *
+   * @readonly
+   * @abstract
+   * @type {number}
+   * @memberof ModbusRequestBody
+   */
+  abstract get count(): number;
+
+  get isException(): boolean {
+    return false;
+  }
+
+  public get isModbusRequestBody() {
+    return true;
   }
 }
 
-module.exports = ModbusRequestBody
+export function isModbusRequestBody(x: any): x is ModbusRequestBody {
+  if (x.isModbusRequestBody) {
+    return true;
+  } else {
+    return false;
+  }
+}

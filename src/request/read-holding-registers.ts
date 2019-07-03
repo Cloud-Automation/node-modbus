@@ -1,20 +1,20 @@
-const ModbusRequestBody = require('./request-body.js')
+import { FC } from "../codes";
+import ModbusRequestBody from './request-body.js'
 
 /** Read Holding Registers Request Body
  * @extends ModbusRequestBody
  */
-class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
-	public _start: any;
-	public _count: any;
-	public _fc: any;
+export default class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
+  private _start: number;
+  private _count: number;
 
-  static fromBuffer (buffer) {
+  static fromBuffer(buffer: Buffer) {
     try {
       const fc = buffer.readUInt8(0)
       const start = buffer.readUInt16BE(1)
       const count = buffer.readUInt16BE(3)
 
-      if (fc !== 0x03) {
+      if (fc !== FC.READ_HOLDING_REGISTERS) {
         return null
       }
 
@@ -30,8 +30,8 @@ class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
    * @throws {InvalidStartAddressException} When start address is larger than 0xFFFF.
    * @throws {InvalidQuantityException} When count is larger than 0x7D0.
    */
-  constructor (start, count) {
-    super(0x03)
+  constructor(start: number, count: number) {
+    super(FC.READ_HOLDING_REGISTERS)
     if (start > 0xFFFF) {
       throw new Error('InvalidStartAddress')
     }
@@ -43,24 +43,24 @@ class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
   }
 
   /** Start Address. */
-  get start () {
+  get start() {
     return this._start
   }
 
   /** Quantity of registers. */
-  get count () {
+  get count() {
     return this._count
   }
 
-  get byteCount () {
+  get byteCount() {
     return 5
   }
 
-  get name () {
-    return 'ReadHoldingRegisters'
+  get name() {
+    return 'ReadHoldingRegisters' as const
   }
 
-  createPayload () {
+  createPayload() {
     const payload = Buffer.alloc(5)
     payload.writeUInt8(this._fc, 0) // function code
     payload.writeUInt16BE(this._start, 1) // start address
@@ -69,4 +69,11 @@ class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
   }
 }
 
-module.exports = ReadHoldingRegistersRequestBody
+export function isReadHoldingRegistersRequestBody(x: any): x is ReadHoldingRegistersRequestBody {
+  if (x instanceof ReadHoldingRegistersRequestBody) {
+    return true;
+  } else {
+    return false;
+  }
+}
+

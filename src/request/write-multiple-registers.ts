@@ -1,26 +1,27 @@
-const ModbusRequestBody = require('./request-body.js')
+import { FC } from "../codes";
+
+import ModbusRequestBody from './request-body.js'
 
 /** Write Multiple Registers Request Body
  * @extends ModbusRequestBody
  */
-class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
-	public _address: any;
-	public _values: any;
-	public _byteCount: any;
-	public _numberOfBytes: any;
-	public _quantity: any;
-	public _valuesAsBuffer: any;
-	public _valuesAsArray: any;
-	public _fc: any;
+export default class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
+  private _address: number;
+  private _values: number[] | Buffer;
+  private _byteCount!: number;
+  private _numberOfBytes!: number;
+  private _quantity!: number;
+  private _valuesAsBuffer!: Buffer;
+  private _valuesAsArray!: number[];
 
-  static fromBuffer (buffer) {
+  static fromBuffer(buffer: Buffer) {
     try {
       const fc = buffer.readUInt8(0)
       const address = buffer.readUInt16BE(1)
       const numberOfBytes = buffer.readUInt8(5)
       const values = buffer.slice(6, 6 + numberOfBytes)
 
-      if (fc !== 0x10) {
+      if (fc !== FC.WRITE_MULTIPLE_HOLDING_REGISTERS) {
         return null
       }
 
@@ -31,15 +32,15 @@ class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
   }
 
   /** Create a new Write Multiple Registers Request Body.
-   * @param {Number} address Write address.
-   * @param {Array|Buffer} values Values to be written. Either a Array of UInt16 values or a Buffer.
-   * @param {Number} quantity In case of values being a Buffer, specify the number of coils that needs to be written.
+   * @param {number} address Write address.
+   * @param {number[] | Buffer} values Values to be written. Either a Array of UInt16 values or a Buffer.
+   * @param {number} quantity In case of values being a Buffer, specify the number of coils that needs to be written.
    * @throws {InvalidStartAddressException} When address is larger than 0xFFFF.
    * @throws {InvalidArraySizeException}
    * @throws {InvalidBufferSizeException}
    */
-  constructor (address, values) {
-    super(0x10)
+  constructor(address: number, values: number[] | Buffer) {
+    super(FC.WRITE_MULTIPLE_HOLDING_REGISTERS)
     if (address > 0xFFFF) {
       throw new Error('InvalidStartAddress')
     }
@@ -68,48 +69,52 @@ class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
       this._numberOfBytes = Math.floor(this._values.length * 2)
       this._quantity = this._values.length
       this._valuesAsBuffer = Buffer.alloc(this._numberOfBytes)
-      this._values.forEach(function (v, i) {
+      this._values.forEach((v, i) => {
         this._valuesAsBuffer.writeUInt16BE(v, i * 2)
-      }.bind(this))
+      })
     }
   }
 
   /** Start Address to begin writing data */
-  get address () {
+  get address() {
     return this._address
   }
 
   /** Quantity of registers beein written */
-  get quantity () {
+  get quantity() {
     return this._quantity
   }
 
+  get count() {
+    return this.quantity
+  }
+
   /** Values to be written */
-  get values () {
+  get values() {
     return this._values
   }
 
-  get valuesAsArray () {
+  get valuesAsArray() {
     return this._valuesAsArray
   }
 
-  get valuesAsBuffer () {
+  get valuesAsBuffer() {
     return this._valuesAsBuffer
   }
 
-  get byteCount () {
+  get byteCount() {
     return this._byteCount
   }
 
-  get numberOfBytes () {
+  get numberOfBytes() {
     return this._numberOfBytes
   }
 
-  get name () {
-    return 'WriteMultipleRegisters'
+  get name() {
+    return 'WriteMultipleRegisters' as const
   }
 
-  createPayload () {
+  createPayload() {
     const payload = Buffer.alloc(6 + this._numberOfBytes)
     payload.writeUInt8(this._fc, 0) // function code
     payload.writeUInt16BE(this._address, 1) // start address
@@ -120,4 +125,10 @@ class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
   }
 }
 
-module.exports = WriteMultipleRegistersRequestBody
+export function isWriteMultipleRegistersRequestBody(x: any): x is WriteMultipleRegistersRequestBody {
+  if (x instanceof WriteMultipleRegistersRequestBody) {
+    return true;
+  } else {
+    return false;
+  }
+}

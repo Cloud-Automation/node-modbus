@@ -1,20 +1,20 @@
-const ModbusRequestBody = require('./request-body.js')
+import { FC } from "../codes";
+import ModbusRequestBody from './request-body.js'
 
 /** Write Single Register Request Body
  * @extends ModbusRequestBody
  */
-class WriteSingleRegisterRequestBody extends ModbusRequestBody {
-	public _address: any;
-	public _value: any;
-	public _fc: any;
+export default class WriteSingleRegisterRequestBody extends ModbusRequestBody {
+  private _address: number;
+  private _value: number;
 
-  static fromBuffer (buffer) {
+  static fromBuffer(buffer: Buffer) {
     try {
       const fc = buffer.readUInt8(0)
       const address = buffer.readUInt16BE(1)
       const value = buffer.readUInt16BE(3)
 
-      if (fc !== 0x06) {
+      if (fc !== FC.WRITE_SINGLE_HOLDING_REGISTER) {
         return null
       }
 
@@ -25,12 +25,12 @@ class WriteSingleRegisterRequestBody extends ModbusRequestBody {
   }
 
   /** Create a new Write Single Register Request Body.
-   * @param {Number} address Write address.
-   * @param {Number} value Value to be written.
+   * @param {number} address Write address.
+   * @param {number} value Value to be written.
    * @throws {InvalidStartAddressException} When address is larger than 0xFFFF.
    */
-  constructor (address, value) {
-    super(0x06)
+  constructor(address: number, value: number) {
+    super(FC.WRITE_SINGLE_HOLDING_REGISTER)
     if (address > 0xFFFF) {
       throw new Error('InvalidStartAddress')
     }
@@ -42,20 +42,28 @@ class WriteSingleRegisterRequestBody extends ModbusRequestBody {
   }
 
   /** Address to be written. */
-  get address () {
+  get address() {
     return this._address
   }
 
   /** Value to be written. */
-  get value () {
+  get value() {
     return this._value
   }
 
-  get name () {
-    return 'WriteSingleRegister'
+  get name() {
+    return 'WriteSingleRegister' as const
   }
 
-  createPayload () {
+  get quantity() {
+    return 1;
+  }
+
+  get count() {
+    return 1;
+  }
+
+  createPayload() {
     const payload = Buffer.alloc(5)
     payload.writeUInt8(this._fc, 0) // function code
     payload.writeUInt16BE(this._address, 1) // output address
@@ -63,9 +71,15 @@ class WriteSingleRegisterRequestBody extends ModbusRequestBody {
     return payload
   }
 
-  get byteCount () {
+  get byteCount() {
     return 5
   }
 }
 
-module.exports = WriteSingleRegisterRequestBody
+export function isWriteSingleRegisterRequestBody(x: any): x is WriteSingleRegisterRequestBody {
+  if (x instanceof WriteSingleRegisterRequestBody) {
+    return true;
+  } else {
+    return false;
+  }
+}
