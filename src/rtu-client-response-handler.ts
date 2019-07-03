@@ -1,16 +1,20 @@
 const debug = require('debug')('rtu-response-handler')
-const ModbusRTUResponse = require('./rtu-response.js')
-const ModbusClientResponseHandler = require('./client-response-handler.js')
+import ModbusRTUResponse from './rtu-response.js'
+import ModbusClientResponseHandler from './client-response-handler.js'
 
 /** Modbus/RTU Client Response Handler
  * @extends ModbusClientResponseHandler
  * @class
  */
-class ModbusRTUClientResponseHandler extends ModbusClientResponseHandler {
-	public _buffer: any;
-	public _messages: any;
+export default class ModbusRTUClientResponseHandler extends ModbusClientResponseHandler {
+  protected _messages: ModbusRTUResponse[];
 
-  handleData (data) {
+  constructor() {
+    super();
+    this._messages = [];
+  }
+
+  handleData(data: Buffer) {
     debug('receiving new data')
     this._buffer = Buffer.concat([this._buffer, data])
 
@@ -35,9 +39,7 @@ class ModbusRTUClientResponseHandler extends ModbusClientResponseHandler {
     } while (1)
   }
 
-  shift () {
+  shift() {
     return this._messages.shift()
   }
 }
-
-module.exports = ModbusRTUClientResponseHandler

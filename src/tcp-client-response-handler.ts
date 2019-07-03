@@ -1,30 +1,29 @@
 const debug = require('debug')('tcp-response-handler')
-const TCPResponse = require('./tcp-response.js')
-const ModbusClientResponseHandler = require('./client-response-handler.js')
+import ModbusTCPResponse from './tcp-response.js';
+import ModbusClientResponseHandler from './client-response-handler.js';
 
 /** Modbus/TCP Client Response Handler.
  * @extends ModbusClientResponseHandler
  * @class
  */
-class ModbusTCPClientResponseHandler extends ModbusClientResponseHandler {
-	public _buffer: any;
-	public _messages: any;
+export default class ModbusTCPClientResponseHandler extends ModbusClientResponseHandler {
+  protected _messages: ModbusTCPResponse[];
 
   /** Create new Modbus/TCP Client Response Handler */
-  constructor () {
+  constructor() {
     super()
     this._buffer = Buffer.alloc(0)
     this._messages = []
   }
 
-  handleData (data) {
+  handleData(data: Buffer) {
     debug('receiving new data', data)
     this._buffer = Buffer.concat([this._buffer, data])
 
     debug('buffer', this._buffer)
 
     do {
-      const response = TCPResponse.fromBuffer(this._buffer)
+      const response = ModbusTCPResponse.fromBuffer(this._buffer)
 
       if (!response) {
         debug('not enough data available to parse')
@@ -42,5 +41,3 @@ class ModbusTCPClientResponseHandler extends ModbusClientResponseHandler {
     } while (1)
   }
 }
-
-module.exports = ModbusTCPClientResponseHandler
