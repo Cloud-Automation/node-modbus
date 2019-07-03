@@ -7,7 +7,7 @@ import CRC from 'crc'
 import SerialSocket from 'serialport';
 import ModbusRequestBody from './request/request-body.js';
 import ModbusRTUResponse from './rtu-response.js';
-import { UserRequestError } from './user-request.js';
+import { UserRequestError } from "./user-request-error";
 
 /** Modbus/RTU Client Request Handler
  * Implements behaviour for Client Requests for Modbus/RTU

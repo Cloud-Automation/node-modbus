@@ -7,7 +7,7 @@ const debug = require('debug')('tcp-client-request-handler')
 import ModbusTCPRequest from './tcp-request.js'
 import ModbusClientRequestHandler from './client-request-handler.js'
 import { Socket } from "net";
-import { UserRequestError } from "./user-request";
+import { UserRequestError } from "./user-request-error";
 
 const OUT_OF_SYNC = 'OutOfSync'
 const PROTOCOL = 'Protocol'

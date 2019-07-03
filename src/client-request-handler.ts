@@ -3,7 +3,8 @@ const OFFLINE = 'Offline'
 const MODBUS_EXCEPTION = 'ModbusException'
 
 const debug = require('debug')('client-request-handler')
-import UserRequest, { UserRequestError, ModbusRequest, ModbusResponse } from './user-request.js'
+import UserRequest, { ModbusRequest, ModbusResponse } from './user-request.js'
+import { UserRequestError } from "./user-request-error";
 import ExceptionResponseBody from './response/exception.js'
 import ModbusRequestBody from './request/request-body.js';
 import * as Stream from 'stream';
