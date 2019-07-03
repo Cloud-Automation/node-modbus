@@ -1,15 +1,18 @@
 const debug = require('debug')('tcp-response')
-const ResponseFactory = require('./response/response-factory.js')
+import ResponseFactory from './response/response-factory.js'
+import ModbusResponseBody from './response/response-body.js';
+import ModbusTCPRequest from './tcp-request.js';
+import ModbusAbstractResponse from './abstract-response.js';
 
 /** Modbus/TCP Response
  * @class
  */
-class ModbusTCPResponse {
-	public _id: any;
-	public _protocol: any;
-	public _bodyLength: any;
-	public _unitId: any;
-	public _body: any;
+export default class ModbusTCPResponse extends ModbusAbstractResponse {
+  protected _id: number;
+  protected _protocol: number;
+  protected _bodyLength: number;
+  protected _unitId: number;
+  protected _body: ModbusResponseBody;
 
   /** Create Modbus/TCP Response from a Modbus/TCP Request including
    * the modbus function body.
@@ -17,7 +20,7 @@ class ModbusTCPResponse {
    * @param {ModbusResponseBody} body
    * @returns {ModbusTCPResponse}
    */
-  static fromRequest (tcpRequest, modbusBody) {
+  static fromRequest(tcpRequest: ModbusTCPRequest, modbusBody: ModbusResponseBody) {
     return new ModbusTCPResponse(
       tcpRequest.id,
       tcpRequest.protocol,
@@ -30,7 +33,7 @@ class ModbusTCPResponse {
    * @param {Buffer} buffer
    * @returns {ModbusTCPResponse} Returns null if not enough data located in the buffer.
    */
-  static fromBuffer (buffer) {
+  static fromBuffer(buffer: Buffer) {
     try {
       const id = buffer.readUInt16BE(0)
       const protocol = buffer.readUInt16BE(2)
@@ -57,13 +60,14 @@ class ModbusTCPResponse {
   }
 
   /** Create new Modbus/TCP Response Object.
-   * @param {Number} id Transaction ID
-   * @param {Number} protocol Protcol version (Usually 0)
-   * @param {Number} bodyLength Body length + 1
-   * @param {Number} unitId Unit ID
+   * @param {number} id Transaction ID
+   * @param {number} protocol Protcol version (Usually 0)
+   * @param {number} bodyLength Body length + 1
+   * @param {number} unitId Unit ID
    * @param {ModbusResponseBody} body Modbus response body object
    */
-  constructor (id, protocol, bodyLength, unitId, body) {
+  constructor(id: number, protocol: number, bodyLength: number, unitId: number, body: ModbusResponseBody) {
+    super();
     this._id = id
     this._protocol = protocol
     this._bodyLength = bodyLength
@@ -72,36 +76,43 @@ class ModbusTCPResponse {
   }
 
   /** Transaction ID */
-  get id () {
+  get id() {
     return this._id
   }
 
   /** Protocol version */
-  get protocol () {
+  get protocol() {
     return this._protocol
   }
 
   /** Body length */
-  get bodyLength () {
+  get bodyLength() {
     return this._bodyLength
   }
 
   /** Payload byte count */
-  get byteCount () {
+  get byteCount() {
     return this._bodyLength + 6
   }
 
-  /** Unit ID */
-  get unitId () {
+  get unitId() {
     return this._unitId
   }
 
+  get slaveId() {
+    return this._unitId;
+  }
+
+  get address() {
+    return this._unitId;
+  }
+
   /** Modbus response body */
-  get body () {
+  get body() {
     return this._body
   }
 
-  createPayload () {
+  createPayload() {
     /* Payload is a buffer with:
      * Transaction ID = 2 Bytes
      * Protocol ID = 2 Bytes
@@ -121,5 +132,3 @@ class ModbusTCPResponse {
     return payload
   }
 }
-
-module.exports = ModbusTCPResponse
