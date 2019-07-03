@@ -112,7 +112,7 @@ export default abstract class ModbusClientRequestHandler<
 
     /* check that response fc equals request id */
     // TODO: Check that the new isException logic works for all tests
-    if (response.body.isException && response.body.fc !== request.body.fc) {
+    if (response.body.isException === false && response.body.fc !== request.body.fc) {
       debug('something is weird, request fc and response fc do not match.')
       /* clear all request, client must be reset */
       userRequest.reject(new UserRequestError({
