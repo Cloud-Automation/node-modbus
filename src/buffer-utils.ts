@@ -1,4 +1,6 @@
-'use strict'
+
+
+import { Byte, BooleanArray } from "./constants";
 
 const debug = require('debug')('buffer-utils')
 
@@ -26,7 +28,7 @@ const debug = require('debug')('buffer-utils')
  */
 
 class BufferUtils {
-  static bufferShift (startAddress, endAddress, outputs) {
+  static bufferShift(startAddress: number, endAddress: number, outputs: Buffer) {
     startAddress = startAddress - 1
     const startShift = startAddress % 8
     const startByte = Math.floor(startAddress / 8)
@@ -58,12 +60,12 @@ class BufferUtils {
   }
 
   /** firstByte ensure first byte is set correctly
-   * @param {start_address} first coil to write
-   * @param {origianl_byte} byte from the original coils buffer
-   * @param {output_byte} first byte from the shifted outputs buffer
+   * @param {Byte} startAddress coil to write
+   * @param {Byte} originalByte from the original coils buffer
+   * @param {Byte} outputByte byte from the shifted outputs buffer
    * @returns correct first byte to be written to coils buffer
    */
-  static firstByte (startAddress, originalByte, outputByte) {
+  static firstByte(startAddress: Byte, originalByte: Byte, outputByte: Byte): number {
     startAddress = startAddress - 1
     const startShift = startAddress % 8
     const mask = 0xff >> (8 - startShift)
@@ -73,12 +75,12 @@ class BufferUtils {
   }
 
   /** lastByte ensure last byte is set correctly
-   * @param {end_address} last coil to write
-   * @param {origianl_byte} byte from the original coils buffer
-   * @param {output_byte} last byte from the shifted outputs buffer
-   * @returns correct last byte to be written to coils buffer
+   * @param {number} last coil to write
+   * @param {Byte} byte from the original coils buffer
+   * @param {Byte} last byte from the shifted outputs buffer
+   * @returns {number} correct last byte to be written to coils buffer
    */
-  static lastByte (endAddress, originalByte, outputByte) {
+  static lastByte(endAddress: number, originalByte: Byte, outputByte: Byte): number {
     const endShift = endAddress % 8
     const mask = 0xff << endShift
     const maskedOriginalByte = originalByte & mask
@@ -86,9 +88,9 @@ class BufferUtils {
     return outputByte + maskedOriginalByte
   }
 
-  static bufferToArrayStatus (buffer) {
-    const statusArray = []
-    let pos, curByteIdx, curByte
+  static bufferToArrayStatus(buffer: Buffer): BooleanArray {
+    const statusArray: BooleanArray = []
+    let pos: number, curByteIdx: number, curByte: Byte
     if (!(buffer instanceof Buffer)) {
       return statusArray
     }
@@ -97,13 +99,14 @@ class BufferUtils {
       pos = i % 8
       curByteIdx = Math.floor(i / 8)
       curByte = buffer.readUInt8(curByteIdx)
-      statusArray.push(((curByte & Math.pow(2, pos)) > 0) + 0)
+      const value = ((curByte & Math.pow(2, pos)) > 0);
+      statusArray.push(value ? 1 : 0);
     }
 
     return statusArray
   }
 
-  static arrayStatusToBuffer (array) {
+  static arrayStatusToBuffer(array: BooleanArray) {
     const byteCount = array instanceof Array ? Math.ceil(array.length / 8) : 0
     const buffer = Buffer.alloc(byteCount)
 
@@ -124,4 +127,4 @@ class BufferUtils {
   }
 }
 
-module.exports = BufferUtils
+export = BufferUtils
