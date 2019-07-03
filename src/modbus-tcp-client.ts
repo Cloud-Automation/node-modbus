@@ -1,8 +1,9 @@
-'use strict'
 
-const ModbusClient = require('./modbus-client.js')
-const ModbusTCPClientRequestHandler = require('./tcp-client-request-handler.js')
-const ModbusTCPClientResponseHandler = require('./tcp-client-response-handler.js')
+
+import ModbusClient from './modbus-client.js'
+import ModbusTCPClientRequestHandler from './tcp-client-request-handler.js'
+import ModbusTCPClientResponseHandler from './tcp-client-response-handler.js'
+import { Socket } from 'net';
 
 /** This client must be initiated with a net.Socket object. The module does not handle reconnections
  * or anything related to keep the connection up in case of an unplugged cable or a closed server. See
@@ -23,22 +24,23 @@ const ModbusTCPClientResponseHandler = require('./tcp-client-response-handler.js
  * })
  *
  */
-class ModbusTCPClient extends ModbusClient {
-	public _unitId: any;
-	public _timeout: any;
-	public _requestHandler: any;
-	public _socket: any;
-	public _responseHandler: any;
+export default class ModbusTCPClient extends ModbusClient<Socket> {
+  protected readonly _unitId: number;
+  protected readonly _timeout: number;
+  protected readonly _requestHandler: ModbusTCPClientRequestHandler;
+  protected readonly _responseHandler: ModbusTCPClientResponseHandler;
 
-  /** Creates a new Modbus/TCP Client.
-   * @param {net.Socket} socket The TCP Socket.
-   * @param {Number} unitId Unit ID
-   * @param {Number} timeout Timeout for requests in ms.
+  /**
+   * Creates a new Modbus/TCP Client.
+   * @param {Socket} socket The TCP Socket.
+   * @param {number} [unitId=1] Unit ID
+   * @param {number} [timeout=5000] Timeout for requests in ms.
+   * @memberof ModbusTCPClient
    */
-  constructor (socket, unitId, timeout) {
+  constructor(socket: Socket, unitId: number = 1, timeout: number = 5000) {
     super(socket)
-    this._unitId = unitId || 1
-    this._timeout = timeout || 5000
+    this._unitId = unitId
+    this._timeout = timeout
 
     /* Simply set the request and response handler and you are done.
      * The request handler needs to implement the following methods
@@ -51,6 +53,12 @@ class ModbusTCPClient extends ModbusClient {
     this._requestHandler = new ModbusTCPClientRequestHandler(this._socket, this._unitId, timeout)
     this._responseHandler = new ModbusTCPClientResponseHandler()
   }
-}
 
-module.exports = ModbusTCPClient
+  get slaveId() {
+    return this._unitId;
+  }
+
+  get unitId() {
+    return this._unitId;
+  }
+}

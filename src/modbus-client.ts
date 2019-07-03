@@ -1,28 +1,37 @@
 const debug = require('debug')('modbus-client')
 
-const ReadCoilsRequestBody = require('./request/read-coils.js')
-const ReadDiscreteInputsRequestBody = require('./request/read-discrete-inputs.js')
-const ReadHoldingRegistersRequestBody = require('./request/read-holding-registers.js')
-const ReadInputRegistersRequestBody = require('./request/read-input-registers.js')
-const WriteSingleCoilRequestBody = require('./request/write-single-coil.js')
-const WriteSingleRegisterRequestBody = require('./request/write-single-register.js')
-const WriteMultipleCoilsRequestBody = require('./request/write-multiple-coils.js')
-const WriteMultipleRegistersRequestBody = require('./request/write-multiple-registers.js')
+import ReadCoilsRequestBody from './request/read-coils.js'
+import ReadDiscreteInputsRequestBody from './request/read-discrete-inputs.js'
+import ReadHoldingRegistersRequestBody from './request/read-holding-registers.js'
+import ReadInputRegistersRequestBody from './request/read-input-registers.js'
+import WriteSingleCoilRequestBody from './request/write-single-coil.js'
+import WriteSingleRegisterRequestBody from './request/write-single-register.js'
+import WriteMultipleCoilsRequestBody from './request/write-multiple-coils.js'
+import WriteMultipleRegistersRequestBody from './request/write-multiple-registers.js'
+import * as Stream from 'stream';
+import { PromiseUserRequest } from './user-request.js';
+import ModbusTCPClientRequestHandler from './tcp-client-request-handler.js';
+import ModbusRTUClientRequestHandler from './rtu-client-request-handler.js';
+import ModbusTCPClientResponseHandler from './tcp-client-response-handler.js';
+import ModbusRTUClientResponseHandler from './rtu-client-response-handler.js';
+
 
 /** Common Modbus Client
  * @abstract
  */
-class ModbusClient {
-	public _socket: any;
-	public _responseHandler: any;
-	public _unitId: any;
-	public _requestHandler: any;
+export default abstract class ModbusClient<S extends Stream.Duplex> {
+  protected _socket: S;
+  protected abstract readonly _responseHandler: ModbusTCPClientResponseHandler | ModbusRTUClientResponseHandler;
+  protected abstract readonly _requestHandler: ModbusTCPClientRequestHandler | ModbusRTUClientRequestHandler;
+
+  public abstract get slaveId(): number;
+  public abstract get unitId(): number;
 
   /** Creates a new Modbus client object.
    * @param {Socket} socket A socket object
    * @throws {NoSocketException}
    */
-  constructor (socket) {
+  constructor(socket: S) {
     if (new.target === ModbusClient) {
       throw new TypeError('Cannot instantiate ModbusClient directly.')
     }
@@ -36,7 +45,7 @@ class ModbusClient {
     this._socket.on('data', this._onData.bind(this))
   }
 
-  _onData (data) {
+  private _onData(data: Buffer) {
     debug('received data')
 
     this._responseHandler.handleData(data)
@@ -52,15 +61,15 @@ class ModbusClient {
       }
 
       /* process the response in the request handler if unitId is a match */
-      if (this._unitId === response.unitId) {
-        this._requestHandler.handle(response)
+      if (this.unitId === response.unitId) {
+        this._requestHandler.handle(response as any) //TODO: Find a better way than overwriting the type as any
       }
     } while (1)
   }
 
   /** Execute ReadCoils Request (Function Code 0x01)
-   * @param {Number} start Start Address.
-   * @param {Number} count Coil Quantity.
+   * @param {number} start Start Address.
+   * @param {number} count Coil Quantity.
    * @returns {Promise}
    * @example
    * client.readCoils(0, 10).then(function (res) {
@@ -69,13 +78,14 @@ class ModbusClient {
    *   ...
    * })
    */
-  readCoils (start, count) {
+  public readCoils(start: number, count: number) {
     debug('issuing new read coils request')
     let request
 
     try {
       request = new ReadCoilsRequestBody(start, count)
     } catch (e) {
+      debug('unknown request error occurred')
       return Promise.reject(e)
     }
 
@@ -83,9 +93,8 @@ class ModbusClient {
   }
 
   /** Execute ReadDiscreteInputs Request (Function Code 0x02)
-   * @param {Number} start Start Address.
-   * @param {Number} count Coil Quantity.
-   * @returns {Promise}
+   * @param {number} start Start Address.
+   * @param {number} count Coil Quantity.
    * @example
    * client.readDiscreteInputs(0, 10).then(function (res) {
    *   console.log(res.response, res.request)
@@ -93,12 +102,13 @@ class ModbusClient {
    *   ...
    * })
    */
-  readDiscreteInputs (start, count) {
+  public readDiscreteInputs(start: number, count: number) {
     debug('issuing new read discrete inputs request')
     let request
     try {
       request = new ReadDiscreteInputsRequestBody(start, count)
     } catch (e) {
+      debug('unknown request error occurred')
       return Promise.reject(e)
     }
 
@@ -106,9 +116,8 @@ class ModbusClient {
   }
 
   /** Execute ReadHoldingRegisters Request (Function Code 0x03)
-   * @param {Number} start Start Address.
-   * @param {Number} count Coil Quantity.
-   * @returns {Promise}
+   * @param {number} start Start Address.
+   * @param {number} count Coil Quantity.
    * @example
    * client.readHoldingRegisters(0, 10).then(function (res) {
    *   console.log(res.response, res.request)
@@ -116,12 +125,13 @@ class ModbusClient {
    *   ...
    * })
    */
-  readHoldingRegisters (start, count) {
+  public readHoldingRegisters(start: number, count: number) {
     debug('issuing new read holding registers request')
     let request
     try {
       request = new ReadHoldingRegistersRequestBody(start, count)
     } catch (e) {
+      debug('unknown request error occurred')
       return Promise.reject(e)
     }
 
@@ -129,9 +139,8 @@ class ModbusClient {
   }
 
   /** Execute ReadInputRegisters Request (Function Code 0x04)
-   * @param {Number} start Start Address.
-   * @param {Number} count Coil Quantity.
-   * @returns {Promise}
+   * @param {number} start Start Address.
+   * @param {number} count Coil Quantity.
    * @example
    * client.readInputRegisters(0, 10).then(function (res) {
    *   console.log(res.response, res.request)
@@ -139,13 +148,14 @@ class ModbusClient {
    *   ...
    * })
    */
-  readInputRegisters (start, count) {
+  public readInputRegisters(start: number, count: number) {
     debug('issuing new read input registers request')
 
     let request
     try {
       request = new ReadInputRegistersRequestBody(start, count)
     } catch (e) {
+      debug('unknown request error occurred')
       return Promise.reject(e)
     }
 
@@ -153,9 +163,8 @@ class ModbusClient {
   }
 
   /** Execute WriteSingleCoil Request (Function Code 0x05)
-   * @param {Number} address Address.
-   * @param {Boolean} value Value.
-   * @returns {Promise}
+   * @param {number} address Address.
+   * @param {boolean | 0 | 1} value Value.
    * @example
    * client.writeSingleCoil(10, true).then(function (res) {
    *   console.log(res.response, res.request)
@@ -163,13 +172,14 @@ class ModbusClient {
    *   ...
    * })
    */
-  writeSingleCoil (address, value) {
+  public writeSingleCoil(address: number, value: boolean | 0 | 1) {
     debug('issuing new write single coil request')
 
     let request
     try {
       request = new WriteSingleCoilRequestBody(address, value)
     } catch (e) {
+      debug('unknown request error occurred')
       return Promise.reject(e)
     }
 
@@ -177,9 +187,8 @@ class ModbusClient {
   }
 
   /** Execute WriteSingleRegister Request (Function Code 0x06)
-   * @param {Number} address Address.
-   * @param {Number} value Value.
-   * @returns {Promise}
+   * @param {number} address Address.
+   * @param {number} value Value.
    * @example
    * client.writeSingleRegister(10, 1234).then(function (res) {
    *   console.log(res.response, res.request)
@@ -187,12 +196,13 @@ class ModbusClient {
    *   ...
    * })
    */
-  writeSingleRegister (address, value) {
+  public writeSingleRegister(address: number, value: number) {
     debug('issuing new write single register request')
     let request
     try {
       request = new WriteSingleRegisterRequestBody(address, value)
     } catch (e) {
+      debug('unknown request error occurred')
       return Promise.reject(e)
     }
 
@@ -201,8 +211,8 @@ class ModbusClient {
 
   /** Execute WriteMultipleCoils Request (Function Code 0x0F)
    * @param {Number} address Address.
-   * @param {Array|Buffer} values Values either as an Array[Boolean] or a Buffer.
-   * @param {Number} quantity If you choose to use the Buffer for the values then you have to
+   * @param {number[] | Buffer} values Values either as an Array[Boolean] or a Buffer.
+   * @param {Number} [quantity] If you choose to use the Buffer for the values then you have to
    *   specify the quantity of bytes.
    * @returns {Promise}
    * @example
@@ -218,13 +228,22 @@ class ModbusClient {
    *   ...
    * })
    */
-  writeMultipleCoils (start, values, quantity) {
+  public writeMultipleCoils(start: number, values: boolean[]): PromiseUserRequest
+  public writeMultipleCoils(start: number, values: Buffer, quantity: number): PromiseUserRequest
+  public writeMultipleCoils(start: number, values: boolean[] | Buffer, quantity: number = 0): PromiseUserRequest {
     debug('issuing new write multiple coils request')
 
     let request
     try {
-      request = new WriteMultipleCoilsRequestBody(start, values, quantity)
+
+      if (values instanceof Buffer) {
+        request = new WriteMultipleCoilsRequestBody(start, values, quantity)
+      } else {
+        request = new WriteMultipleCoilsRequestBody(start, values)
+      }
+
     } catch (e) {
+      debug('unknown request error occurred')
       return Promise.reject(e)
     }
 
@@ -248,18 +267,17 @@ class ModbusClient {
    *   ...
    * })
    */
-  writeMultipleRegisters (start, values) {
+  public writeMultipleRegisters(start: number, values: number[] | Buffer) {
     debug('issuing new write multiple registers request')
 
     let request
     try {
       request = new WriteMultipleRegistersRequestBody(start, values)
     } catch (e) {
+      debug('unknown request error occurred')
       return Promise.reject(e)
     }
 
     return this._requestHandler.register(request)
   }
 }
-
-module.exports = ModbusClient

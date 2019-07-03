@@ -1,8 +1,10 @@
-'use strict'
 
-const ModbusClient = require('./modbus-client.js')
-const ModbusRTUClientRequestHandler = require('./rtu-client-request-handler.js')
-const ModbusRTUClientResponseHandler = require('./rtu-client-response-handler.js')
+
+import ModbusClient from './modbus-client.js'
+import ModbusRTUClientRequestHandler from './rtu-client-request-handler.js'
+import ModbusRTUClientResponseHandler from './rtu-client-response-handler.js'
+
+import SerialPort from 'serialport';
 
 /** This Client musst be initiated with a socket object that implements the event emitter
  * interface and fires a 'data' event with a buffer as a parameter. It also needs to
@@ -17,21 +19,28 @@ const ModbusRTUClientResponseHandler = require('./rtu-client-response-handler.js
  * @extends ModbusClient
  * @class
  */
-class ModbusRTUClient extends ModbusClient {
-	public _requestHandler: any;
-	public _socket: any;
-	public _responseHandler: any;
+export default class ModbusRTUClient extends ModbusClient<SerialPort> {
+  protected readonly _requestHandler: ModbusRTUClientRequestHandler;
+  protected readonly _responseHandler: ModbusRTUClientResponseHandler;
 
   /** Creates a new Modbus/RTU Client.
-   * @param {SerialSocket} socket The serial Socket.
-   * @param {Number} address The address of the serial client.
+   * @param {SerialPort} socket The serial Socket.
+   * @param {number} address The address of the serial client.
+   * @param {number} [timeout=5000]
    */
-  constructor (socket, address) {
+  constructor(socket: SerialPort, address: number, timeout = 5000) {
     super(socket)
 
-    this._requestHandler = new ModbusRTUClientRequestHandler(this._socket, address)
+    this._requestHandler = new ModbusRTUClientRequestHandler(this._socket, address, timeout)
     this._responseHandler = new ModbusRTUClientResponseHandler()
   }
-}
 
-module.exports = ModbusRTUClient
+  public get slaveId() {
+    return this._requestHandler.address;
+  }
+
+  public get unitId() {
+    return this._requestHandler.address;
+  }
+
+}
