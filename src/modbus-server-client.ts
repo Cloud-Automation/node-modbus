@@ -1,34 +1,44 @@
-'use strict'
+
 
 const debug = require('debug')('modbus tcp client socket')
-const RequestHandler = require('./modbus-server-request-handler.js')
-const ResponseHandler = require('./modbus-server-response-handler.js')
+import ModbusServerRequestHandler from './modbus-server-request-handler.js'
+import ModbusServerResponseHandler from './modbus-server-response-handler.js'
+import ModbusServer from './modbus-server.js';
+import * as Stream from 'stream';
+import { ModbusAbstractResponseFromRequest } from './abstract-response.js';
+import { ModbusAbstractRequestFromBuffer } from './abstract-request.js';
 
-class ModbusServerClient {
-	public _server: any;
-	public _socket: any;
-	public _requestHandler: any;
-	public _responseHandler: any;
 
-  constructor (server, socket, Request, Response) {
+
+
+export default class ModbusServerClient<
+  S extends Stream.Duplex,
+  ReqFromBufferMethod extends ModbusAbstractRequestFromBuffer,
+  ResFromRequestMethod extends ModbusAbstractResponseFromRequest> {
+  public _server: ModbusServer;
+  public _socket: S;
+  public _requestHandler: ModbusServerRequestHandler<ReqFromBufferMethod>;
+  public _responseHandler: ModbusServerResponseHandler<ResFromRequestMethod>;
+
+  constructor(server: ModbusServer, socket: S, fromBufferMethod: ReqFromBufferMethod, fromRequestMethod: ResFromRequestMethod) {
     this._server = server
     this._socket = socket
 
-    this._requestHandler = new RequestHandler(Request)
-    this._responseHandler = new ResponseHandler(this._server, Response)
+    this._requestHandler = new ModbusServerRequestHandler(fromBufferMethod)
+    this._responseHandler = new ModbusServerResponseHandler(this._server, fromRequestMethod)
 
     this._socket.on('data', this._onData.bind(this))
   }
 
-  get socket () {
+  get socket() {
     return this._socket
   }
 
-  get server () {
+  get server() {
     return this._server
   }
 
-  _onData (data) {
+  _onData(data: Buffer) {
     debug('new data coming in')
     this._requestHandler.handle(data)
 
@@ -41,13 +51,12 @@ class ModbusServerClient {
         break
       }
 
-      this._responseHandler.handle(request, function (response) {
+      //TODO: Find a better to overwrite the type definition for request instead of using "any"
+      this._responseHandler.handle(request as any, (response) => {
         this._socket.write(response, function () {
           debug('response flushed', response)
         })
-      }.bind(this))
+      })
     } while (1)
   }
 }
-
-module.exports = ModbusServerClient
