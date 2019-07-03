@@ -1,27 +1,25 @@
-class Response {
-	public _head: any;
-	public _body: any;
+export default class Response {
+  public _head: any;
+  public _body: any;
 
-  static compose (head, body) {
+  static compose(head: any, body: any) {
     return new Response(head, body)
   }
 
-  constructor (head, body) {
+  constructor(head: any, body: any) {
     this._head = head
     this._body = body
   }
 
-  get head () {
+  get head() {
     return this._head
   }
 
-  get body () {
+  get body() {
     return this._body
   }
 
-  get length () {
+  get length() {
     return this._head.length + this._body.length
   }
 }
-
-module.exports = Response
