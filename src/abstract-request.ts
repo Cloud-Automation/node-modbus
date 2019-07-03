@@ -14,7 +14,7 @@ export default abstract class ModbusAbstractRequest {
   public abstract get body(): ModbusRequestBody;
 
   static fromBuffer: ModbusAbstractRequestFromBuffer = (buffer) => {
-    throw new Error('Cannot call from buffer from base abstract class')
+    throw new TypeError('Cannot call from buffer from base abstract class')
   }
 
   /**

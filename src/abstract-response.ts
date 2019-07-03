@@ -22,7 +22,7 @@ export default abstract class ModbusAbstractResponse {
    * @memberof ModbusAbstractResponse
    */
   public static fromRequest(request: ModbusAbstractRequest, body: ModbusResponseBody): ModbusAbstractResponse {
-    throw new Error('Cannot call fromRequest directly from abstract class')
+    throw new TypeError('Cannot call fromRequest directly from abstract class')
   }
 
   /**
