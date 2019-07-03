@@ -4,17 +4,17 @@ import ModbusAbstractRequest from './abstract-request.js';
 import RequestFactory from './request/request-factory.js';
 
 /** Class representing a Modbus TCP Request */
-export default class ModbusTCPRequest extends ModbusAbstractRequest {
+export default class ModbusTCPRequest<ReqBody extends ModbusRequestBody = ModbusRequestBody> extends ModbusAbstractRequest<ReqBody> {
   protected _id: number;
   protected _protocol: number;
   protected _length: number;
   protected _unitId: number;
-  protected _body: ModbusRequestBody;
+  protected _body: ReqBody;
 
   /** Convert a buffer into a new Modbus TCP Request. Returns null if the buffer
    * does not contain enough data.
    * @param {Buffer} buffer
-   * @return {ModbusTCPRequest} A new Modbus TCP Request or Null.
+   * @return  A new Modbus TCP Request or Null.
    */
   static fromBuffer(buffer: Buffer) {
     try {
@@ -49,9 +49,9 @@ export default class ModbusTCPRequest extends ModbusAbstractRequest {
    * @param {number} Protocol Type
    * @param {number} Byte count of the following data (inc. unitId)
    * @param {number} Unit ID
-   * @param {ModbusRequestBody} Actual modbus request containing function code and parameters.
+   * @param {ReqBody} Actual modbus request containing function code and parameters.
    */
-  constructor(id: number, protocol: number, length: number, unitId: number, body: ModbusRequestBody) {
+  constructor(id: number, protocol: number, length: number, unitId: number, body: ReqBody) {
     super()
     this._id = id
     this._protocol = protocol

@@ -11,16 +11,16 @@ import RequestFactory from './request/request-factory.js';
  * @class ModbusRTURequest
  * @extends {ModbusAbstractRequest}
  */
-export default class ModbusRTURequest extends ModbusAbstractRequest {
+export default class ModbusRTURequest<ReqBody extends ModbusRequestBody = ModbusRequestBody> extends ModbusAbstractRequest<ReqBody> {
   protected _address: number;
-  protected _body: ModbusRequestBody;
+  protected _body: ReqBody;
   protected _corrupted: boolean;
   protected _crc!: number;
 
   /** Convert a buffer into a new Modbus RTU Request. Returns null if the buffer
    * does not contain enough data.
    * @param {Buffer} buffer
-   * @return {ModbusRTURequest} A new Modbus RTU Request or null.
+   * @return  A new Modbus RTU Request or null.
    */
   static fromBuffer(buffer: Buffer) {
     try {
@@ -55,11 +55,11 @@ export default class ModbusRTURequest extends ModbusAbstractRequest {
   /**
    *Creates an instance of ModbusRTURequest.
    * @param {number} address
-   * @param {ModbusRequestBody} body
+   * @param {ReqBody} body
    * @param {boolean} [corrupted=false]
    * @memberof ModbusRTURequest
    */
-  constructor(address: number, body: ModbusRequestBody, corrupted: boolean = false) {
+  constructor(address: number, body: ReqBody, corrupted: boolean = false) {
     super()
     this._address = address
     this._body = body

@@ -1,30 +1,32 @@
 import ModbusServer from "./modbus-server";
-import ReadCoilsResponseBody from './response/read-coils.js'
-import ReadDiscreteInputsResponseBody from './response/read-discrete-inputs.js'
-import ReadHoldingRegistersResponseBody from './response/read-holding-registers.js'
-import ReadInputRegistersResponseBody from './response/read-input-registers.js'
-import WriteSingleCoilResponseBody from './response/write-single-coil.js'
-import WriteMultipleCoilsResponseBody from './response/write-multiple-coils.js'
-import WriteMultipleRegistersResponseBody from './response/write-multiple-registers.js'
-import ExceptionResponseBody from './response/exception.js'
+
+import {
+  ReadCoilsResponseBody,
+  ReadDiscreteInputsResponseBody,
+  ReadHoldingRegistersResponseBody,
+  ReadInputRegistersResponseBody,
+  WriteSingleCoilResponseBody,
+  WriteMultipleCoilsResponseBody,
+  WriteMultipleRegistersResponseBody,
+  ExceptionResponseBody,
+  WriteSingleRegisterResponseBody,
+} from './response';
+
+import {
+  isReadCoilsRequestBody,
+  isReadDiscreteInputsRequestBody,
+  isReadHoldingRegistersRequestBody,
+  isExceptionRequestBody,
+  isReadInputRegistersRequestBody,
+  isWriteSingleCoilRequestBody,
+  isWriteSingleRegisterRequestBody,
+  isWriteMultipleCoilsRequestBody,
+  isWriteMultipleRegistersRequestBody,
+} from './request';
 
 import { FC, isFunctionCode } from "./codes";
-
 import BufferUtils from './buffer-utils.js';
 import { ModbusRequest } from "./user-request";
-
-import { isReadCoilsRequestBody } from "./request/read-coils";
-import { isReadDiscreteInputsRequestBody } from "./request/read-discrete-inputs";
-import { isReadHoldingRegistersRequestBody } from "./request/read-holding-registers";
-import { isExceptionRequestBody } from "./request/exception";
-import { isReadInputRegistersRequestBody } from "./request/read-input-registers";
-import { isWriteSingleCoilRequestBody } from "./request/write-single-coil";
-
-import WriteSingleRegisterResponseBody from './response/write-single-register.js'
-import { isWriteSingleRegisterRequestBody } from "./request/write-single-register";
-import { isWriteMultipleCoilsRequestBody } from "./request/write-multiple-coils";
-import { isWriteMultipleRegistersRequestBody } from "./request/write-multiple-registers";
-
 import { ModbusAbstractResponseFromRequest } from "./abstract-response";
 
 const {

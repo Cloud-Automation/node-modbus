@@ -1,5 +1,6 @@
-import ModbusResponseBody from "./response/response-body";
+import { ModbusResponseBody } from "./response";
 import ModbusAbstractRequest from "./abstract-request";
+import { ModbusRequestBody } from "./request";
 
 /**
  *
@@ -8,8 +9,8 @@ import ModbusAbstractRequest from "./abstract-request";
  * @abstract
  * @class ModbusAbstractResponse
  */
-export default abstract class ModbusAbstractResponse {
-  protected abstract _body: ModbusResponseBody
+export default abstract class ModbusAbstractResponse<ResBody extends ModbusResponseBody = ModbusResponseBody> {
+  protected abstract _body: ResBody
 
   /**
    * Creates Modbus TCP or RTU Response from a Modbus TCP or RTU Request including
@@ -21,7 +22,7 @@ export default abstract class ModbusAbstractResponse {
    * @returns {ModbusAbstractResponse}
    * @memberof ModbusAbstractResponse
    */
-  public static fromRequest(request: ModbusAbstractRequest, body: ModbusResponseBody): ModbusAbstractResponse {
+  public static fromRequest<ReqBody extends ModbusRequestBody, ResBody extends ModbusResponseBody>(request: ModbusAbstractRequest<ReqBody>, body: ResBody): ModbusAbstractResponse<ResBody> {
     throw new TypeError('Cannot call fromRequest directly from abstract class')
   }
 

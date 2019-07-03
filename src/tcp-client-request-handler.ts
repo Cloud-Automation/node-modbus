@@ -37,7 +37,7 @@ export default class ModbusTCPClientRequestHandler extends ModbusClientRequestHa
     this._socket.on('close', this._onClose.bind(this))
   }
 
-  register(requestBody: ModbusRequestBody) {
+  register<ReqBody extends ModbusRequestBody>(requestBody: ReqBody) {
     this._requestId = (this._requestId + 1) % 0xFFFF
     debug('registrating new request', 'transaction id', this._requestId, 'unit id', this._unitId, 'length', requestBody.byteCount)
 
@@ -46,7 +46,7 @@ export default class ModbusTCPClientRequestHandler extends ModbusClientRequestHa
     return super.registerRequest(tcpRequest)
   }
 
-  handle(response: ModbusTCPResponse) {
+  handle<T extends ModbusTCPResponse>(response: T) {
     if (!response) {
       return
     }

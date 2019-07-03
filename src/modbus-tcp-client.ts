@@ -57,3 +57,4 @@ export default class ModbusTCPClient extends ModbusClient<Socket, ModbusTCPReque
     return this._unitId;
   }
 }
+

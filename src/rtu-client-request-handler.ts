@@ -36,7 +36,7 @@ export default class ModbusRTUClientRequestHandler extends ModbusClientRequestHa
     this._socket.on('open', this._onConnect.bind(this))
   }
 
-  register(requestBody: ModbusRequestBody) {
+  register<T extends ModbusRequestBody>(requestBody: T) {
     debug('registrating new request')
 
     const request = new ModbusRTURequest(this._address, requestBody)
@@ -44,7 +44,7 @@ export default class ModbusRTUClientRequestHandler extends ModbusClientRequestHa
     return super.registerRequest(request)
   }
 
-  handle(response: ModbusRTUResponse) {
+  handle<T extends ModbusRTUResponse>(response: T) {
     debug('new response coming in')
     if (!response) {
       return

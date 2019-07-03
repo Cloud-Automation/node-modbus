@@ -3,14 +3,15 @@ const OFFLINE = 'Offline'
 const MODBUS_EXCEPTION = 'ModbusException'
 
 const debug = require('debug')('client-request-handler')
-import UserRequest from './user-request.js'
+import UserRequest, { PromiseUserRequest } from './user-request.js'
 import { UserRequestError } from "./user-request-error";
 import ExceptionResponseBody from './response/exception.js'
-import ModbusRequestBody from './request/request-body.js';
-import * as Stream from 'stream';
-import { Socket } from 'net';
+import { ModbusRequestBody } from './request';
 import ModbusAbstractRequest from './abstract-request.js';
 import ModbusAbstractResponse from './abstract-response.js';
+import * as Stream from 'stream';
+import { ModbusResponseBody } from './response/index.js';
+import { RequestToResponse } from './request-response-map.js';
 
 
 /** Common Request Handler
@@ -73,22 +74,22 @@ export default abstract class ModbusClientRequestHandler<
     this._clearAllRequests()
   }
 
-  public abstract register(request: ModbusRequestBody): ReturnType<ModbusClientRequestHandler<S, Req, Res>['registerRequest']>
+  public abstract register<T extends ModbusRequestBody>(request: T): RegisterRequestReturnType<T>
 
   /** Register a new request.
    * @param {ModbusAbstractRequest} requestBody A request body to execute a modbus function.
    * @returns A promise to handle the request outcome.
    */
-  public registerRequest(request: Req) {
+  public registerRequest<R extends ModbusAbstractRequest>(request: R) {
 
-    const userRequest = new UserRequest<Req, Res>(request, this._timeout)
+    const userRequest = new UserRequest<R, Res>(request, this._timeout)
 
 
 
-    this._requests.push(userRequest)
+    this._requests.push(userRequest as unknown as UserRequest<Req, Res>)
     this._flush()
 
-    return userRequest.promise
+    return userRequest.promise as unknown as RegisterRequestReturnType<R['body']>
   }
 
   /** Handle a ModbusTCPResponse object.
@@ -187,3 +188,5 @@ export default abstract class ModbusClientRequestHandler<
     })
   }
 }
+
+export type RegisterRequestReturnType<T extends ModbusRequestBody> = PromiseUserRequest<ModbusAbstractRequest<T>, ModbusAbstractResponse<RequestToResponse<T>>>

@@ -1,29 +1,24 @@
 const debug = require('debug')('modbus-client')
 
-import ReadCoilsRequestBody from './request/read-coils.js'
-import ReadDiscreteInputsRequestBody from './request/read-discrete-inputs.js'
-import ReadHoldingRegistersRequestBody from './request/read-holding-registers.js'
-import ReadInputRegistersRequestBody from './request/read-input-registers.js'
-import WriteSingleCoilRequestBody from './request/write-single-coil.js'
-import WriteSingleRegisterRequestBody from './request/write-single-register.js'
-import WriteMultipleCoilsRequestBody from './request/write-multiple-coils.js'
-import WriteMultipleRegistersRequestBody from './request/write-multiple-registers.js'
 import * as Stream from 'stream';
+
+import {
+  ReadCoilsRequestBody,
+  ReadDiscreteInputsRequestBody,
+  ReadHoldingRegistersRequestBody,
+  ReadInputRegistersRequestBody,
+  WriteSingleCoilRequestBody,
+  WriteSingleRegisterRequestBody,
+  WriteMultipleCoilsRequestBody,
+  WriteMultipleRegistersRequestBody,
+} from './request'
+
 import { PromiseUserRequest } from './user-request.js';
-import ModbusTCPClientRequestHandler from './tcp-client-request-handler.js';
-import ModbusRTUClientRequestHandler from './rtu-client-request-handler.js';
-import ModbusTCPClientResponseHandler from './tcp-client-response-handler.js';
-import ModbusRTUClientResponseHandler from './rtu-client-response-handler.js';
 import ModbusClientResponseHandler from './client-response-handler.js';
 import ModbusClientRequestHandler from './client-request-handler.js';
-import ModbusTCPRequest from './tcp-request.js';
 import ModbusAbstractRequest from './abstract-request.js';
 import ModbusAbstractResponse from './abstract-response.js';
-
-type Either<A, B> = A | B;
-
-// type ResponseHandler = Either<ModbusTCPClientResponseHandler, ModbusRTUClientResponseHandler>;
-// type RequestHandler = Either<ModbusTCPClientRequestHandler, ModbusRTUClientRequestHandler>;
+import { WriteMultipleCoilsResponseBody } from './response';
 
 /** Common Modbus Client
  * @abstract
@@ -99,6 +94,10 @@ export default abstract class ModbusClient<S extends Stream.Duplex, ReqType exte
     }
 
     return this._requestHandler.register(request)
+  }
+
+  public get socket() {
+    return this._socket;
   }
 
   /** Execute ReadDiscreteInputs Request (Function Code 0x02)
@@ -219,17 +218,23 @@ export default abstract class ModbusClient<S extends Stream.Duplex, ReqType exte
   }
 
   /** Execute WriteMultipleCoils Request (Function Code 0x0F)
-   * @param {Number} address Address.
-   * @param {number[] | Buffer} values Values either as an Array[Boolean] or a Buffer.
-   * @param {Number} [quantity] If you choose to use the Buffer for the values then you have to
-   *   specify the quantity of bytes.
-   * @returns {Promise}
+   * @param {number} address Address.
+   * @param {boolean[]} values Values either as an Array[Boolean] or a Buffer.
+   * @returns {PromiseUserRequest<ReqType, ResType>}
    * @example
    * client.writeMultipleCoils(10, [true, false, true, false, true]).then(function (res) {
    *   console.log(res.response, res.request)
    * }).catch(function (err) {
    *   ...
    * })
+   */
+  public writeMultipleCoils(start: number, values: boolean[]): PromiseUserRequest<ModbusAbstractRequest<WriteMultipleCoilsRequestBody>, ModbusAbstractResponse<WriteMultipleCoilsResponseBody>>
+  /** Execute WriteMultipleCoils Request (Function Code 0x0F)
+   * @param {Number} address Address.
+   * @param { Buffer} values Values either as an Array[Boolean] or a Buffer.
+   * @param {Number} [quantity] If you choose to use the Buffer for the values then you have to
+   *   specify the quantity of bytes.
+   * @returns {PromiseUserRequest<ReqType, ResType>}
    * @example
    * client.writeMultipleCoils(10, Buffer.from([0xdd]), 7).then(function (res) {
    *   console.log(res.response, res.request)
@@ -237,8 +242,7 @@ export default abstract class ModbusClient<S extends Stream.Duplex, ReqType exte
    *   ...
    * })
    */
-  public writeMultipleCoils(start: number, values: boolean[]): PromiseUserRequest<any, any>
-  public writeMultipleCoils(start: number, values: Buffer, quantity: number): PromiseUserRequest<any, any>
+  public writeMultipleCoils(start: number, values: Buffer, quantity: number): PromiseUserRequest<ModbusAbstractRequest<WriteMultipleCoilsRequestBody>, ModbusAbstractResponse<WriteMultipleCoilsResponseBody>>
   public writeMultipleCoils(start: number, values: boolean[] | Buffer, quantity: number = 0) {
     debug('issuing new write multiple coils request')
 

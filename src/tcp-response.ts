@@ -3,16 +3,17 @@ import ResponseFactory from './response/response-factory.js'
 import ModbusResponseBody from './response/response-body.js';
 import ModbusTCPRequest from './tcp-request.js';
 import ModbusAbstractResponse from './abstract-response.js';
+import { ModbusRequestBody } from './request';
 
 /** Modbus/TCP Response
  * @class
  */
-export default class ModbusTCPResponse extends ModbusAbstractResponse {
+export default class ModbusTCPResponse<ResBody extends ModbusResponseBody = ModbusResponseBody> extends ModbusAbstractResponse<ResBody> {
   protected _id: number;
   protected _protocol: number;
   protected _bodyLength: number;
   protected _unitId: number;
-  protected _body: ModbusResponseBody;
+  protected _body: ResBody;
 
   /** Create Modbus/TCP Response from a Modbus/TCP Request including
    * the modbus function body.
@@ -20,7 +21,7 @@ export default class ModbusTCPResponse extends ModbusAbstractResponse {
    * @param {ModbusResponseBody} body
    * @returns {ModbusTCPResponse}
    */
-  static fromRequest(tcpRequest: ModbusTCPRequest, modbusBody: ModbusResponseBody) {
+  static fromRequest<ReqBody extends ModbusRequestBody, ResBody extends ModbusResponseBody>(tcpRequest: ModbusTCPRequest<ReqBody>, modbusBody: ResBody) {
     return new ModbusTCPResponse(
       tcpRequest.id,
       tcpRequest.protocol,
@@ -66,7 +67,7 @@ export default class ModbusTCPResponse extends ModbusAbstractResponse {
    * @param {number} unitId Unit ID
    * @param {ModbusResponseBody} body Modbus response body object
    */
-  constructor(id: number, protocol: number, bodyLength: number, unitId: number, body: ModbusResponseBody) {
+  constructor(id: number, protocol: number, bodyLength: number, unitId: number, body: ResBody) {
     super();
     this._id = id
     this._protocol = protocol

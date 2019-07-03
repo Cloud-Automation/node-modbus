@@ -4,9 +4,10 @@ import ResponseFactory from './response/response-factory.js'
 import ModbusResponseBody from './response/response-body.js';
 import ModbusRTURequest from './rtu-request.js';
 import ModbusAbstractResponse from './abstract-response.js';
+import { ModbusRequestBody } from './request/index.js';
 
-export default class ModbusRTUResponse extends ModbusAbstractResponse {
-  protected _body: ModbusResponseBody;
+export default class ModbusRTUResponse<ResBody extends ModbusResponseBody = ModbusResponseBody> extends ModbusAbstractResponse<ResBody> {
+  protected _body: ResBody;
   public _address: number;
   public _crc: number | undefined;
 
@@ -16,7 +17,7 @@ export default class ModbusRTUResponse extends ModbusAbstractResponse {
    * @param {ModbusResponseBody} body
    * @returns {ModbusRTUResponse}
    */
-  static fromRequest(rtuRequest: ModbusRTURequest, modbusBody: ModbusResponseBody): ModbusRTUResponse {
+  static fromRequest<ReqBody extends ModbusRequestBody, ResBody extends ModbusResponseBody>(rtuRequest: ModbusRTURequest<ReqBody>, modbusBody: ResBody): ModbusRTUResponse<ResBody> {
     return new ModbusRTUResponse(
       rtuRequest.address,
       undefined,  // CRC is calculated when createPayload () is called
@@ -49,7 +50,7 @@ export default class ModbusRTUResponse extends ModbusAbstractResponse {
     return new ModbusRTUResponse(address, crc, body)
   }
 
-  constructor(address: number, crc: number | undefined, body: ModbusResponseBody) {
+  constructor(address: number, crc: number | undefined, body: ResBody) {
     super();
     this._address = address
     this._crc = crc

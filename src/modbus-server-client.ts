@@ -13,7 +13,7 @@ import { ModbusAbstractRequestFromBuffer } from './abstract-request.js';
 
 export default class ModbusServerClient<
   S extends Stream.Duplex,
-  ReqFromBufferMethod extends ModbusAbstractRequestFromBuffer,
+  ReqFromBufferMethod extends ModbusAbstractRequestFromBuffer<any>,
   ResFromRequestMethod extends ModbusAbstractResponseFromRequest> {
   public _server: ModbusServer;
   public _socket: S;

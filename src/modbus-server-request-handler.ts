@@ -3,7 +3,7 @@ import ModbusAbstractRequest, { ModbusAbstractRequestFromBuffer } from "./abstra
 
 const debug = require('debug')('modbus-server-request-handler')
 
-export default class ModbusServerRequestHandler<FB extends ModbusAbstractRequestFromBuffer> {
+export default class ModbusServerRequestHandler<FB extends ModbusAbstractRequestFromBuffer<any>> {
   public _fromBuffer: FB;
   public _requests: ModbusAbstractRequest[];
   public _buffer: Buffer;
