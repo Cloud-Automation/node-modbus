@@ -1,28 +1,34 @@
-'use strict'
-
 const OUT_OF_SYNC = 'OutOfSync'
 const OFFLINE = 'Offline'
 const MODBUS_EXCEPTION = 'ModbusException'
 
 const debug = require('debug')('client-request-handler')
-const UserRequest = require('./user-request.js')
-const ExceptionResponseBody = require('./response/exception.js')
+import UserRequest, { UserRequestError, ModbusRequest, ModbusResponse } from './user-request.js'
+import ExceptionResponseBody from './response/exception.js'
+import ModbusRequestBody from './request/request-body.js';
+import * as Stream from 'stream';
+import { Socket } from 'net';
+
 
 /** Common Request Handler
  * @abstract
  */
-class ModbusClientRequestHandler {
-	public _socket: any;
-	public _timeout: any;
-	public _requests: any;
-	public _currentRequest: any;
-	public _state: any;
+export default abstract class ModbusClientRequestHandler<
+  S extends Stream.Duplex = Socket,
+  Req extends ModbusRequest = ModbusRequest,
+  Res extends ModbusResponse = ModbusResponse,
+  > {
+  protected _socket: S;
+  protected _timeout: number;
+  protected _requests: UserRequest<Req, Res>[];
+  protected _currentRequest: UserRequest<Req, Res> | null | undefined;
+  protected _state: 'offline' | 'online';
 
   /** Create a new Request handler for Client requests
-   * @param {net.Socket} socket A net.Socket object.
-   * @param {Number} timeout The request timeout value in ms.
+   * @param {S extends Stream.Duplex} socket A net.Socket object.
+   * @param {number} timeout The request timeout value in ms.
    */
-  constructor (socket, timeout) {
+  constructor(socket: S, timeout: number) {
     if (new.target === ModbusClientRequestHandler) {
       throw new TypeError('Cannot instantiate ModbusClientRequestHandler directly.')
     }
@@ -33,7 +39,7 @@ class ModbusClientRequestHandler {
     this._state = 'offline'
   }
 
-  _clearCurrentRequest () {
+  protected _clearCurrentRequest() {
     if (!this._currentRequest) {
       return
     }
@@ -41,33 +47,40 @@ class ModbusClientRequestHandler {
     this._currentRequest = null
   }
 
-  _clearAllRequests () {
+  protected _clearAllRequests() {
     this._clearCurrentRequest()
 
     while (this._requests.length > 0) {
       const req = this._requests.shift()
-      req.reject({
-        'err': OUT_OF_SYNC,
-        'message': 'rejecting because of earlier OutOfSync error'
-      })
+      if (req) {
+        req.reject(new UserRequestError({
+          'err': OUT_OF_SYNC,
+          'message': 'rejecting because of earlier OutOfSync error'
+        }))
+      }
     }
   }
 
-  _onConnect () {
+  protected _onConnect() {
     this._state = 'online'
   }
 
-  _onClose () {
+  protected _onClose() {
     this._state = 'offline'
     this._clearAllRequests()
   }
 
+  public abstract register(request: ModbusRequestBody): ReturnType<ModbusClientRequestHandler['registerRequest']>
+
   /** Register a new request.
-   * @param {RequestBody} requestBody A request body to execute a modbus function.
-   * @returns {Promise} A promise to handle the request outcome.
+   * @param {ModbusAbstractRequest} requestBody A request body to execute a modbus function.
+   * @returns A promise to handle the request outcome.
    */
-  register (request) {
-    const userRequest = new UserRequest(request, this._timeout)
+  public registerRequest(request: Req) {
+
+    const userRequest = new UserRequest<Req, Res>(request, this._timeout)
+
+
 
     this._requests.push(userRequest)
     this._flush()
@@ -76,9 +89,9 @@ class ModbusClientRequestHandler {
   }
 
   /** Handle a ModbusTCPResponse object.
-   * @param {ModbusTCPResponse} response A Modbus TCP Response.
+   * @param {ModbusAbstractRequest} response A Modbus TCP Response.
    */
-  handle (response) {
+  public handle(response: Res) {
     debug('incoming response')
     if (!response) {
       debug('well, sorry I was wrong, no response at all')
@@ -95,13 +108,14 @@ class ModbusClientRequestHandler {
     const request = userRequest.request
 
     /* check that response fc equals request id */
-    if (response.body.fc < 0x80 && response.body.fc !== request.body.fc) {
+    // TODO: Check that the new isException logic works for all tests
+    if (response.body.isException && response.body.fc !== request.body.fc) {
       debug('something is weird, request fc and response fc do not match.')
       /* clear all request, client must be reset */
-      userRequest.reject({
+      userRequest.reject(new UserRequestError({
         'err': OUT_OF_SYNC,
         'message': 'request fc and response fc does not match.'
-      })
+      }))
       this._clearAllRequests()
       return
     }
@@ -109,10 +123,11 @@ class ModbusClientRequestHandler {
     /* check if response is an exception */
     if (response.body instanceof ExceptionResponseBody) {
       debug('response is a exception')
-      userRequest.reject({
+      userRequest.reject(new UserRequestError({
         'err': MODBUS_EXCEPTION,
+        'message': `A Modbus Exception Occurred - See Response Body`,
         'response': response
-      })
+      }))
       this._clearCurrentRequest()
       this._flush()
       return
@@ -129,7 +144,7 @@ class ModbusClientRequestHandler {
   }
 
   /* execute next request */
-  _flush () {
+  protected _flush() {
     debug('flushing')
     if (this._currentRequest !== null) {
       debug('executing another request, come back later')
@@ -145,29 +160,27 @@ class ModbusClientRequestHandler {
 
     if (this._state === 'offline') {
       debug('rejecting request immediatly, client offline')
-      this._currentRequest.reject({
+      this._currentRequest && this._currentRequest.reject(new UserRequestError({
         'err': OFFLINE,
         'message': 'no connection to modbus server'
-      })
+      }))
       this._clearCurrentRequest()
       /* start next request */
       setTimeout(this._flush.bind(this), 0)
       return
     }
 
-    const payload = this._currentRequest.createPayload()
+    const payload = this._currentRequest && this._currentRequest.createPayload()
 
     debug('flushing new request', payload)
 
-    this._currentRequest.start(function () {
+    this._currentRequest && this._currentRequest.start(() => {
       this._clearCurrentRequest()
       this._flush()
-    }.bind(this))
+    })
 
-    this._socket.write(payload, function (err, result) {
-      debug('request fully flushed, ( error:', err, ')', result)
+    this._socket.write(payload, function (err) {
+      debug('request fully flushed, ( error:', err, ')')
     })
   }
 }
-
-module.exports = ModbusClientRequestHandler

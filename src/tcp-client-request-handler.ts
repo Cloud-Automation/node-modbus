@@ -1,8 +1,13 @@
-'use strict'
+
+
+import ModbusRequestBody from "./request/request-body";
+import ModbusTCPResponse from "./tcp-response";
 
 const debug = require('debug')('tcp-client-request-handler')
-const TCPRequest = require('./tcp-request.js')
-const ModbusClientRequestHandler = require('./client-request-handler.js')
+import ModbusTCPRequest from './tcp-request.js'
+import ModbusClientRequestHandler from './client-request-handler.js'
+import { Socket } from "net";
+import { UserRequestError } from "./user-request";
 
 const OUT_OF_SYNC = 'OutOfSync'
 const PROTOCOL = 'Protocol'
@@ -12,21 +17,18 @@ const PROTOCOL = 'Protocol'
  * @extends ModbusClientRequestHandler
  * @class
  */
-class ModbusTCPClientRequestHandler extends ModbusClientRequestHandler {
-	public _requestId: any;
-	public _unitId: any;
-	public _socket: any;
-	public _onConnect: any;
-	public _onClose: any;
-	public _currentRequest: any;
-	public _clearAllRequests: any;
+export default class ModbusTCPClientRequestHandler extends ModbusClientRequestHandler<Socket, ModbusTCPRequest, ModbusTCPResponse> {
+  private _requestId: number;
+  private _unitId: number;
 
-  /** Create a new TCPClientRequestHandler
-   * @param {net.Socket} socket net.Socket
-   * @param {Number} unitId Unit ID
-   * @param {Number} timeout Timeout in ms for requests
+  /**
+   * Creates an instance of ModbusTCPClientRequestHandler.
+   * @param {Socket} socket net.Socket
+   * @param {number} unitId Unit ID
+   * @param {number} [timeout=5000] Timeout in ms for requests
+   * @memberof ModbusTCPClientRequestHandler
    */
-  constructor (socket, unitId, timeout) {
+  constructor(socket: Socket, unitId: number, timeout: number = 5000) {
     super(socket, timeout)
     this._requestId = 0
     this._unitId = unitId
@@ -35,16 +37,16 @@ class ModbusTCPClientRequestHandler extends ModbusClientRequestHandler {
     this._socket.on('close', this._onClose.bind(this))
   }
 
-  register (requestBody) {
+  register(requestBody: ModbusRequestBody) {
     this._requestId = (this._requestId + 1) % 0xFFFF
     debug('registrating new request', 'transaction id', this._requestId, 'unit id', this._unitId, 'length', requestBody.byteCount)
 
-    const tcpRequest = new TCPRequest(this._requestId, 0x00, requestBody.byteCount + 1, this._unitId, requestBody)
+    const tcpRequest = new ModbusTCPRequest(this._requestId, 0x00, requestBody.byteCount + 1, this._unitId, requestBody)
 
-    return super.register(tcpRequest)
+    return super.registerRequest(tcpRequest)
   }
 
-  handle (response) {
+  handle(response: ModbusTCPResponse) {
     if (!response) {
       return
     }
@@ -62,10 +64,10 @@ class ModbusTCPClientRequestHandler extends ModbusClientRequestHandler {
     if (response.id !== request.id) {
       debug('something weird is going on, response transition id does not equal request transition id', response.id, request.id)
       /* clear all request, client must be reset */
-      userRequest.reject({
+      userRequest.reject(new UserRequestError({
         'err': OUT_OF_SYNC,
         'message': 'request fc and response fc does not match.'
-      })
+      }))
       this._clearAllRequests()
       return
     }
@@ -73,10 +75,10 @@ class ModbusTCPClientRequestHandler extends ModbusClientRequestHandler {
     /* check if protocol version of response is 0x00 */
     if (response.protocol !== 0x00) {
       debug('server responds with wrong protocol version')
-      userRequest.reject({
+      userRequest.reject(new UserRequestError({
         'err': PROTOCOL,
         'message': 'Unknown protocol version ' + response.protocol
-      })
+      }))
       this._clearAllRequests()
       return
     }
@@ -84,5 +86,3 @@ class ModbusTCPClientRequestHandler extends ModbusClientRequestHandler {
     super.handle(response)
   }
 }
-
-module.exports = ModbusTCPClientRequestHandler

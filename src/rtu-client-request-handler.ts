@@ -1,29 +1,34 @@
-'use strict'
+
 
 const debug = require('debug')('rtu-client-request-handler')
-const ModbusRTURequest = require('./rtu-request.js')
-const ModbusClientRequestHandler = require('./client-request-handler.js')
-const CRC = require('crc')
+import ModbusRTURequest from './rtu-request.js'
+import ModbusClientRequestHandler from './client-request-handler.js'
+import CRC from 'crc'
+import SerialSocket from 'serialport';
+import ModbusRequestBody from './request/request-body.js';
+import ModbusRTUResponse from './rtu-response.js';
+import { UserRequestError } from './user-request.js';
 
 /** Modbus/RTU Client Request Handler
  * Implements behaviour for Client Requests for Modbus/RTU
  * @extends ModbusClientRequestHandler
  * @class
  */
-class ModbusRTUClientRequestHandler extends ModbusClientRequestHandler {
-	public _address: any;
-	public _requests: any;
-	public _currentRequest: any;
-	public _socket: any;
-	public _onConnect: any;
-	public _clearAllRequests: any;
+export default class ModbusRTUClientRequestHandler extends ModbusClientRequestHandler<SerialSocket, ModbusRTURequest, ModbusRTUResponse> {
+  protected readonly _address: number;
+  protected _socket: any;
+  protected _onConnect: any;
+  protected _clearAllRequests: any;
 
-  /** Create a new ModbusRTUClientRequestHandler
+  /**
+   *Creates an instance of ModbusRTUClientRequestHandler.
    * @param {SerialSocket} socket Any serial Socket that implements the serialport interface
-   * @param {address} address The serial address of the modbus slave
+   * @param {number} address The serial address of the modbus slave
+   * @param {number} [timeout=5000]
+   * @memberof ModbusRTUClientRequestHandler
    */
-  constructor (socket, address) {
-    super(socket, 5000)
+  constructor(socket: SerialSocket, address: number, timeout: number = 5000) {
+    super(socket, timeout)
     this._address = address
     this._requests = []
     this._currentRequest = null
@@ -31,15 +36,15 @@ class ModbusRTUClientRequestHandler extends ModbusClientRequestHandler {
     this._socket.on('open', this._onConnect.bind(this))
   }
 
-  register (requestBody) {
+  register(requestBody: ModbusRequestBody) {
     debug('registrating new request')
 
     const request = new ModbusRTURequest(this._address, requestBody)
 
-    return super.register(request)
+    return super.registerRequest(request)
   }
 
-  handle (response) {
+  handle(response: ModbusRTUResponse) {
     debug('new response coming in')
     if (!response) {
       return
@@ -59,16 +64,18 @@ class ModbusRTUClientRequestHandler extends ModbusClientRequestHandler {
 
     if (response.crc !== crc) {
       debug('CRC does not match', response.crc, '!==', crc)
-      userRequest.reject({
+      userRequest.reject(new UserRequestError({
         'err': 'crcMismatch',
         'message': 'the response payload does not match the crc'
-      })
+      }))
       this._clearAllRequests()
       return
     }
 
     super.handle(response)
   }
-}
 
-module.exports = ModbusRTUClientRequestHandler
+  public get address() {
+    return this._address;
+  }
+}
