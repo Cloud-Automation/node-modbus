@@ -23,6 +23,7 @@
     "@types/serialport": "^7.0.4",
     "mocha": "^3.3.0",
     "nyc": "^13.1.0",
+    "serialport": "^7.1.5",
     "sinon": "2.2.0",
     "standard": "^8.5.0",
     "typescript": "^3.5.2"
