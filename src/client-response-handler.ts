@@ -1,33 +1,27 @@
+import ModbusTCPResponse from './tcp-response';
+import ModbusRTUResponse from './rtu-response';
 
 /** Modbus Client Repsonse Handler
  * @abstract
  */
-class ModbusClientResponseHandler {
-	public _buffer: any;
-	public _messages: any;
+export default abstract class ModbusClientResponseHandler {
+  protected _buffer: Buffer;
+  protected abstract _messages: ModbusTCPResponse[] | ModbusRTUResponse[];
 
   /** Create new Modbus Client Response Hanlder */
-  constructor () {
-    if (new.target === ModbusClientResponseHandler) {
-      throw new TypeError('Cannot instantiate ModbusClientResponseHandler directly')
-    }
+  constructor() {
     this._buffer = Buffer.alloc(0)
-    this._messages = []
   }
 
   /** Process new incoming data and enqueue new modbus responses.
    * @param {Buffer} data New incoming data from the socket.
    */
-  handleData (data) {
-    throw new Error('Not implemented yet.')
-  }
+  public abstract handleData(data: Buffer): void;
 
   /** Extract latest Modbus Response.
    * @returns {ModbusResponse}
    */
-  shift () {
+  shift() {
     return this._messages.shift()
   }
 }
-
-module.exports = ModbusClientResponseHandler
