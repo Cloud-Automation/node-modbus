@@ -29,8 +29,11 @@
     "typescript": "^3.5.2"
   },
   "scripts": {
-    "test": "tsc && mocha test/*.test.js",
-    "watch": "tsc && mocha --watch test/*.test.js",
+    "test": "npm run build && mocha test/*.test.js",
+    "build": "tsc",
+    "watch": "npm run build && mocha --watch test/*.test.js",
+    "prepublishOnly": "npm run test",
+    "prepare": "npm run build",
     "cov": "nyc mocha test/*.test.js"
   },
   "license": "MIT",
@@ -46,5 +49,8 @@
   "directories": {
     "test": "test",
     "example": "examples"
-  }
+  },
+  "files": [
+    "dist/**/*"
+  ]
 }
