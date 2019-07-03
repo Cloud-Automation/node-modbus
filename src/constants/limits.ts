@@ -1,0 +1,19 @@
+const UINT16_MIN = 0x0000;
+const UINT16_MAX = 0xFFFF;
+const REGISTER_MAX = UINT16_MAX;
+const REGISTER_MIN = UINT16_MIN;
+
+const COIL_MIN = 0x00;
+const COIL_MAX = 0x01;
+
+const ERROR_CODE_THRESHOLD = 0x80;
+
+export const LIMITS = {
+  UINT16_MIN,
+  UINT16_MAX,
+  REGISTER_MIN,
+  REGISTER_MAX,
+  COIL_MIN,
+  COIL_MAX,
+  ERROR_CODE_THRESHOLD,
+} as const;
