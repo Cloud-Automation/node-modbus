@@ -1,71 +1,96 @@
-'use strict'
+
+
+import ModbusTCPRequest from "./tcp-request";
+import ModbusRTURequest from "./rtu-request";
+import ModbusTCPResponse from "./tcp-response";
+import ModbusRTUResponse from "./rtu-response";
+import { UserRequestError } from "./user-request-error";
 
 const debug = require('debug')('user-request')
+
+type Either<A, B> = A | B;
+
+export type ModbusRequest = Either<ModbusTCPRequest, ModbusRTURequest>;
+export type ModbusResponse = Either<ModbusTCPResponse, ModbusRTUResponse>;
+
+export interface UserRequestResolve<Req = ModbusRequest, Res = ModbusResponse> {
+  request: Req;
+  response: Res;
+}
+
+export type PromiseUserRequest<Req = ModbusRequest, Res = ModbusResponse> = Promise<UserRequestResolve<Req, Res>>;
 
 /** Request created for the user. It contains the actual modbus request,
  * the timeout handler and the promise delivered from the readCoils method
  * in the client.
- * @class
+ * @export
+ * @class UserRequest
+ * @template ReqBody
+ * @template ResBody
  */
-class UserRequest {
-	public _request: any;
-	public _timeout: any;
-	public _promise: any;
-	public _resolve: any;
-	public _reject: any;
-	public _timer: any;
+export default class UserRequest<Req extends ModbusRequest = ModbusRequest, Res extends ModbusResponse = ModbusResponse> {
+  protected _request: Req;
+  protected _timeout: number;
+  protected _promise: Promise<UserRequestResolve<Req, Res>>;
+  protected _resolve!: (value: UserRequestResolve<Req, Res>) => void;
+  protected _reject!: (err: UserRequestError) => void;
+  protected _timer!: NodeJS.Timeout;
 
-  constructor (request, timeout) {
+  /**
+   * Creates an instance of UserRequest.
+   * @param {Req} request
+   * @param {number} [timeout=5000]
+   * @memberof UserRequest
+   */
+  constructor(request: Req, timeout: number = 5000) {
     debug('creating new user request with timeout', timeout)
     this._request = request
-    this._timeout = timeout || 5000
+    this._timeout = timeout
 
-    this._promise = new Promise(function (resolve, reject) {
+    this._promise = new Promise<UserRequestResolve<Req, Res>>((resolve, reject) => {
       this._resolve = resolve
       this._reject = reject
-    }.bind(this))
+    })
   }
 
-  createPayload () {
+  public createPayload() {
     return this._request.createPayload()
   }
 
-  start (cb) {
-    this._timer = setTimeout(function () {
-      this._reject({
+  public start(cb: Function) {
+    this._timer = setTimeout(() => {
+      this._reject(new UserRequestError({
         'err': 'Timeout',
-        'message': 'Request timed out'
-      })
+        'message': 'Req timed out'
+      }))
       cb()
-    }.bind(this), this._timeout)
+    }, this._timeout)
   }
 
-  done () {
+  public done() {
     clearTimeout(this._timer)
   }
 
-  get request () {
+  get request() {
     return this._request
   }
 
-  get timeout () {
+  get timeout() {
     return this._timeout
   }
 
-  get promise () {
+  get promise() {
     return this._promise
   }
 
-  resolve (response) {
+  public resolve(response: Res) {
     return this._resolve({
       'response': response,
       'request': this._request
     })
   }
 
-  get reject () {
+  get reject() {
     return this._reject
   }
 }
-
-module.exports = UserRequest
