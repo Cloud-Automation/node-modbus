@@ -1,19 +1,28 @@
 const debug = require('debug')('rtu-request')
-const CRC = require('crc')
-const CommonRequestBody = require('./request/request-body.js')
+import CRC = require('crc')
+import ModbusRequestBody from './request/request-body.js';
+import ModbusAbstractRequest from './abstract-request.js';
+import RequestFactory from './request/request-factory.js';
 
-class ModbusRTURequest {
-	public _address: any;
-	public _body: any;
-	public _corrupted: any;
-	public _crc: any;
+/**
+ *
+ *
+ * @export
+ * @class ModbusRTURequest
+ * @extends {ModbusAbstractRequest}
+ */
+export default class ModbusRTURequest extends ModbusAbstractRequest {
+  protected _address: number;
+  protected _body: ModbusRequestBody;
+  protected _corrupted: boolean;
+  protected _crc!: number;
 
   /** Convert a buffer into a new Modbus RTU Request. Returns null if the buffer
    * does not contain enough data.
    * @param {Buffer} buffer
    * @return {ModbusRTURequest} A new Modbus RTU Request or null.
    */
-  static fromBuffer (buffer) {
+  static fromBuffer(buffer: Buffer) {
     try {
       if (buffer.length < 1 /* address */ + 2 /* CRC */) {
         debug('not enough data in the buffer yet')
@@ -26,7 +35,7 @@ class ModbusRTURequest {
       debug('buffer', buffer)
 
       // NOTE: This is potentially more than the body; the body length isn't know at this point...
-      const body = CommonRequestBody.fromBuffer(buffer.slice(1))
+      const body = RequestFactory.fromBuffer(buffer.slice(1))
 
       if (!body) {
         return null
@@ -43,47 +52,61 @@ class ModbusRTURequest {
       return null
     }
   }
-  constructor (address, body, corrupted) {
+  /**
+   *Creates an instance of ModbusRTURequest.
+   * @param {number} address
+   * @param {ModbusRequestBody} body
+   * @param {boolean} [corrupted=false]
+   * @memberof ModbusRTURequest
+   */
+  constructor(address: number, body: ModbusRequestBody, corrupted: boolean = false) {
+    super()
     this._address = address
     this._body = body
     this._corrupted = corrupted
   }
 
-  get address () {
+  get address() {
     return this._address
   }
 
-  get crc () {
+  get slaveId() {
+    return this.address
+  }
+
+  get unitId() {
+    return this.address
+  }
+
+  get crc() {
     return this._crc
   }
 
-  get body () {
-    return this._body
-  }
-
-  get name () {
+  get name() {
     return this._body.name
   }
 
-  get corrupted () {
+  get corrupted() {
     return (this._corrupted === true)
   }
 
-  createPayload () {
+  public get body() {
+    return this._body;
+  }
+
+  createPayload() {
     const bodyPayload = this._body.createPayload()
 
     this._crc = CRC.crc16modbus(Buffer.concat([Buffer.from([this._address]), bodyPayload]))
     const crBu = Buffer.alloc(2)
-    crBu.writeUInt16LE(this._crc)
+    crBu.writeUInt16LE(this._crc, 0)
     const idBuf = Buffer.from([this._address])
     const payload = Buffer.concat([idBuf, bodyPayload, crBu])
 
     return payload
   }
 
-  get byteCount () {
+  get byteCount() {
     return this.body.byteCount + 3
   }
 }
-
-module.exports = ModbusRTURequest
