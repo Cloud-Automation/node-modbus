@@ -1,23 +1,24 @@
-const ModbusResponseBody = require('./response-body.js')
+import ReadInputRegistersRequestBody from '../request/read-input-registers.js';
+import { FC } from '../codes/index.js';
+import ModbusReadResponseBody from './read-response-body.js';
 
 /** Read Input Registers Response Body (Function Code 0x04)
  * @extends ModbusResponseBody
  * @class
  */
-class ReadInputRegistersResponseBody extends ModbusResponseBody {
-	public _byteCount: any;
-	public _values: any;
-	public _bufferLength: any;
-	public _valuesAsArray: any;
-	public _valuesAsBuffer: any;
-	public _fc: any;
+export default class ReadInputRegistersResponseBody extends ModbusReadResponseBody {
+  private _byteCount: number;
+  private _values: number[] | Uint16Array | Buffer;
+  private _bufferLength: number;
+  protected _valuesAsArray!: number[] | Uint16Array;
+  protected _valuesAsBuffer!: Buffer;
 
   /** Create ReadInputRegistersResponseBody from Request
    * @param {ReadInputRegistersRequestBody} request
    * @param {Buffer} inputRegisters
    * @returns ReadInputRegistersResponseBody
    */
-  static fromRequest (requestBody, inputRegisters) {
+  static fromRequest(requestBody: ReadInputRegistersRequestBody, inputRegisters: Buffer) {
     const startByte = requestBody.start * 2
     const endByte = startByte + (requestBody.count * 2)
 
@@ -30,12 +31,12 @@ class ReadInputRegistersResponseBody extends ModbusResponseBody {
    * @param {Buffer} buffer
    * @returns ReadInputRegistersResponseBody
    */
-  static fromBuffer (buffer) {
+  static fromBuffer(buffer: Buffer) {
     const fc = buffer.readUInt8(0)
     const byteCount = buffer.readUInt8(1)
     const payload = buffer.slice(2, 2 + byteCount)
 
-    if (fc !== 0x04) {
+    if (fc !== FC.READ_INPUT_REGISTERS) {
       return null
     }
 
@@ -47,8 +48,8 @@ class ReadInputRegistersResponseBody extends ModbusResponseBody {
     return new ReadInputRegistersResponseBody(byteCount, values, payload)
   }
 
-  constructor (byteCount, values, payload?) {
-    super(0x04)
+  constructor(byteCount: number, values: number[] | Uint16Array | Buffer, payload?: Buffer) {
+    super(FC.READ_INPUT_REGISTERS)
     this._byteCount = byteCount
     this._values = values
     this._bufferLength = 2
@@ -68,37 +69,35 @@ class ReadInputRegistersResponseBody extends ModbusResponseBody {
     }
   }
 
-  get byteCount () {
+  get byteCount() {
     return this._bufferLength
   }
 
-  get values () {
+  get values() {
     return this._values
   }
 
-  get valuesAsArray () {
+  get valuesAsArray() {
     return this._valuesAsArray
   }
 
-  get valuesAsBuffer () {
+  get valuesAsBuffer() {
     return this._valuesAsBuffer
   }
 
-  get length () {
+  get length() {
     return this._values.length
   }
 
-  createPayload () {
+  createPayload() {
     const payload = Buffer.alloc(this.byteCount)
 
     payload.writeUInt8(this._fc, 0)
     payload.writeUInt8(this.length, 1)
-    this._values.forEach(function (value, i) {
+    this._values.forEach(function (value: number, i: number) {
       payload.writeUInt8(value, 2 + i)
     })
 
     return payload
   }
 }
-
-module.exports = ReadInputRegistersResponseBody

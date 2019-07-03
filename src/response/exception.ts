@@ -1,45 +1,46 @@
-const Messages = {
-  0x01: 'ILLEGAL FUNCTION',
-  0x02: 'ILLEGAL DATA ADDRESS',
-  0x03: 'ILLEGAL DATA VALUE',
-  0x04: 'SLAVE DEVICE FAILURE',
-  0x05: 'ACKNOWLEDGE',
-  0x06: 'SLAVE DEVICE BUSY',
-  0x08: 'MEMORY PARITY ERROR',
-  0x0A: 'GATEWAY PATH UNAVAILABLE',
-  0x0B: 'GATEWAY TARGET DEVICE FAILED TO RESPOND'
-}
-
-const ModbusResponseBody = require('./response-body.js')
+import ModbusResponseBody from './response-body.js';
+import {
+  isFunctionCode,
+  FunctionCode,
+  errorCodeToMessage,
+  ErrorCode,
+} from '../codes';
+import ModbusRequestBody from '../request/request-body.js';
+import ExceptionRequestBody from '../request/exception.js';
 
 /** Modbus Excepiton Response Body
  * @extends ModbusResponseBody
  * @class
  */
-class ExceptionResponseBody extends ModbusResponseBody {
-  private _code: any;
-  private _fc: any;
+export default class ExceptionResponseBody extends ModbusResponseBody {
+  private _code: ErrorCode;
 
   /** Create Exception Response from buffer.
    * @param {Buffer} buffer Buffer
    * @returns {ExceptionResponseBody}
    */
-  static fromBuffer(buffer) {
-    const fc = buffer.readUInt8(0)
-    const code = buffer.readUInt8(1)
-    return new ExceptionResponseBody(fc - 0x80, code)
+  static fromBuffer(buffer: Buffer) {
+    const fc = buffer.readUInt8(0) - 0x80;
+    const code = buffer.readUInt8(1) as ErrorCode
+
+    if (!isFunctionCode(fc)) {
+      throw Error('InvalidFunctionCode')
+    }
+    return new ExceptionResponseBody(fc, code)
   }
 
-  static fromRequest(requestBody) {
+  //TODO: Figure out what type the requestBody is
+  static fromRequest(requestBody: ExceptionRequestBody) {
     return new ExceptionResponseBody(requestBody.fc, requestBody.code)
   }
 
   /** Create ExceptionResponseBody
-   * @param {Codes.FunctionCode} fc Function Code
-   * @param {Codes.ErrorCode} code Exception Code
+   * @param {FunctionCode} fc Function Code
+   * @param {ErrorCode} code Exception Code
    */
-  constructor(fc, code) {
-    super(fc)
+  constructor(fc: FunctionCode, code: ErrorCode) {
+    const ignoreInvalidFunctionCode = true;
+    super(fc, ignoreInvalidFunctionCode)
     this._code = code
   }
 
@@ -50,7 +51,7 @@ class ExceptionResponseBody extends ModbusResponseBody {
 
   /** Exception message */
   get message() {
-    return Messages[this._code]
+    return errorCodeToMessage(this._code)
   }
 
   get byteCount() {
@@ -63,6 +64,16 @@ class ExceptionResponseBody extends ModbusResponseBody {
     payload.writeUInt8(this._code, 1)
     return payload
   }
+
+  get isException(): boolean {
+    return true;
+  }
 }
 
-module.exports = ExceptionResponseBody
+export function isExceptionResponseBody(x: any): x is ExceptionResponseBody {
+  if (x instanceof ExceptionResponseBody) {
+    return true;
+  } else {
+    return false;
+  }
+}

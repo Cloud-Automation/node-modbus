@@ -1,36 +1,31 @@
-'use strict'
+
+
+import { isFunctionCode, FunctionCode } from "../codes";
+import ModbusRequestBody from "../request/request-body";
 
 /** Modbus Response Body
  * @abstract
  */
-abstract class ModbusResponseBody {
-  public _fc: FunctionCode;
-
-  static fromBuffer(buffer: Buffer) {
-    const ReadCoilsResponse = require('./read-coils.js')
-
-    try {
-      const fc = buffer.readUInt8(0)
-
-      if (fc === 0x01) {
-        return ReadCoilsResponse.fromBuffer(buffer)
-      }
-
-      return null
-    } catch (e) {
-      return null
-    }
-  }
+export default abstract class ModbusBaseResponseBody {
+  protected _fc: FunctionCode;
 
   /** Create new ModbusResponseBody
    * @param {FunctionCode} fc Function Code
+   * @throws {InvalidFunctionCode}
    */
-  constructor(fc: FunctionCode) {
-    if (new.target === ModbusResponseBody) {
-      throw new TypeError('Cannot instantiate ModbusResponseBody directly.')
+  constructor(fc: FunctionCode, ignoreInvalidFunctionCode = false) {
+    if (ignoreInvalidFunctionCode === false) {
+      if (!isFunctionCode(fc)) {
+        throw Error('InvalidFunctionCode')
+      }
     }
+
     this._fc = fc
   }
+
+  public static fromRequest(requestBody: ModbusRequestBody, buf: Buffer): any {
+    throw new Error('Cannot call from request from abstract class')
+  };
 
   /** Function Code */
   get fc() {
@@ -44,6 +39,9 @@ abstract class ModbusResponseBody {
    * @returns {Buffer}
    */
   abstract createPayload(): Buffer;
-}
 
-export = ModbusResponseBody
+  get isException(): boolean {
+    return false;
+  }
+
+}

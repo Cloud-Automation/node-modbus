@@ -1,20 +1,21 @@
 const debug = require('debug')('response-factory')
 
-const ExceptionResponseBody = require('./exception.js')
-const ReadCoilsResponseBody = require('./read-coils.js')
-const ReadDiscreteInputsBody = require('./read-discrete-inputs.js')
-const ReadHoldingRegistersBody = require('./read-holding-registers.js')
-const ReadInputRegistersBody = require('./read-input-registers.js')
-const WriteSingleCoilBody = require('./write-single-coil.js')
-const WriteSingleRegisterBody = require('./write-single-register.js')
-const WriteMultipleCoilsBody = require('./write-multiple-coils.js')
-const WriteMultipleRegistersBody = require('./write-multiple-registers.js')
+import ExceptionResponseBody from './exception.js';
+import ReadCoilsResponseBody from './read-coils.js';
+import ReadDiscreteInputsBody from './read-discrete-inputs.js';
+import ReadHoldingRegistersBody from './read-holding-registers.js';
+import ReadInputRegistersBody from './read-input-registers.js';
+import WriteSingleCoilBody from './write-single-coil.js';
+import WriteSingleRegisterBody from './write-single-register.js';
+import WriteMultipleCoilsBody from './write-multiple-coils.js';
+import WriteMultipleRegistersBody from './write-multiple-registers.js';
+import { FC } from '../codes/index.js';
 
 /** Response Factory
  * @factory
  */
-class ResponseFactory {
-  static fromBuffer (buffer) {
+export default class ResponseFactory {
+  static fromBuffer(buffer: Buffer) {
     try {
       const fc = buffer.readUInt8(0)
 
@@ -26,42 +27,42 @@ class ResponseFactory {
       }
 
       /* Read Coils Response */
-      if (fc === 0x01) {
+      if (fc === FC.READ_COIL) {
         return ReadCoilsResponseBody.fromBuffer(buffer)
       }
 
       /* Read Discrete Inputs Response */
-      if (fc === 0x02) {
+      if (fc === FC.READ_DISCRETE_INPUT) {
         return ReadDiscreteInputsBody.fromBuffer(buffer)
       }
 
       /* Read Holding Registers Response */
-      if (fc === 0x03) {
+      if (fc === FC.READ_HOLDING_REGISTERS) {
         return ReadHoldingRegistersBody.fromBuffer(buffer)
       }
 
       /* Read Input Registers Response */
-      if (fc === 0x04) {
+      if (fc === FC.READ_INPUT_REGISTERS) {
         return ReadInputRegistersBody.fromBuffer(buffer)
       }
 
       /* Write Single Coil Response */
-      if (fc === 0x05) {
+      if (fc === FC.WRITE_SINGLE_COIL) {
         return WriteSingleCoilBody.fromBuffer(buffer)
       }
 
       /* Write Single Register Response */
-      if (fc === 0x06) {
+      if (fc === FC.WRITE_SINGLE_HOLDING_REGISTER) {
         return WriteSingleRegisterBody.fromBuffer(buffer)
       }
 
       /* Write Multiple Coils Response */
-      if (fc === 0x0F) {
+      if (fc === FC.WRITE_MULTIPLE_COILS) {
         return WriteMultipleCoilsBody.fromBuffer(buffer)
       }
 
       /* Write Multiple Registers Response */
-      if (fc === 0x10) {
+      if (fc === FC.WRITE_MULTIPLE_HOLDING_REGISTERS) {
         return WriteMultipleRegistersBody.fromBuffer(buffer)
       }
 
@@ -73,5 +74,3 @@ class ResponseFactory {
     }
   }
 }
-
-module.exports = ResponseFactory

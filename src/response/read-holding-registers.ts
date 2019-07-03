@@ -1,24 +1,25 @@
-const ModbusResponseBody = require('./response-body.js')
+import ReadHoldingRegistersRequestBody from "../request/read-holding-registers";
+import { FC } from "../codes";
+import ModbusReadResponseBody from './read-response-body.js';
 const debug = require('debug')('ReadHoldingRegistersResponseBody')
 
 /** Read Holding Registers ResponseBody (Function Code 0x03)
  * @extends ModbusResponseBody
  * @class
  */
-class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
-	public _byteCount: any;
-	public _values: any;
-	public _bufferLength: any;
-	public _valuesAsArray: any;
-	public _valuesAsBuffer: any;
-	public _fc: any;
+export default class ReadHoldingRegistersResponseBody extends ModbusReadResponseBody {
+  private _byteCount: any;
+  private _values: number[] | Buffer;
+  private _bufferLength: any;
+  protected _valuesAsArray!: number[];
+  protected _valuesAsBuffer!: Buffer;
 
   /** Create ReadHoldingRegistersResponseBody from Request
    * @param {ReadHoldingRegistersRequestBody} request
    * @param {Buffer} holdingRegisters
    * @returns ReadHoldingRegistersResponseBody
    */
-  static fromRequest (requestBody, holdingRegisters) {
+  static fromRequest(requestBody: ReadHoldingRegistersRequestBody, holdingRegisters: Buffer) {
     const startByte = requestBody.start * 2
     const endByte = (requestBody.start * 2) + (requestBody.count * 2)
 
@@ -33,12 +34,12 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
    * @param {Buffer} buffer
    * @returns ReadHoldingRegistersResponseBody
    */
-  static fromBuffer (buffer) {
+  static fromBuffer(buffer: Buffer) {
     const fc = buffer.readUInt8(0)
     const byteCount = buffer.readUInt8(1)
     const payload = buffer.slice(2, 2 + byteCount)
 
-    if (fc !== 0x03) {
+    if (fc !== FC.READ_HOLDING_REGISTERS) {
       return null
     }
 
@@ -50,8 +51,8 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
     return new ReadHoldingRegistersResponseBody(byteCount, values, payload)
   }
 
-  constructor (byteCount, values, payload?) {
-    super(0x03)
+  constructor(byteCount: number, values: number[] | Buffer, payload?: Buffer) {
+    super(FC.READ_HOLDING_REGISTERS)
     this._byteCount = byteCount
     this._values = values
     this._bufferLength = 2
@@ -73,27 +74,27 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
     }
   }
 
-  get byteCount () {
+  get byteCount() {
     return this._bufferLength
   }
 
-  get values () {
+  get values() {
     return this._values
   }
 
-  get valuesAsArray () {
+  get valuesAsArray() {
     return this._valuesAsArray
   }
 
-  get valuesAsBuffer () {
+  get valuesAsBuffer() {
     return this._valuesAsBuffer
   }
 
-  get length () {
+  get length() {
     return this._values.length
   }
 
-  createPayload () {
+  createPayload() {
     if (this._values instanceof Buffer) {
       let payload = Buffer.alloc(2)
       payload.writeUInt8(this._fc, 0)
@@ -112,7 +113,7 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
 
       return payload
     }
+
+    throw new Error('InvalidType_MustBeBufferOrArray')
   }
 }
-
-module.exports = ReadHoldingRegistersResponseBody

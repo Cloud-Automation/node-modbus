@@ -1,20 +1,24 @@
 const debug = require('debug')('read-coils-response')
-const ModbusResponseBody = require('./response-body.js')
+import BufferUtils from '../buffer-utils.js';
+import { BooleanArray } from '../constants';
+import ReadCoilsRequestBody from '../request/read-coils.js';
+import { FC } from '../codes';
+import ModbusReadResponseBody from './read-response-body.js';
+
 const {
   bufferToArrayStatus,
   arrayStatusToBuffer
-} = require('../buffer-utils.js')
+} = BufferUtils;
 
 /** Read Coils Response Body
  * @extends ModbusResponseBody
  * @class
  */
-class ReadCoilsResponseBody extends ModbusResponseBody {
-	public _coils: any;
-	public _numberOfBytes: any;
-	public _valuesAsArray: any;
-	public _valuesAsBuffer: any;
-	public _fc: any;
+export default class ReadCoilsResponseBody extends ModbusReadResponseBody {
+  private _coils: BooleanArray | Buffer;
+  private _numberOfBytes: number;
+  protected _valuesAsArray: BooleanArray;
+  protected _valuesAsBuffer: Buffer;
 
   /** Creates a response body from a request body and
    * the coils buffer
@@ -22,7 +26,7 @@ class ReadCoilsResponseBody extends ModbusResponseBody {
    * @param {Buffer} coils
    * @returns {ReadCoilsResponseBody}
    */
-  static fromRequest (requestBody, coils) {
+  static fromRequest(requestBody: ReadCoilsRequestBody, coils: Buffer) {
     const coilsStatus = bufferToArrayStatus(coils)
 
     const start = requestBody.start
@@ -38,9 +42,9 @@ class ReadCoilsResponseBody extends ModbusResponseBody {
    * @param {Buffer} buffer
    * @returns {ReadCoilsResponseBody} Returns Null of not enough data located in the buffer.
    */
-  static fromBuffer (buffer) {
+  static fromBuffer(buffer: Buffer) {
     try {
-      const fc = buffer.readUInt8(0)
+      const fc = buffer.readUInt8(0);
       const byteCount = buffer.readUInt8(1)
       const coilStatus = buffer.slice(2, 2 + byteCount)
 
@@ -48,7 +52,7 @@ class ReadCoilsResponseBody extends ModbusResponseBody {
         return null
       }
 
-      if (fc !== 0x01) {
+      if (fc !== FC.READ_COIL) {
         return null
       }
 
@@ -59,49 +63,51 @@ class ReadCoilsResponseBody extends ModbusResponseBody {
     }
   }
 
-  /** Create new ReadCoilsResponseBody
-   * @param [Array] coils Array of Boolean.
-   * @param [Number] length
+  /**
+   * Create new ReadCoilsResponseBody
+   * @param {(BooleanArray | Buffer)} coils
+   * @param {number} numberOfBytes
+   * @memberof ReadCoilsResponseBody
    */
-  constructor (coils, numberOfBytes) {
-    super(0x01)
+  constructor(coils: BooleanArray | Buffer, numberOfBytes: number) {
+    super(FC.READ_COIL)
     this._coils = coils
     this._numberOfBytes = numberOfBytes
 
     if (coils instanceof Array) {
       this._valuesAsArray = coils
       this._valuesAsBuffer = arrayStatusToBuffer(coils)
-    }
-
-    if (coils instanceof Buffer) {
+    } else if (coils instanceof Buffer) {
       this._valuesAsBuffer = coils
       this._valuesAsArray = bufferToArrayStatus(coils)
+    } else {
+      throw new Error('INVALID COILS INPUT')
     }
   }
 
   /** Coils */
-  get values () {
+  get values() {
     return this._coils
   }
 
-  get valuesAsArray () {
+  get valuesAsArray() {
     return this._valuesAsArray
   }
 
-  get valuesAsBuffer () {
+  get valuesAsBuffer() {
     return this._valuesAsBuffer
   }
 
   /** Length */
-  get numberOfBytes () {
+  get numberOfBytes() {
     return this._numberOfBytes
   }
 
-  get byteCount () {
+  get byteCount() {
     return this._numberOfBytes + 2
   }
 
-  createPayload () {
+  createPayload() {
     const payload = Buffer.alloc(this.byteCount)
 
     payload.writeUInt8(this._fc, 0)
@@ -112,5 +118,3 @@ class ReadCoilsResponseBody extends ModbusResponseBody {
     return payload
   }
 }
-
-module.exports = ReadCoilsResponseBody

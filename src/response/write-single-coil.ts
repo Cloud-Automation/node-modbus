@@ -1,20 +1,21 @@
-const ModbusResponseBody = require('./response-body.js')
+import WriteSingleCoilRequestBody from '../request/write-single-coil.js';
+import { FC } from '../codes/index.js';
+import ModbusWriteResponseBody from './write-response.body.js';
 
 /** Write Single Coil Response Body
  * @extends ModbusResponseBody
  * @class
  */
-class WriteSingleCoilResponseBody extends ModbusResponseBody {
-	public _address: any;
-	public _value: any;
-	public _fc: any;
+export default class WriteSingleCoilResponseBody extends ModbusWriteResponseBody {
+  public _address: number;
+  public _value: 0 | 0xff00;
 
   /** Create WriteSingleCoilResponseBody from Request
  * @param {WriteSingleCoilRequestBody} request
  * @param {Buffer} coil
  * @returns WriteSingleCoilResponseBody
  */
-  static fromRequest (requestBody) {
+  static fromRequest(requestBody: WriteSingleCoilRequestBody) {
     const address = requestBody.address
     const value = requestBody.value
 
@@ -25,37 +26,38 @@ class WriteSingleCoilResponseBody extends ModbusResponseBody {
    * @param {Buffer} buffer
    * @returns New WriteSingleResponseBody Object
    */
-  static fromBuffer (buffer) {
+  static fromBuffer(buffer: Buffer) {
     const fc = buffer.readUInt8(0)
     const address = buffer.readUInt16BE(1)
     const value = buffer.readUInt16BE(3) === 0xFF00
 
-    if (fc !== 0x05) {
+    if (fc !== FC.WRITE_SINGLE_COIL) {
       return null
     }
 
     return new WriteSingleCoilResponseBody(address, value)
   }
 
-  constructor (address, value) {
-    super(0x05)
+  constructor(address: number, value: 0 | 0xff00 | boolean) {
+    super(FC.WRITE_SINGLE_COIL)
     this._address = address
-    this._value = value
+
+    this._value = value === 0xFF00 ? 0xFF00 : 0x0000
   }
 
-  get address () {
+  get address() {
     return this._address
   }
 
-  get value () {
+  get value() {
     return this._value === 0xff00
   }
 
-  get byteCount () {
+  get byteCount() {
     return 5
   }
 
-  createPayload () {
+  createPayload() {
     const payload = Buffer.alloc(this.byteCount)
 
     payload.writeUInt8(this._fc, 0)
@@ -65,5 +67,3 @@ class WriteSingleCoilResponseBody extends ModbusResponseBody {
     return payload
   }
 }
-
-module.exports = WriteSingleCoilResponseBody
