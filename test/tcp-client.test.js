@@ -6,7 +6,6 @@ const assert = require('assert')
 const Modbus = require('../')
 const sinon = require('sinon')
 const EventEmitter = require('events')
-const ReadCoilsResponseBody = require('../dist/response/read-coils.js').default
 
 describe('TCP Client Tests.', function () {
   let socket
@@ -30,7 +29,7 @@ describe('TCP Client Tests.', function () {
         0x00
       ])
 
-      const response = ReadCoilsResponseBody.fromBuffer(buffer)
+      const response = Modbus.responses.ReadCoilsResponseBody.fromBuffer(buffer)
 
       assert.ok(response !== null)
       assert.equal(0x01, response.fc)
@@ -62,7 +61,7 @@ describe('TCP Client Tests.', function () {
         0xdd // coils
       ])
 
-      const response = ReadCoilsResponseBody.fromBuffer(buffer)
+      const response = Modbus.responses.ReadCoilsResponseBody.fromBuffer(buffer)
 
       assert.ok(response === null)
     })
@@ -215,6 +214,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (e) {
+          assert.equal(Modbus.errors.isInternalException(e), false)
+          assert.equal(Modbus.errors.isUserRequestError(e), true)
           assert.equal('OutOfSync', e.err)
           socketMock.verify()
           done()
@@ -276,6 +277,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (e) {
+          assert.equal(Modbus.errors.isInternalException(e), false)
+          assert.equal(Modbus.errors.isUserRequestError(e), true)
           assert.equal('OutOfSync', e.err)
           socketMock.verify()
           done()
@@ -353,6 +356,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
+          assert.equal(Modbus.errors.isInternalException(error), true)
+          assert.equal(Modbus.errors.isUserRequestError(error), false)
           assert.equal('InvalidStartAddress', error.message)
           socketMock.verify()
           done()
@@ -368,6 +373,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (e) {
+          assert.equal(Modbus.errors.isInternalException(e), true)
+          assert.equal(Modbus.errors.isUserRequestError(e), false)
           assert.equal('InvalidQuantity', e.message)
           socketMock.verify()
           done()
@@ -415,6 +422,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
+          assert.equal(Modbus.errors.isInternalException(error), true)
+          assert.equal(Modbus.errors.isUserRequestError(error), false)
           assert.equal('InvalidStartAddress', error.message)
           socketMock.verify()
           done()
@@ -430,6 +439,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (e) {
+          assert.equal(Modbus.errors.isInternalException(e), true)
+          assert.equal(Modbus.errors.isUserRequestError(e), false)
           assert.equal('InvalidQuantity', e.message)
           socketMock.verify()
           done()
@@ -477,6 +488,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
+          assert.equal(Modbus.errors.isInternalException(error), true)
+          assert.equal(Modbus.errors.isUserRequestError(error), false)
           assert.equal('InvalidStartAddress', error.message)
           socketMock.verify()
           done()
@@ -492,6 +505,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (e) {
+          assert.equal(Modbus.errors.isInternalException(e), true)
+          assert.equal(Modbus.errors.isUserRequestError(e), false)
           assert.equal('InvalidQuantity', e.message)
           socketMock.verify()
           done()
@@ -538,6 +553,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
+          assert.equal(Modbus.errors.isInternalException(error), true)
+          assert.equal(Modbus.errors.isUserRequestError(error), false)
           assert.equal('InvalidStartAddress', error.message)
           socketMock.verify()
           done()
@@ -584,6 +601,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
+          assert.equal(Modbus.errors.isInternalException(error), true)
+          assert.equal(Modbus.errors.isUserRequestError(error), false)
           assert.equal('InvalidStartAddress', error.message)
           socketMock.verify()
           done()
@@ -614,6 +633,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
+          assert.equal(Modbus.errors.isInternalException(error), true)
+          assert.equal(Modbus.errors.isUserRequestError(error), false)
           assert.equal('InvalidValue', error.message)
           socketMock.verify()
           done()
@@ -629,6 +650,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
+          assert.equal(Modbus.errors.isInternalException(error), true)
+          assert.equal(Modbus.errors.isUserRequestError(error), false)
           assert.equal('InvalidValue', error.message)
           socketMock.verify()
           done()
@@ -705,6 +728,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
+          assert.equal(Modbus.errors.isInternalException(error), true)
+          assert.equal(Modbus.errors.isUserRequestError(error), false)
           assert.equal('InvalidStartAddress', error.message)
           socketMock.verify()
           done()
@@ -725,6 +750,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
+          assert.equal(Modbus.errors.isInternalException(error), true)
+          assert.equal(Modbus.errors.isUserRequestError(error), false)
           assert.equal('InvalidArraySize', error.message)
           socketMock.verify()
           done()
@@ -741,6 +768,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
+          assert.equal(Modbus.errors.isInternalException(error), true)
+          assert.equal(Modbus.errors.isUserRequestError(error), false)
           assert.equal('InvalidBufferSize', error.message)
           socketMock.verify()
           done()
@@ -757,6 +786,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
+          assert.equal(Modbus.errors.isInternalException(error), true)
+          assert.equal(Modbus.errors.isUserRequestError(error), false)
           assert.equal('InvalidBufferSize', error.message)
           socketMock.verify()
           done()
@@ -833,6 +864,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
+          assert.equal(Modbus.errors.isInternalException(error), true)
+          assert.equal(Modbus.errors.isUserRequestError(error), false)
           assert.equal('InvalidStartAddress', error.message)
           socketMock.verify()
           done()
@@ -853,6 +886,8 @@ describe('TCP Client Tests.', function () {
         .then(function (resp) {
           assert.ok(false)
         }).catch(function (error) {
+          assert.equal(Modbus.errors.isInternalException(error), true)
+          assert.equal(Modbus.errors.isUserRequestError(error), false)
           assert.equal('InvalidArraySize', error.message)
           socketMock.verify()
           done()
@@ -870,6 +905,8 @@ describe('TCP Client Tests.', function () {
           assert.ok(false)
           done()
         }).catch(function (error) {
+          assert.equal(Modbus.errors.isInternalException(error), true)
+          assert.equal(Modbus.errors.isUserRequestError(error), false)
           assert.equal('InvalidBufferSize', error.message)
           socketMock.verify()
           done()

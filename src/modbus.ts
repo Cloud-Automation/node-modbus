@@ -41,7 +41,7 @@ import * as Requests from './request';
 import * as Responses from './response';
 import * as Codes from './codes';
 import UserRequest from './user-request.js';
-import { UserRequestError, isUserRequestError } from './user-request-error.js';
+import * as Errors from './errors';
 
 export const client = {
   TCP: ModbusTCPClient,
@@ -58,9 +58,8 @@ export const server = {
 export const requests = {
   ...Requests,
   UserRequest,
-  UserRequestError,
-  isUserRequestError,
 };
 
 export const responses = Responses;
 export const codes = Codes;
+export const errors = Errors

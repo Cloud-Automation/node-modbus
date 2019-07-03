@@ -81,7 +81,7 @@ export default class ReadCoilsResponseBody extends ModbusReadResponseBody {
       this._valuesAsBuffer = coils
       this._valuesAsArray = bufferToArrayStatus(coils)
     } else {
-      throw new Error('INVALID COILS INPUT')
+      throw new Error('InvalidCoilsInput')
     }
   }
 
