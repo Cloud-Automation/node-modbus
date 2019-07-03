@@ -1,44 +1,45 @@
-'use strict'
+import ModbusRTURequest from "./rtu-request";
+import ModbusAbstractRequest, { ModbusAbstractRequestFromBuffer } from "./abstract-request";
 
 const debug = require('debug')('modbus-server-request-handler')
 
-class RequestHandler {
-	public _requestClass: any;
-	public _requests: any;
-	public _buffer: any;
+export default class ModbusServerRequestHandler<FB extends ModbusAbstractRequestFromBuffer> {
+  public _fromBuffer: FB;
+  public _requests: ModbusAbstractRequest[];
+  public _buffer: Buffer;
 
-  constructor (requestClass) {
-    this._requestClass = requestClass
+  constructor(fromBufferMethod: FB) {
+    this._fromBuffer = fromBufferMethod
     this._requests = []
     this._buffer = Buffer.alloc(0)
   }
 
-  shift () {
+  shift() {
     return this._requests.shift()
   }
 
-  handle (data) {
+  handle(data: Buffer) {
     this._buffer = Buffer.concat([this._buffer, data])
     debug('this._buffer', this._buffer)
 
     do {
-      const request = this._requestClass.fromBuffer(this._buffer)
+      const request = this._fromBuffer(this._buffer)
       debug('request', request)
 
       if (!request) {
         return
       }
 
-      if (request.corrupted) {
+      if (request instanceof ModbusRTURequest && request.corrupted) {
         const corruptDataDump = this._buffer.slice(0, request.byteCount).toString('hex')
         debug(`request message was corrupt: ${corruptDataDump}`)
       } else {
         this._requests.unshift(request)
       }
 
+
+
       this._buffer = this._buffer.slice(request.byteCount)
     } while (1)
   }
 }
-
-module.exports = RequestHandler
