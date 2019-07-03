@@ -1,20 +1,20 @@
-'use strict'
 
-const ModbusServer = require('./modbus-server.js')
-const ModbusServerClient = require('./modbus-server-client.js')
-const Request = require('./rtu-request.js')
-const Response = require('./rtu-response.js')
 
-class ModbusRTUServer extends ModbusServer {
-	public _socket: any;
-	public emit: any;
+import ModbusServer, { ModbusServerOptions } from './modbus-server.js'
+import ModbusServerClient from './modbus-server-client.js'
+import ModbusRTURequest from './rtu-request.js'
+import ModbusRTUResponse from './rtu-response.js'
 
-  constructor (socket, options) {
+import SerialPort from 'serialport';
+
+export default class ModbusRTUServer extends ModbusServer {
+  public _socket: any;
+  public emit: any;
+
+  constructor(socket: SerialPort, options?: Partial<ModbusServerOptions>) {
     super(options)
     this._socket = socket
-    const client = new ModbusServerClient(this, socket, Request, Response)
+    const client = new ModbusServerClient(this, socket, ModbusRTURequest.fromBuffer, ModbusRTUResponse.fromRequest as any)
     this.emit('connection', client)
   }
 }
-
-module.exports = ModbusRTUServer
