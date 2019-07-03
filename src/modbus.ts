@@ -37,13 +37,30 @@ import ModbusTCPServer from './modbus-tcp-server.js';
 /** module:jsmodbus.server.RTU */
 import ModbusRTUServer from './modbus-rtu-server.js';
 
-export = {
-  'client': {
-    'TCP': ModbusTCPClient,
-    'RTU': ModbusRTUClient
-  },
-  server: {
-    'TCP': ModbusTCPServer,
-    'RTU': ModbusRTUServer
-  }
+import * as Requests from './request';
+import * as Responses from './response';
+import * as Codes from './codes';
+import UserRequest from './user-request.js';
+import { UserRequestError, isUserRequestError } from './user-request-error.js';
+
+export const client = {
+  TCP: ModbusTCPClient,
+  RTU: ModbusRTUClient
 }
+
+export const server = {
+  TCP: ModbusTCPServer,
+  RTU: ModbusRTUServer
+}
+
+
+
+export const requests = {
+  ...Requests,
+  UserRequest,
+  UserRequestError,
+  isUserRequestError,
+};
+
+export const responses = Responses;
+export const codes = Codes;
