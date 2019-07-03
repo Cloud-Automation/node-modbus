@@ -5,6 +5,8 @@ import ModbusRTUClientRequestHandler from './rtu-client-request-handler.js'
 import ModbusRTUClientResponseHandler from './rtu-client-response-handler.js'
 
 import SerialPort from 'serialport';
+import ModbusRTURequest from './rtu-request.js';
+import ModbusRTUResponse from './rtu-response.js';
 
 /** This Client musst be initiated with a socket object that implements the event emitter
  * interface and fires a 'data' event with a buffer as a parameter. It also needs to
@@ -19,9 +21,10 @@ import SerialPort from 'serialport';
  * @extends ModbusClient
  * @class
  */
-export default class ModbusRTUClient extends ModbusClient<SerialPort> {
-  protected readonly _requestHandler: ModbusRTUClientRequestHandler;
-  protected readonly _responseHandler: ModbusRTUClientResponseHandler;
+export default class ModbusRTUClient extends ModbusClient<SerialPort, ModbusRTURequest, ModbusRTUResponse> {
+  protected _requestHandler: ModbusRTUClientRequestHandler;
+  protected _responseHandler: ModbusRTUClientResponseHandler;
+
 
   /** Creates a new Modbus/RTU Client.
    * @param {SerialPort} socket The serial Socket.
@@ -31,8 +34,8 @@ export default class ModbusRTUClient extends ModbusClient<SerialPort> {
   constructor(socket: SerialPort, address: number, timeout = 5000) {
     super(socket)
 
-    this._requestHandler = new ModbusRTUClientRequestHandler(this._socket, address, timeout)
-    this._responseHandler = new ModbusRTUClientResponseHandler()
+    this._requestHandler = new ModbusRTUClientRequestHandler(socket, address, timeout);
+    this._responseHandler = new ModbusRTUClientResponseHandler();
   }
 
   public get slaveId() {

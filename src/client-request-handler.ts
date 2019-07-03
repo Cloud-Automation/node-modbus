@@ -3,21 +3,23 @@ const OFFLINE = 'Offline'
 const MODBUS_EXCEPTION = 'ModbusException'
 
 const debug = require('debug')('client-request-handler')
-import UserRequest, { ModbusRequest, ModbusResponse } from './user-request.js'
+import UserRequest from './user-request.js'
 import { UserRequestError } from "./user-request-error";
 import ExceptionResponseBody from './response/exception.js'
 import ModbusRequestBody from './request/request-body.js';
 import * as Stream from 'stream';
 import { Socket } from 'net';
+import ModbusAbstractRequest from './abstract-request.js';
+import ModbusAbstractResponse from './abstract-response.js';
 
 
 /** Common Request Handler
  * @abstract
  */
 export default abstract class ModbusClientRequestHandler<
-  S extends Stream.Duplex = Socket,
-  Req extends ModbusRequest = ModbusRequest,
-  Res extends ModbusResponse = ModbusResponse,
+  S extends Stream.Duplex,
+  Req extends ModbusAbstractRequest,
+  Res extends ModbusAbstractResponse,
   > {
   protected _socket: S;
   protected _timeout: number;
@@ -71,7 +73,7 @@ export default abstract class ModbusClientRequestHandler<
     this._clearAllRequests()
   }
 
-  public abstract register(request: ModbusRequestBody): ReturnType<ModbusClientRequestHandler['registerRequest']>
+  public abstract register(request: ModbusRequestBody): ReturnType<ModbusClientRequestHandler<S, Req, Res>['registerRequest']>
 
   /** Register a new request.
    * @param {ModbusAbstractRequest} requestBody A request body to execute a modbus function.

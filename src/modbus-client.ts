@@ -14,15 +14,25 @@ import ModbusTCPClientRequestHandler from './tcp-client-request-handler.js';
 import ModbusRTUClientRequestHandler from './rtu-client-request-handler.js';
 import ModbusTCPClientResponseHandler from './tcp-client-response-handler.js';
 import ModbusRTUClientResponseHandler from './rtu-client-response-handler.js';
+import ModbusClientResponseHandler from './client-response-handler.js';
+import ModbusClientRequestHandler from './client-request-handler.js';
+import ModbusTCPRequest from './tcp-request.js';
+import ModbusAbstractRequest from './abstract-request.js';
+import ModbusAbstractResponse from './abstract-response.js';
 
+type Either<A, B> = A | B;
+
+// type ResponseHandler = Either<ModbusTCPClientResponseHandler, ModbusRTUClientResponseHandler>;
+// type RequestHandler = Either<ModbusTCPClientRequestHandler, ModbusRTUClientRequestHandler>;
 
 /** Common Modbus Client
  * @abstract
  */
-export default abstract class ModbusClient<S extends Stream.Duplex> {
+export default abstract class ModbusClient<S extends Stream.Duplex, ReqType extends ModbusAbstractRequest, ResType extends ModbusAbstractResponse>{
   protected _socket: S;
-  protected abstract readonly _responseHandler: ModbusTCPClientResponseHandler | ModbusRTUClientResponseHandler;
-  protected abstract readonly _requestHandler: ModbusTCPClientRequestHandler | ModbusRTUClientRequestHandler;
+
+  protected abstract readonly _requestHandler: ModbusClientRequestHandler<S, ReqType, ResType>;
+  protected abstract readonly _responseHandler: ModbusClientResponseHandler<ResType>;
 
   public abstract get slaveId(): number;
   public abstract get unitId(): number;
@@ -35,7 +45,6 @@ export default abstract class ModbusClient<S extends Stream.Duplex> {
     if (new.target === ModbusClient) {
       throw new TypeError('Cannot instantiate ModbusClient directly.')
     }
-
     this._socket = socket
 
     if (!socket) {
@@ -62,7 +71,7 @@ export default abstract class ModbusClient<S extends Stream.Duplex> {
 
       /* process the response in the request handler if unitId is a match */
       if (this.unitId === response.unitId) {
-        this._requestHandler.handle(response as any) //TODO: Find a better way than overwriting the type as any
+        this._requestHandler.handle(response) //TODO: Find a better way than overwriting the type as any
       }
     } while (1)
   }
@@ -228,9 +237,9 @@ export default abstract class ModbusClient<S extends Stream.Duplex> {
    *   ...
    * })
    */
-  public writeMultipleCoils(start: number, values: boolean[]): PromiseUserRequest
-  public writeMultipleCoils(start: number, values: Buffer, quantity: number): PromiseUserRequest
-  public writeMultipleCoils(start: number, values: boolean[] | Buffer, quantity: number = 0): PromiseUserRequest {
+  public writeMultipleCoils(start: number, values: boolean[]): PromiseUserRequest<any, any>
+  public writeMultipleCoils(start: number, values: Buffer, quantity: number): PromiseUserRequest<any, any>
+  public writeMultipleCoils(start: number, values: boolean[] | Buffer, quantity: number = 0) {
     debug('issuing new write multiple coils request')
 
     let request

@@ -1,12 +1,13 @@
 import ModbusTCPResponse from './tcp-response';
 import ModbusRTUResponse from './rtu-response';
+import ModbusAbstractResponse from './abstract-response';
 
 /** Modbus Client Repsonse Handler
  * @abstract
  */
-export default abstract class ModbusClientResponseHandler {
+export default abstract class ModbusClientResponseHandler<ResType extends ModbusAbstractResponse> {
   protected _buffer: Buffer;
-  protected abstract _messages: ModbusTCPResponse[] | ModbusRTUResponse[];
+  protected abstract _messages: ResType[];
 
   /** Create new Modbus Client Response Hanlder */
   constructor() {

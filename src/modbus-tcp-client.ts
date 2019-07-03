@@ -4,6 +4,8 @@ import ModbusClient from './modbus-client.js'
 import ModbusTCPClientRequestHandler from './tcp-client-request-handler.js'
 import ModbusTCPClientResponseHandler from './tcp-client-response-handler.js'
 import { Socket } from 'net';
+import ModbusTCPRequest from './tcp-request.js';
+import ModbusTCPResponse from './tcp-response.js';
 
 /** This client must be initiated with a net.Socket object. The module does not handle reconnections
  * or anything related to keep the connection up in case of an unplugged cable or a closed server. See
@@ -24,11 +26,11 @@ import { Socket } from 'net';
  * })
  *
  */
-export default class ModbusTCPClient extends ModbusClient<Socket> {
+export default class ModbusTCPClient extends ModbusClient<Socket, ModbusTCPRequest, ModbusTCPResponse> {
+  protected _requestHandler: ModbusTCPClientRequestHandler;
+  protected _responseHandler: ModbusTCPClientResponseHandler;
   protected readonly _unitId: number;
   protected readonly _timeout: number;
-  protected readonly _requestHandler: ModbusTCPClientRequestHandler;
-  protected readonly _responseHandler: ModbusTCPClientResponseHandler;
 
   /**
    * Creates a new Modbus/TCP Client.
@@ -39,19 +41,12 @@ export default class ModbusTCPClient extends ModbusClient<Socket> {
    */
   constructor(socket: Socket, unitId: number = 1, timeout: number = 5000) {
     super(socket)
+
+    this._requestHandler = new ModbusTCPClientRequestHandler(socket, unitId, timeout);
+    this._responseHandler = new ModbusTCPClientResponseHandler();
+
     this._unitId = unitId
     this._timeout = timeout
-
-    /* Simply set the request and response handler and you are done.
-     * The request handler needs to implement the following methods
-     *   - register(pdu) returns a promise
-     * The response handler needs to implement the following methods
-     *   - handelData(buffer)
-     *   - shift () // get latest message from the socket
-     *      and remove it internally
-     */
-    this._requestHandler = new ModbusTCPClientRequestHandler(this._socket, this._unitId, timeout)
-    this._responseHandler = new ModbusTCPClientResponseHandler()
   }
 
   get slaveId() {

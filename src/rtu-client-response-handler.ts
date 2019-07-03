@@ -6,7 +6,7 @@ import ModbusClientResponseHandler from './client-response-handler.js'
  * @extends ModbusClientResponseHandler
  * @class
  */
-export default class ModbusRTUClientResponseHandler extends ModbusClientResponseHandler {
+export default class ModbusRTUClientResponseHandler extends ModbusClientResponseHandler<ModbusRTUResponse> {
   protected _messages: ModbusRTUResponse[];
 
   constructor() {

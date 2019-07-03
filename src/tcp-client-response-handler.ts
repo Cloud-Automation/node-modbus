@@ -6,7 +6,7 @@ import ModbusClientResponseHandler from './client-response-handler.js';
  * @extends ModbusClientResponseHandler
  * @class
  */
-export default class ModbusTCPClientResponseHandler extends ModbusClientResponseHandler {
+export default class ModbusTCPClientResponseHandler extends ModbusClientResponseHandler<ModbusTCPResponse> {
   protected _messages: ModbusTCPResponse[];
 
   /** Create new Modbus/TCP Client Response Handler */

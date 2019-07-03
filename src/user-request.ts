@@ -5,20 +5,22 @@ import ModbusRTURequest from "./rtu-request";
 import ModbusTCPResponse from "./tcp-response";
 import ModbusRTUResponse from "./rtu-response";
 import { UserRequestError } from "./user-request-error";
+import ModbusAbstractRequest from "./abstract-request";
+import ModbusAbstractResponse from "./abstract-response";
 
 const debug = require('debug')('user-request')
 
 type Either<A, B> = A | B;
 
 export type ModbusRequest = Either<ModbusTCPRequest, ModbusRTURequest>;
-export type ModbusResponse = Either<ModbusTCPResponse, ModbusRTUResponse>;
+// export type ModbusResponse = Either<ModbusTCPResponse, ModbusRTUResponse>;
 
-export interface UserRequestResolve<Req = ModbusRequest, Res = ModbusResponse> {
+export interface UserRequestResolve<Req extends ModbusAbstractRequest, Res extends ModbusAbstractResponse> {
   request: Req;
   response: Res;
 }
 
-export type PromiseUserRequest<Req = ModbusRequest, Res = ModbusResponse> = Promise<UserRequestResolve<Req, Res>>;
+export type PromiseUserRequest<Req extends ModbusAbstractRequest, Res extends ModbusAbstractResponse> = Promise<UserRequestResolve<Req, Res>>;
 
 /** Request created for the user. It contains the actual modbus request,
  * the timeout handler and the promise delivered from the readCoils method
@@ -28,12 +30,12 @@ export type PromiseUserRequest<Req = ModbusRequest, Res = ModbusResponse> = Prom
  * @template ReqBody
  * @template ResBody
  */
-export default class UserRequest<Req extends ModbusRequest = ModbusRequest, Res extends ModbusResponse = ModbusResponse> {
+export default class UserRequest<Req extends ModbusAbstractRequest, Res extends ModbusAbstractResponse> {
   protected _request: Req;
   protected _timeout: number;
   protected _promise: Promise<UserRequestResolve<Req, Res>>;
   protected _resolve!: (value: UserRequestResolve<Req, Res>) => void;
-  protected _reject!: (err: UserRequestError) => void;
+  protected _reject!: (err: UserRequestError<Res>) => void;
   protected _timer!: NodeJS.Timeout;
 
   /**
