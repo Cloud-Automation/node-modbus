@@ -17,9 +17,46 @@ type Either<A, B> = A | B;
 export type ModbusRequest = Either<ModbusTCPRequest, ModbusRTURequest>;
 // export type ModbusResponse = Either<ModbusTCPResponse, ModbusRTUResponse>;
 
+export class UserRequestMetrics {
+  /**
+   * Timestamp when the request was sent
+   */
+  createdAt: Date = new Date();
+  /**
+   * Timestamp when the request was sent
+   */
+  startedAt: Date = new Date();
+  /**
+   * Timestamp when the response was received
+   */
+  receivedAt: Date = new Date();
+  /**
+   * Difference in the start and end date in milliseconds
+   */
+  public get transferTime(): number {
+    return this.receivedAt.getTime() - this.startedAt.getTime();
+  };
+
+  /**
+   * Amount of time in milliseconds the request was waiting in
+   * the cue.
+   */
+  public get waitTime(): number {
+    return this.startedAt.getTime() - this.createdAt.getTime();
+  }
+
+  toJSON() {
+    return {
+      ...this,
+      transferTime: this.transferTime
+    }
+  }
+}
+
 export interface UserRequestResolve<Req extends ModbusAbstractRequest> {
   request: Req;
   response: RequestToResponse<Req>;
+  metrics: UserRequestMetrics;
 }
 
 export type PromiseUserRequest<Req extends ModbusAbstractRequest> = Promise<UserRequestResolve<Req>>;
@@ -33,12 +70,14 @@ export type PromiseUserRequest<Req extends ModbusAbstractRequest> = Promise<User
  * @template ResBody
  */
 export default class UserRequest<Req extends ModbusAbstractRequest = any> {
-  protected _request: Req;
-  protected _timeout: number;
-  protected _promise: PromiseUserRequest<Req>;
+  protected readonly _request: Req;
+  protected readonly _timeout: number;
+  protected readonly _promise: PromiseUserRequest<Req>;
   protected _resolve!: (value: UserRequestResolve<Req>) => void;
   protected _reject!: (err: UserRequestError<RequestToResponse<Req>>) => void;
   protected _timer!: NodeJS.Timeout;
+
+  protected _metrics: UserRequestMetrics;
 
   /**
    * Creates an instance of UserRequest.
@@ -51,6 +90,8 @@ export default class UserRequest<Req extends ModbusAbstractRequest = any> {
     this._request = request
     this._timeout = timeout
 
+    this._metrics = new UserRequestMetrics();
+
     this._promise = new Promise<UserRequestResolve<Req>>((resolve, reject) => {
       this._resolve = resolve
       this._reject = reject
@@ -62,6 +103,8 @@ export default class UserRequest<Req extends ModbusAbstractRequest = any> {
   }
 
   public start(cb: Function) {
+    this._metrics.startedAt = new Date();
+
     this._timer = setTimeout(() => {
       this._reject(new UserRequestError({
         'err': 'Timeout',
@@ -69,6 +112,10 @@ export default class UserRequest<Req extends ModbusAbstractRequest = any> {
       }))
       cb()
     }, this._timeout)
+  }
+
+  public get metrics() {
+    return this._metrics;
   }
 
   public done() {
@@ -88,9 +135,12 @@ export default class UserRequest<Req extends ModbusAbstractRequest = any> {
   }
 
   public resolve(response: RequestToResponse<Req>) {
+    this._metrics.receivedAt = new Date();
+    debug('request completed in %d ms (sat in cue %d ms)', this.metrics.transferTime, this.metrics.waitTime)
     return this._resolve({
       'response': response,
-      'request': this._request
+      'request': this._request,
+      metrics: this.metrics,
     })
   }
 
