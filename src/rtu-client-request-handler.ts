@@ -2,19 +2,22 @@
 
 const debug = require('debug')('rtu-client-request-handler')
 import ModbusRTURequest from './rtu-request.js'
-import ModbusClientRequestHandler from './client-request-handler.js'
+import MBClientRequestHandler from './client-request-handler.js'
 import CRC from 'crc'
 import SerialSocket from 'serialport';
 import ModbusRequestBody from './request/request-body.js';
 import ModbusRTUResponse from './rtu-response.js';
 import { UserRequestError } from "./user-request-error";
+import UserRequest from './user-request.js';
 
 /** Modbus/RTU Client Request Handler
  * Implements behaviour for Client Requests for Modbus/RTU
- * @extends ModbusClientRequestHandler
+ * @extends MBClientRequestHandler
  * @class
  */
-export default class ModbusRTUClientRequestHandler extends ModbusClientRequestHandler<SerialSocket, ModbusRTURequest, ModbusRTUResponse> {
+export default class ModbusRTUClientRequestHandler extends MBClientRequestHandler<SerialSocket, ModbusRTURequest> {
+  protected _requests: UserRequest<ModbusRTURequest>[];
+  protected _currentRequest: UserRequest<ModbusRTURequest> | null | undefined;
   protected readonly _address: number;
   protected _socket: any;
   protected _onConnect: any;
@@ -36,7 +39,7 @@ export default class ModbusRTUClientRequestHandler extends ModbusClientRequestHa
     this._socket.on('open', this._onConnect.bind(this))
   }
 
-  register<T extends ModbusRequestBody>(requestBody: T) {
+  register<T extends ModbusRequestBody>(requestBody: T): any {//TODO: Find a better way then putting in the any overide
     debug('registrating new request')
 
     const request = new ModbusRTURequest(this._address, requestBody)

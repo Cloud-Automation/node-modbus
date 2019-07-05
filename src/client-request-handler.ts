@@ -10,22 +10,17 @@ import { ModbusRequestBody } from './request';
 import ModbusAbstractRequest from './abstract-request.js';
 import ModbusAbstractResponse from './abstract-response.js';
 import * as Stream from 'stream';
-import { ModbusResponseBody } from './response/index.js';
-import { RequestToResponse } from './request-response-map.js';
+import { CastRequestBody } from './request-response-map.js';
 
 
 /** Common Request Handler
  * @abstract
  */
-export default abstract class ModbusClientRequestHandler<
-  S extends Stream.Duplex,
-  Req extends ModbusAbstractRequest,
-  Res extends ModbusAbstractResponse,
-  > {
+export default abstract class MBClientRequestHandler<S extends Stream.Duplex, Req extends ModbusAbstractRequest> {
   protected _socket: S;
   protected _timeout: number;
-  protected _requests: UserRequest<Req, Res>[];
-  protected _currentRequest: UserRequest<Req, Res> | null | undefined;
+  protected abstract _requests: UserRequest[];
+  protected abstract _currentRequest: UserRequest | null | undefined;
   protected _state: 'offline' | 'online';
 
   /** Create a new Request handler for Client requests
@@ -33,13 +28,11 @@ export default abstract class ModbusClientRequestHandler<
    * @param {number} timeout The request timeout value in ms.
    */
   constructor(socket: S, timeout: number) {
-    if (new.target === ModbusClientRequestHandler) {
+    if (new.target === MBClientRequestHandler) {
       throw new TypeError('Cannot instantiate ModbusClientRequestHandler directly.')
     }
     this._socket = socket
     this._timeout = timeout
-    this._requests = []
-    this._currentRequest = null
     this._state = 'offline'
   }
 
@@ -74,28 +67,28 @@ export default abstract class ModbusClientRequestHandler<
     this._clearAllRequests()
   }
 
-  public abstract register<T extends ModbusRequestBody>(request: T): RegisterRequestReturnType<T>
+  public abstract register<R extends Req, B extends ModbusRequestBody>(requestBody: B): RegisterRequestReturnType<CastRequestBody<R, B>>
 
   /** Register a new request.
    * @param {ModbusAbstractRequest} requestBody A request body to execute a modbus function.
    * @returns A promise to handle the request outcome.
    */
-  public registerRequest<R extends ModbusAbstractRequest>(request: R) {
+  public registerRequest<R extends Req>(request: R): RegisterRequestReturnType<R> {
 
-    const userRequest = new UserRequest<R, Res>(request, this._timeout)
+    const userRequest = new UserRequest(request, this._timeout)
 
 
 
-    this._requests.push(userRequest as unknown as UserRequest<Req, Res>)
+    this._requests.push(userRequest)
     this._flush()
 
-    return userRequest.promise as unknown as RegisterRequestReturnType<R['body']>
+    return userRequest.promise
   }
 
   /** Handle a ModbusTCPResponse object.
    * @param {ModbusAbstractRequest} response A Modbus TCP Response.
    */
-  public handle(response: Res) {
+  public handle(response: ModbusAbstractResponse) {
     debug('incoming response')
     if (!response) {
       debug('well, sorry I was wrong, no response at all')
@@ -189,4 +182,4 @@ export default abstract class ModbusClientRequestHandler<
   }
 }
 
-export type RegisterRequestReturnType<T extends ModbusRequestBody> = PromiseUserRequest<ModbusAbstractRequest<T>, ModbusAbstractResponse<RequestToResponse<T>>>
+export type RegisterRequestReturnType<Req extends ModbusAbstractRequest> = PromiseUserRequest<Req>

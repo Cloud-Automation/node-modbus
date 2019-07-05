@@ -5,19 +5,22 @@ import ModbusTCPResponse from "./tcp-response";
 
 const debug = require('debug')('tcp-client-request-handler')
 import ModbusTCPRequest from './tcp-request.js'
-import ModbusClientRequestHandler from './client-request-handler.js'
+import MBClientRequestHandler from './client-request-handler.js'
 import { Socket } from "net";
 import { UserRequestError } from "./user-request-error";
+import UserRequest from "./user-request";
 
 const OUT_OF_SYNC = 'OutOfSync'
 const PROTOCOL = 'Protocol'
 
 /** TCP Client Request Handler
  * Implements the behaviour for Client Requests for Modus/TCP.
- * @extends ModbusClientRequestHandler
+ * @extends MBClientRequestHandler
  * @class
  */
-export default class ModbusTCPClientRequestHandler extends ModbusClientRequestHandler<Socket, ModbusTCPRequest, ModbusTCPResponse> {
+export default class ModbusTCPClientRequestHandler extends MBClientRequestHandler<Socket, ModbusTCPRequest> {
+  protected _requests: UserRequest<ModbusTCPRequest>[];
+  protected _currentRequest: UserRequest<ModbusTCPRequest> | null | undefined;
   private _requestId: number;
   private _unitId: number;
 
@@ -32,12 +35,14 @@ export default class ModbusTCPClientRequestHandler extends ModbusClientRequestHa
     super(socket, timeout)
     this._requestId = 0
     this._unitId = unitId
+    this._requests = [];
+    this._currentRequest = null;
 
     this._socket.on('connect', this._onConnect.bind(this))
     this._socket.on('close', this._onClose.bind(this))
   }
 
-  register<ReqBody extends ModbusRequestBody>(requestBody: ReqBody) {
+  register<T extends ModbusRequestBody>(requestBody: T): any { //TODO: Find a better way then putting in the any overide
     this._requestId = (this._requestId + 1) % 0xFFFF
     debug('registrating new request', 'transaction id', this._requestId, 'unit id', this._unitId, 'length', requestBody.byteCount)
 

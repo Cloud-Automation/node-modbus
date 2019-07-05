@@ -14,20 +14,21 @@ import {
 } from './request'
 
 import { PromiseUserRequest } from './user-request.js';
-import ModbusClientResponseHandler from './client-response-handler.js';
-import ModbusClientRequestHandler from './client-request-handler.js';
+import MBClientResponseHandler from './client-response-handler.js';
+import MBClientRequestHandler from './client-request-handler.js';
 import ModbusAbstractRequest from './abstract-request.js';
 import ModbusAbstractResponse from './abstract-response.js';
 import { WriteMultipleCoilsResponseBody } from './response';
+import { CastRequestBody } from './request-response-map';
 
 /** Common Modbus Client
  * @abstract
  */
-export default abstract class ModbusClient<S extends Stream.Duplex, ReqType extends ModbusAbstractRequest, ResType extends ModbusAbstractResponse>{
+export default abstract class MBClient<S extends Stream.Duplex, Req extends ModbusAbstractRequest>{
   protected _socket: S;
 
-  protected abstract readonly _requestHandler: ModbusClientRequestHandler<S, ReqType, ResType>;
-  protected abstract readonly _responseHandler: ModbusClientResponseHandler<ResType>;
+  protected abstract readonly _requestHandler: MBClientRequestHandler<S, Req>;
+  protected abstract readonly _responseHandler: MBClientResponseHandler;
 
   public abstract get slaveId(): number;
   public abstract get unitId(): number;
@@ -37,7 +38,7 @@ export default abstract class ModbusClient<S extends Stream.Duplex, ReqType exte
    * @throws {NoSocketException}
    */
   constructor(socket: S) {
-    if (new.target === ModbusClient) {
+    if (new.target === MBClient) {
       throw new TypeError('Cannot instantiate ModbusClient directly.')
     }
     this._socket = socket
@@ -228,7 +229,7 @@ export default abstract class ModbusClient<S extends Stream.Duplex, ReqType exte
    *   ...
    * })
    */
-  public writeMultipleCoils(start: number, values: boolean[]): PromiseUserRequest<ModbusAbstractRequest<WriteMultipleCoilsRequestBody>, ModbusAbstractResponse<WriteMultipleCoilsResponseBody>>
+  public writeMultipleCoils(start: number, values: boolean[]): PromiseUserRequest<CastRequestBody<Req, WriteMultipleCoilsRequestBody>>
   /** Execute WriteMultipleCoils Request (Function Code 0x0F)
    * @param {Number} address Address.
    * @param { Buffer} values Values either as an Array[Boolean] or a Buffer.
@@ -242,7 +243,7 @@ export default abstract class ModbusClient<S extends Stream.Duplex, ReqType exte
    *   ...
    * })
    */
-  public writeMultipleCoils(start: number, values: Buffer, quantity: number): PromiseUserRequest<ModbusAbstractRequest<WriteMultipleCoilsRequestBody>, ModbusAbstractResponse<WriteMultipleCoilsResponseBody>>
+  public writeMultipleCoils(start: number, values: Buffer, quantity: number): PromiseUserRequest<CastRequestBody<Req, WriteMultipleCoilsRequestBody>>
   public writeMultipleCoils(start: number, values: boolean[] | Buffer, quantity: number = 0) {
     debug('issuing new write multiple coils request')
 

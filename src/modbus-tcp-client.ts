@@ -1,16 +1,18 @@
 
 
-import ModbusClient from './modbus-client.js'
-import ModbusTCPClientRequestHandler from './tcp-client-request-handler.js'
+import MBClient from './modbus-client.js'
+import MBTCPClientRequestHandler from './tcp-client-request-handler.js'
 import ModbusTCPClientResponseHandler from './tcp-client-response-handler.js'
 import { Socket } from 'net';
 import ModbusTCPRequest from './tcp-request.js';
 import ModbusTCPResponse from './tcp-response.js';
 
+
+
 /** This client must be initiated with a net.Socket object. The module does not handle reconnections
  * or anything related to keep the connection up in case of an unplugged cable or a closed server. See
  * the node-net-reconnect module for these issues.
- * @extends ModbusClient
+ * @extends MBClient
  * @class
  * @example <caption>Create new Modbus/TCP Client</caption>
  * const net = require('net')
@@ -26,8 +28,8 @@ import ModbusTCPResponse from './tcp-response.js';
  * })
  *
  */
-export default class ModbusTCPClient extends ModbusClient<Socket, ModbusTCPRequest, ModbusTCPResponse> {
-  protected _requestHandler: ModbusTCPClientRequestHandler;
+export default class ModbusTCPClient extends MBClient<Socket, ModbusTCPRequest> {
+  protected _requestHandler: MBTCPClientRequestHandler;
   protected _responseHandler: ModbusTCPClientResponseHandler;
   protected readonly _unitId: number;
   protected readonly _timeout: number;
@@ -42,7 +44,7 @@ export default class ModbusTCPClient extends ModbusClient<Socket, ModbusTCPReque
   constructor(socket: Socket, unitId: number = 1, timeout: number = 5000) {
     super(socket)
 
-    this._requestHandler = new ModbusTCPClientRequestHandler(socket, unitId, timeout);
+    this._requestHandler = new MBTCPClientRequestHandler(socket, unitId, timeout);
     this._responseHandler = new ModbusTCPClientResponseHandler();
 
     this._unitId = unitId
@@ -57,4 +59,3 @@ export default class ModbusTCPClient extends ModbusClient<Socket, ModbusTCPReque
     return this._unitId;
   }
 }
-

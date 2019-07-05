@@ -1,6 +1,6 @@
 
 
-import ModbusClient from './modbus-client.js'
+import MBClient from './modbus-client.js'
 import ModbusRTUClientRequestHandler from './rtu-client-request-handler.js'
 import ModbusRTUClientResponseHandler from './rtu-client-response-handler.js'
 
@@ -18,10 +18,10 @@ import ModbusRTUResponse from './rtu-response.js';
  * const socket = new SerialPort("/dev/tty/ttyUSB0", { "baudRate: 57600" })
  * const client = new Modbus.client.RTU(socket, address)
  *
- * @extends ModbusClient
+ * @extends MBClient
  * @class
  */
-export default class ModbusRTUClient extends ModbusClient<SerialPort, ModbusRTURequest, ModbusRTUResponse> {
+export default class ModbusRTUClient extends MBClient<SerialPort, ModbusRTURequest> {
   protected _requestHandler: ModbusRTUClientRequestHandler;
   protected _responseHandler: ModbusRTUClientResponseHandler;
 
