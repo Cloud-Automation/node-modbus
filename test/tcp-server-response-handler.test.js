@@ -3,16 +3,16 @@
 /* global describe, it */
 
 const assert = require('assert')
-const ReadCoilsResponseBody = require('../src/response/read-coils.js')
-const ReadDiscreteInputsResponseBody = require('../src/response/read-discrete-inputs.js')
-const ReadHoldingRegistersResponseBody = require('../src/response/read-holding-registers.js')
-const ReadInputRegistersResponseBody = require('../src/response/read-input-registers.js')
-const WriteSingleCoilResponseBody = require('../src/response/write-single-coil.js')
-const WriteSingleRegisterResponseBody = require('../src/response/write-single-register.js')
-const WriteMultipleCoilsResponseBody = require('../src/response/write-multiple-coils.js')
-const WriteMultipleRegistersResponseBody = require('../src/response/write-multiple-registers.js')
-const ModbusTCPResponse = require('../src/tcp-response.js')
-const ModbusTCPRequest = require('../src/tcp-request.js')
+const ReadCoilsResponseBody = require('../dist/response/read-coils.js').default
+const ReadDiscreteInputsResponseBody = require('../dist/response/read-discrete-inputs.js').default
+const ReadHoldingRegistersResponseBody = require('../dist/response/read-holding-registers.js').default
+const ReadInputRegistersResponseBody = require('../dist/response/read-input-registers.js').default
+const WriteSingleCoilResponseBody = require('../dist/response/write-single-coil.js').default
+const WriteSingleRegisterResponseBody = require('../dist/response/write-single-register.js').default
+const WriteMultipleCoilsResponseBody = require('../dist/response/write-multiple-coils.js').default
+const WriteMultipleRegistersResponseBody = require('../dist/response/write-multiple-registers.js').default
+const ModbusTCPResponse = require('../dist/tcp-response.js').default
+const ModbusTCPRequest = require('../dist/tcp-request.js').default
 
 describe('Modbus/TCP Server Response Handler Tests', function () {
   /* we are using the read coils function to test the modbus/tcp specifics */

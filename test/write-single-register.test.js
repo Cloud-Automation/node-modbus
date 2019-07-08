@@ -3,7 +3,7 @@
 /* global describe, it */
 
 const assert = require('assert')
-const WriteSingleRegisterRequest = require('../src/request/write-single-register.js')
+const WriteSingleRegisterRequest = require('../dist/request/write-single-register.js').default
 
 describe('WriteSingleRegister Tests.', function () {
   describe('WriteSingleRegister Response', function () {

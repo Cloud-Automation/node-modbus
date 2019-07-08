@@ -3,7 +3,7 @@
 /* global describe, it, beforeEach */
 
 const assert = require('assert')
-const ModbusRTUClientResponseHandler = require('../src/rtu-client-response-handler.js')
+const ModbusRTUClientResponseHandler = require('../dist/rtu-client-response-handler.js').default
 
 describe('Modbus/RTU Client Response Tests', function () {
   let handler

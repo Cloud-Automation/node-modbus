@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const bufferUtils = require('../src/buffer-utils.js')
+const bufferUtils = require('../dist/buffer-utils')
 
 describe('Buffer and status conversions.', function () {
   it('should convert 10 coils status to buffer 2 bytes', function () {

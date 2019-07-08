@@ -4,8 +4,8 @@
 const assert = require('assert')
 const sinon = require('sinon')
 const EventEmitter = require('events')
-const TCPRequestHandler = require('../src/tcp-client-request-handler.js')
-const ReadCoilsRequest = require('../src/request/read-coils.js')
+const TCPRequestHandler = require('../dist/tcp-client-request-handler.js').default
+const ReadCoilsRequest = require('../dist/request/read-coils.js').default
 
 describe('TCP Modbus Request Tests', function () {
   let socket

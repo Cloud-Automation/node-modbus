@@ -3,7 +3,7 @@
 /* global describe, it */
 
 const assert = require('assert')
-const WriteSingleCoilRequest = require('../src/request/write-single-coil.js')
+const WriteSingleCoilRequest = require('../dist/request/write-single-coil.js').default
 
 describe('WriteSingleCoil Tests.', function () {
   describe('WriteSingleCoil Response', function () {

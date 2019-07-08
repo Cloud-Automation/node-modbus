@@ -2,3 +2,5 @@ node_modules
 *.swp
 out
 old-tests
+.nyc-output
+dist

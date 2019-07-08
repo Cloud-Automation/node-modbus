@@ -3,8 +3,8 @@
 /* global describe, it */
 
 const assert = require('assert')
-const ReadDiscreteInputsRequest = require('../src/request/read-discrete-inputs.js')
-const ReadDiscreteInputsResponse = require('../src/response/read-discrete-inputs.js')
+const ReadDiscreteInputsRequest = require('../dist/request/read-discrete-inputs.js').default
+const ReadDiscreteInputsResponse = require('../dist/response/read-discrete-inputs.js').default
 
 describe('ReadDiscreteInputs Tests.', function () {
   describe('ReadDiscreteInputs Response', function () {

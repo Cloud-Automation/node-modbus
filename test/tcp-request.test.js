@@ -2,7 +2,7 @@
 'use strict'
 
 const assert = require('assert')
-const TCPRequest = require('../src/tcp-request.js')
+const TCPRequest = require('../dist/tcp-request.js').default
 
 describe('TCP Request Tests', function () {
   it('should return a valid TCPRequest object for function 15', function () {
