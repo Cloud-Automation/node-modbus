@@ -26,8 +26,8 @@ import {
 
 import { FC, isFunctionCode } from "./codes";
 import BufferUtils from './buffer-utils.js';
-import { ModbusRequest } from "./user-request";
 import { ModbusAbstractResponseFromRequest } from "./abstract-response";
+import ModbusAbstractRequest from "./abstract-request";
 
 const {
   bufferToArrayStatus,
@@ -48,7 +48,7 @@ export default class ModbusServerResponseHandler<FR extends ModbusAbstractRespon
   }
 
 
-  public handle(request: ModbusRequest, cb: (buffer: Buffer) => void) {
+  public handle(request: ModbusAbstractRequest, cb: (buffer: Buffer) => void) {
     if (!request) {
       return null
     }
@@ -98,7 +98,7 @@ export default class ModbusServerResponseHandler<FR extends ModbusAbstractRespon
     return;
   }
 
-  private _handleReadCoil(request: ModbusRequest, cb: (buffer: Buffer) => void) {
+  private _handleReadCoil(request: ModbusAbstractRequest, cb: (buffer: Buffer) => void) {
 
     if (!isReadCoilsRequestBody(request.body)) {
       throw new Error(`InvalidRequestClass - Expected ReadCoilsRequestBody but received ${request.body.name}`);
@@ -122,7 +122,7 @@ export default class ModbusServerResponseHandler<FR extends ModbusAbstractRespon
     return response
   }
 
-  private _handleDiscreteInput(request: ModbusRequest, cb: (buffer: Buffer) => void) {
+  private _handleDiscreteInput(request: ModbusAbstractRequest, cb: (buffer: Buffer) => void) {
 
     if (!isReadDiscreteInputsRequestBody(request.body)) {
       throw new Error(`InvalidRequestClass - Expected ReadDiscreteInputsRequestBody but received ${request.body.name}`);
@@ -146,7 +146,7 @@ export default class ModbusServerResponseHandler<FR extends ModbusAbstractRespon
     return response
   }
 
-  private _handleReadHoldingRegisters(request: ModbusRequest, cb: (buffer: Buffer) => void) {
+  private _handleReadHoldingRegisters(request: ModbusAbstractRequest, cb: (buffer: Buffer) => void) {
 
     if (!isReadHoldingRegistersRequestBody(request.body)) {
       throw new Error(`InvalidRequestClass - Expected ReadHoldingRegistersRequestBody but received ${request.body.name}`);
@@ -170,7 +170,7 @@ export default class ModbusServerResponseHandler<FR extends ModbusAbstractRespon
     return response
   }
 
-  private _handleReadInputRegisters(request: ModbusRequest, cb: (buffer: Buffer) => void) {
+  private _handleReadInputRegisters(request: ModbusAbstractRequest, cb: (buffer: Buffer) => void) {
 
     if (!isReadInputRegistersRequestBody(request.body)) {
       throw new Error(`InvalidRequestClass - Expected ReadInputRegistersRequestBody but received ${request.body.name}`);
@@ -194,7 +194,7 @@ export default class ModbusServerResponseHandler<FR extends ModbusAbstractRespon
     return response
   }
 
-  private _handleWriteSingleCoil(request: ModbusRequest, cb: (buffer: Buffer) => void) {
+  private _handleWriteSingleCoil(request: ModbusAbstractRequest, cb: (buffer: Buffer) => void) {
 
     if (!isWriteSingleCoilRequestBody(request.body)) {
       throw new Error(`InvalidRequestClass - Expected WriteSingleCoilRequestBody but received ${request.body.name}`);
@@ -255,7 +255,7 @@ export default class ModbusServerResponseHandler<FR extends ModbusAbstractRespon
     return response
   }
 
-  private _handleWriteSingleHoldingRegister(request: ModbusRequest, cb: (buffer: Buffer) => void) {
+  private _handleWriteSingleHoldingRegister(request: ModbusAbstractRequest, cb: (buffer: Buffer) => void) {
 
     if (!isWriteSingleRegisterRequestBody(request.body)) {
       throw new Error(`InvalidRequestClass - Expected WriteSingleRegisterRequestBody but received ${request.body.name}`);
@@ -293,7 +293,7 @@ export default class ModbusServerResponseHandler<FR extends ModbusAbstractRespon
     return response
   }
 
-  private _handleWriteMultipleCoils(request: ModbusRequest, cb: (buffer: Buffer) => void) {
+  private _handleWriteMultipleCoils(request: ModbusAbstractRequest, cb: (buffer: Buffer) => void) {
 
     if (!isWriteMultipleCoilsRequestBody(request.body)) {
       throw new Error(`InvalidRequestClass - Expected WriteMultipleCoilsRequestBody but received ${request.body.name}`);
@@ -340,7 +340,7 @@ export default class ModbusServerResponseHandler<FR extends ModbusAbstractRespon
     return response
   }
 
-  private _handleWriteMultipleHoldingRegisters(request: ModbusRequest, cb: (buffer: Buffer) => void) {
+  private _handleWriteMultipleHoldingRegisters(request: ModbusAbstractRequest, cb: (buffer: Buffer) => void) {
 
     if (!isWriteMultipleRegistersRequestBody(request.body)) {
       throw new Error(`InvalidRequestClass - Expected WriteMultipleRegistersRequestBody but received ${request.body.name}`);

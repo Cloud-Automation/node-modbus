@@ -13,7 +13,7 @@ import { ModbusAbstractRequestFromBuffer } from './abstract-request.js';
 
 export default class ModbusServerClient<
   S extends Stream.Duplex,
-  ReqFromBufferMethod extends ModbusAbstractRequestFromBuffer<any>,
+  ReqFromBufferMethod extends ModbusAbstractRequestFromBuffer,
   ResFromRequestMethod extends ModbusAbstractResponseFromRequest> {
   public _server: ModbusServer;
   public _socket: S;
@@ -51,8 +51,7 @@ export default class ModbusServerClient<
         break
       }
 
-      //TODO: Find a better to overwrite the type definition for request instead of using "any"
-      this._responseHandler.handle(request as any, (response) => {
+      this._responseHandler.handle(request, (response) => {
         this._socket.write(response, function () {
           debug('response flushed', response)
         })

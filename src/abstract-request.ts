@@ -74,7 +74,7 @@ export default abstract class ModbusAbstractRequest<ReqBody extends ModbusReques
   public abstract get byteCount(): number;
 }
 
-export type ModbusAbstractRequestFromBuffer<ReqBody extends ModbusRequestBody> = (buffer: Buffer) => ReqBody | null;
+export type ModbusAbstractRequestFromBuffer<ReqBody extends ModbusRequestBody = ModbusRequestBody> = (buffer: Buffer) => ReqBody | null;
 
 export function isModbusRequest(x: any): x is ModbusAbstractRequest {
   if (x.body !== undefined) {
