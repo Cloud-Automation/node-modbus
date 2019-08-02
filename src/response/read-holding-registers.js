@@ -96,11 +96,11 @@ class ReadHoldingRegistersResponseBody extends ModbusResponseBody {
     }
 
     if (this._values instanceof Array) {
-      const payload = Buffer.alloc(this.byteCount)
+      const payload = Buffer.alloc(this._byteCount + 2)
       payload.writeUInt8(this._fc, 0)
       payload.writeUInt8(this._byteCount, 1)
       this._values.forEach(function (value, i) {
-        payload.writeUInt8(value, 2 + i)
+        payload.writeUInt16BE(Math.max(0, Math.min(0xFFFF, value)), 2 * i + 2)
       })
 
       return payload
