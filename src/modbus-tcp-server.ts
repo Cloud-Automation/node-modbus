@@ -5,12 +5,12 @@ import ModbusServer, { ModbusServerOptions } from './modbus-server'
 import ModbusServerClient from './modbus-server-client.js'
 import ModbusTCPRequest from './tcp-request.js'
 import ModbusTCPResponse from './tcp-response.js'
-import { Socket } from 'net';
+import { Socket, Server } from 'net';
 
 export default class ModbusTCPServer extends ModbusServer {
-  public _server: ModbusServer;
+  public _server: Server | ModbusServer;
 
-  constructor(server: ModbusServer, options?: Partial<ModbusServerOptions>) {
+  constructor(server: Server | ModbusServer, options?: Partial<ModbusServerOptions>) {
     super(options)
     this._server = server
 
