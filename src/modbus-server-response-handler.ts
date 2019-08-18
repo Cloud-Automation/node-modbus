@@ -366,7 +366,7 @@ export default class ModbusServerResponseHandler<FR extends ModbusAbstractRespon
     } else {
       this._server.emit('writeMultipleRegisters', this._server.holding)
       console.log(request.body)
-      this._server.holding.fill(request.body.values,
+      this._server.holding.fill(new Uint8Array(request.body.values),
         request.body.address * 2,
         request.body.address * 2 + request.body.values.length)
       this._server.emit('postWriteMultipleRegisters', this._server.holding)
