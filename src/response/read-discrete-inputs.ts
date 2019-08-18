@@ -17,8 +17,8 @@ const {
 export default class ReadDiscreteInputsResponseBody extends ModbusReadResponseBody {
   private _discrete: BooleanArray | Buffer;
   private _numberOfBytes: number;
-  protected _valuesAsArray!: BooleanArray;
-  protected _valuesAsBuffer!: Buffer;
+  protected _valuesAsArray: BooleanArray;
+  protected _valuesAsBuffer: Buffer;
 
   /** Create ReadDiscreteInputsResponseBody from Request
    * @param {ReadDiscreteInputsRequestBody} request
@@ -73,11 +73,11 @@ export default class ReadDiscreteInputsResponseBody extends ModbusReadResponseBo
     if (discrete instanceof Array) {
       this._valuesAsArray = discrete
       this._valuesAsBuffer = arrayStatusToBuffer(discrete)
-    }
-
-    if (discrete instanceof Buffer) {
+    } else if (discrete instanceof Buffer) {
       this._valuesAsBuffer = discrete
       this._valuesAsArray = bufferToArrayStatus(discrete)
+    } else {
+      throw new Error('InvalidType_MustBeBufferOrArray');
     }
   }
 

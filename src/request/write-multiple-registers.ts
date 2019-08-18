@@ -8,11 +8,11 @@ import ModbusRequestBody from './request-body.js'
 export default class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
   private _address: number;
   private _values: number[] | Buffer;
-  private _byteCount!: number;
-  private _numberOfBytes!: number;
-  private _quantity!: number;
-  private _valuesAsBuffer!: Buffer;
-  private _valuesAsArray!: number[];
+  private _byteCount: number;
+  private _numberOfBytes: number;
+  private _quantity: number;
+  private _valuesAsBuffer: Buffer;
+  private _valuesAsArray: number[];
 
   static fromBuffer(buffer: Buffer) {
     try {
@@ -62,9 +62,8 @@ export default class WriteMultipleRegistersRequestBody extends ModbusRequestBody
       for (let i = 0; i < this._values.length; i += 2) {
         this._valuesAsArray.push(this._values.readUInt16BE(i))
       }
-    }
-
-    if (this._values instanceof Array) {
+    } else if (this._values instanceof Array) {
+      this._valuesAsArray = this._values
       this._byteCount = Math.min(this._values.length * 2 + 6, 0xF6)
       this._numberOfBytes = Math.floor(this._values.length * 2)
       this._quantity = this._values.length
@@ -72,6 +71,8 @@ export default class WriteMultipleRegistersRequestBody extends ModbusRequestBody
       this._values.forEach((v, i) => {
         this._valuesAsBuffer.writeUInt16BE(v, i * 2)
       })
+    } else {
+      throw new Error('InvalidType_MustBeBufferOrArray');
     }
   }
 

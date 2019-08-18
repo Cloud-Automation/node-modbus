@@ -10,8 +10,8 @@ export default class ReadInputRegistersResponseBody extends ModbusReadResponseBo
   private _byteCount: number;
   private _values: number[] | Uint16Array | Buffer;
   private _bufferLength: number;
-  protected _valuesAsArray!: number[] | Uint16Array;
-  protected _valuesAsBuffer!: Buffer;
+  protected _valuesAsArray: number[] | Uint16Array;
+  protected _valuesAsBuffer: Buffer;
 
   /** Create ReadInputRegistersResponseBody from Request
    * @param {ReadInputRegistersRequestBody} request
@@ -56,15 +56,17 @@ export default class ReadInputRegistersResponseBody extends ModbusReadResponseBo
 
     if (values instanceof Array) {
       this._valuesAsArray = values
+      this._valuesAsBuffer = Buffer.from(values)
       this._bufferLength += values.length * 2
-    }
-
-    if (values instanceof Buffer) {
+    } else if (values instanceof Buffer) {
+      this._valuesAsArray = Uint16Array.from(values)
       this._valuesAsBuffer = values
       this._bufferLength += values.length
+    } else {
+      throw new Error('InvalidType_MustBeBufferOrArray');
     }
 
-    if (payload !== undefined && payload instanceof Buffer) {
+    if (payload instanceof Buffer) {
       this._valuesAsBuffer = payload
     }
   }

@@ -10,9 +10,9 @@ export default class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
   private _values: boolean[] | Buffer;
   private _quantity: number;
   private _numberOfBytes: number;
-  private _valuesAsBuffer!: Buffer;
-  private _byteCount!: number;
-  private _valuesAsArray!: boolean[];
+  private _valuesAsBuffer: Buffer;
+  private _byteCount: number;
+  private _valuesAsArray: boolean[];
 
   static fromBuffer(buffer: Buffer) {
     try {
@@ -81,9 +81,7 @@ export default class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
 
         this._valuesAsArray.push((curByte & Math.pow(2, pos)) > 0)
       }
-    }
-
-    if (this._values instanceof Array) {
+    } else if (this._values instanceof Array) {
       this._byteCount = Math.ceil(this._values.length / 8) + 6
 
       this._valuesAsArray = this._values
@@ -107,6 +105,8 @@ export default class WriteMultipleCoilsRequestBody extends ModbusRequestBody {
       }
 
       this._valuesAsBuffer = bytes
+    } else {
+      throw new Error('InvalidType_MustBeBufferOrArray');
     }
   }
 

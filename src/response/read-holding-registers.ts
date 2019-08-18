@@ -1,6 +1,7 @@
 import ReadHoldingRegistersRequestBody from "../request/read-holding-registers";
 import { FC } from "../codes";
 import ModbusReadResponseBody from './read-response-body.js';
+import BufferUtils from '../buffer-utils.js'
 const debug = require('debug')('ReadHoldingRegistersResponseBody')
 
 /** Read Holding Registers ResponseBody (Function Code 0x03)
@@ -11,8 +12,8 @@ export default class ReadHoldingRegistersResponseBody extends ModbusReadResponse
   private _byteCount: any;
   private _values: number[] | Buffer;
   private _bufferLength: any;
-  protected _valuesAsArray!: number[];
-  protected _valuesAsBuffer!: Buffer;
+  protected _valuesAsArray: number[] | Uint16Array;
+  protected _valuesAsBuffer: Buffer;
 
   /** Create ReadHoldingRegistersResponseBody from Request
    * @param {ReadHoldingRegistersRequestBody} request
@@ -61,15 +62,17 @@ export default class ReadHoldingRegistersResponseBody extends ModbusReadResponse
 
     if (values instanceof Array) {
       this._valuesAsArray = values
+      this._valuesAsBuffer = Buffer.from(values)
       this._bufferLength += values.length * 2
-    }
-
-    if (values instanceof Buffer) {
+    } else if (values instanceof Buffer) {
+      this._valuesAsArray = Uint16Array.from(values)
       this._valuesAsBuffer = values
       this._bufferLength += values.length
+    } else {
+      throw new Error('InvalidType_MustBeBufferOrArray');
     }
 
-    if (payload !== undefined && payload instanceof Buffer) {
+    if (payload instanceof Buffer) {
       this._valuesAsBuffer = payload
     }
   }
