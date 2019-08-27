@@ -20,6 +20,7 @@ import ModbusAbstractRequest from './abstract-request.js';
 import ModbusAbstractResponse from './abstract-response.js';
 import { WriteMultipleCoilsResponseBody } from './response';
 import { CastRequestBody } from './request-response-map';
+import { UserRequestError } from './errors';
 
 /** Common Modbus Client
  * @abstract
