@@ -294,4 +294,34 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
 
     return this._requestHandler.register(request)
   }
+
+  /**
+   * The current number of requests
+   * in the handler cue
+   */
+  public get requestCount(): number {
+    return this._requestHandler.requestCount;
+  }
+
+  /**
+   * Manually Reject a specified number of requests
+   */
+  public manuallyClearRequests(numRequests: number): void {
+    return this._requestHandler.manuallyRejectRequests(numRequests);
+  }
+
+  /**
+   * Manually reject the first request in the cue
+   */
+  public manuallyRejectCurrentRequest(): void {
+    return this._requestHandler.manuallyRejectCurrentRequest();
+  }
+
+  /**
+   * Reject current request with a custom error
+   */
+  public customErrorRequest(err: UserRequestError<any>) {
+    return this._requestHandler.customErrorRequest(err);
+  }
+
 }

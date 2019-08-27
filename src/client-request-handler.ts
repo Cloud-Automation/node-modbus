@@ -1,6 +1,7 @@
 const OUT_OF_SYNC = 'OutOfSync'
 const OFFLINE = 'Offline'
 const MODBUS_EXCEPTION = 'ModbusException'
+const MANUALLY_CLEARED = 'ManuallyCleared';
 
 const debug = require('debug')('client-request-handler')
 import UserRequest, { PromiseUserRequest } from './user-request.js'
@@ -179,6 +180,53 @@ export default abstract class MBClientRequestHandler<S extends Stream.Duplex, Re
     this._socket.write(payload, function (err) {
       debug('request fully flushed, ( error:', err, ')')
     })
+  }
+
+  /**
+   * The current number of requests
+   * in the handler cue
+   */
+  public get requestCount() {
+    return this._requests.length;
+  }
+
+
+  /** 
+   * Manually reject the first request in the cue
+   */
+  public manuallyRejectCurrentRequest() {
+    if (this._currentRequest) {
+      this._currentRequest.reject(new UserRequestError({
+        'err': MANUALLY_CLEARED,
+        'message': 'the request was manually cleared'
+      }))
+      this._flush();
+    }
+  }
+
+  /**
+   * Manually Reject a specified number of requests
+   */
+  public manuallyRejectRequests(numRequests: number) {
+    for (let i = 0; i < numRequests; i++) {
+      this.manuallyRejectCurrentRequest();
+    }
+  }
+
+  /**
+   * Manually reject all requests in the cue
+   */
+  public manuallylRejectAllRequests() {
+    this.manuallyRejectRequests(this.requestCount);
+  }
+
+  /**
+   * Reject current request with a custom error
+   */
+  public customErrorRequest(err: UserRequestError<any>) {
+    if (this._currentRequest) {
+      this._currentRequest.reject(err)
+    }
   }
 }
 
