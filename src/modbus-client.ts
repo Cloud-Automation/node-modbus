@@ -98,6 +98,13 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
     return this._requestHandler.register(request)
   }
 
+  /**
+   * Connection state of the client. Either online or offline.
+   */
+  public get connectionState() {
+    return this._requestHandler.state;
+  }
+
   public get socket() {
     return this._socket;
   }

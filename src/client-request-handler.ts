@@ -59,6 +59,10 @@ export default abstract class MBClientRequestHandler<S extends Stream.Duplex, Re
     }
   }
 
+  public get state() {
+    return this._state;
+  }
+
   protected _onConnect() {
     this._state = 'online'
   }
