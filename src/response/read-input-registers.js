@@ -86,7 +86,7 @@ class ReadInputRegistersResponseBody extends ModbusResponseBody {
 
     payload.writeUInt8(this._fc, 0)
     payload.writeUInt8(this.length, 1)
-    this._values.forEach(function (value, i) {
+    this._valuesAsBuffer.forEach(function (value, i) {
       payload.writeUInt8(value, 2 + i)
     })
 
