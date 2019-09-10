@@ -82,15 +82,24 @@ class ReadInputRegistersResponseBody extends ModbusResponseBody {
   }
 
   createPayload () {
-    const payload = Buffer.alloc(this.byteCount)
+    if (this._values instanceof Buffer) {
+      let payload = Buffer.alloc(2)
+      payload.writeUInt8(this._fc, 0)
+      payload.writeUInt8(this._byteCount, 1)
+      payload = Buffer.concat([payload, this._values])
+      return payload
+    }
 
-    payload.writeUInt8(this._fc, 0)
-    payload.writeUInt8(this.length, 1)
-    this._values.forEach(function (value, i) {
-      payload.writeUInt8(value, 2 + i)
-    })
+    if (this._values instanceof Array) {
+      const payload = Buffer.alloc(this._byteCount + 2)
+      payload.writeUInt8(this._fc, 0)
+      payload.writeUInt8(this._byteCount, 1)
+      this._values.forEach(function (value, i) {
+        payload.writeUInt16BE(Math.max(0, Math.min(0xFFFF, value)), 2 + 2 * i)
+      })
 
-    return payload
+      return payload
+    }
   }
 }
 

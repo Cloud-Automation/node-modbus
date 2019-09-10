@@ -4,10 +4,26 @@
 
 const assert = require('assert')
 const ReadInputRegistersRequest = require('../src/request/read-input-registers.js')
+const ReadInputRegistersResponse = require('../src/response/read-input-registers.js')
 
 describe('ReadInputRegisters Tests.', function () {
   describe('ReadInputRegisters Response', function () {
+    it('should create a response from a buffer', function () {
+      const request = new ReadInputRegistersRequest(0, 1)
+      const inputRegisters = Buffer.from([0x01, 0x00, 0x02, 0x00, 0xFF, 0xFF])
+      const response = ReadInputRegistersResponse.fromRequest(request, inputRegisters)
+      const respPayload = response.createPayload()
+      const expected = Buffer.from([0x04, 0x02, 0x01, 0x00])
 
+      assert.deepEqual(respPayload, expected)
+    })
+    it('should create a response with constructor from array', function () {
+      const response = new ReadInputRegistersResponse(6, [0x01, 0x02, 0xFFFE])
+      const respPayload = response.createPayload()
+      const expected = Buffer.from([0x04, 0x06, 0x00, 0x01, 0x00, 0x02, 0xFF, 0xFE])
+
+      assert.deepEqual(respPayload, expected)
+    })
   })
   describe('ReadInputRegisters Request', function () {
     it('should create a buffer from a read input registers message', function () {
