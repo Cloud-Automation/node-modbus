@@ -58,6 +58,7 @@
     "example": "examples"
   },
   "files": [
+    "bin/**/*",
     "dist/**/*"
   ]
 }
