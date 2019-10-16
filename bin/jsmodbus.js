@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+
+const pkg = require('../package.json')
 const net = require('net')
 const modbus = require('..')
 const program = require('commander')
@@ -80,7 +82,10 @@ program
     })
 
     socket.on('end', () => process.exit(0))
-    socket.connect({ host, port })
+    socket.connect({
+      host,
+      port
+    })
   })
 
 program
@@ -160,7 +165,10 @@ program
     })
 
     socket.on('end', () => process.exit(0))
-    socket.connect({ host, port })
+    socket.connect({
+      host,
+      port
+    })
   })
 
 program
@@ -240,7 +248,10 @@ program
     })
 
     socket.on('end', () => process.exit(0))
-    socket.connect({ host, port })
+    socket.connect({
+      host,
+      port
+    })
   })
 
 program
@@ -320,9 +331,12 @@ program
     })
 
     socket.on('end', () => process.exit(0))
-    socket.connect({ host, port })
+    socket.connect({
+      host,
+      port
+    })
   })
 
 program
-  .version('0.0.1')
+  .version(pkg.version)
   .parse(process.argv)
