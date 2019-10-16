@@ -4,7 +4,7 @@ const debug = require('debug')('rtu-client-request-handler')
 import ModbusRTURequest from './rtu-request.js'
 import MBClientRequestHandler from './client-request-handler.js'
 import CRC from 'crc'
-import SerialSocket from 'serialport';
+import * as SerialSocket from 'serialport';
 import ModbusRequestBody from './request/request-body.js';
 import ModbusRTUResponse from './rtu-response.js';
 import { UserRequestError } from "./user-request-error";

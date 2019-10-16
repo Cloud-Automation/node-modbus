@@ -5,7 +5,7 @@ import ModbusServerClient from './modbus-server-client.js'
 import ModbusRTURequest from './rtu-request.js'
 import ModbusRTUResponse from './rtu-response.js'
 
-import SerialPort from 'serialport';
+import * as SerialPort from 'serialport';
 
 export default class ModbusRTUServer extends ModbusServer {
   public _socket: any;

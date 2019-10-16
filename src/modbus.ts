@@ -72,7 +72,7 @@ export { default as ModbusClient } from './modbus-client'
 export * from './request-response-map'
 export { default as ModbusTCPRequest } from './tcp-request'
 export { default as ModbusTCPResponse } from './tcp-response'
-export { default as UserRequestError } from './user-request-error'
+export { UserRequestError } from './user-request-error'
 export {
   default as UserRequest,
   ModbusRequest,
