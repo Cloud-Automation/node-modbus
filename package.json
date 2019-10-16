@@ -29,12 +29,15 @@
     "nyc": "^13.1.0",
     "serialport": "^7.1.5",
     "sinon": "2.2.0",
-    "standard": "^8.5.0",
+    "tslint": "^5.20.0",
+    "tslint-config-standard": "^8.0.1",
     "typescript": "^3.5.2"
   },
   "scripts": {
     "test": "npm run build && mocha test/*.test.js",
     "build": "tsc",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "lint:fix": "tslint -c tslint.json 'src/**/*.ts' --fix",
     "watch": "npm run build && mocha --watch test/*.test.js",
     "prepublishOnly": "npm run test",
     "prepare": "npm run build",
