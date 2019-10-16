@@ -1,4 +1,8 @@
+// tslint:disable:no-shadowed-variable
+import ModbusAbstractRequest from './abstract-request'
+import ModbusAbstractResponse from './abstract-response'
 import {
+  ModbusRequestBody,
   ReadCoilsRequestBody,
   ReadDiscreteInputsRequestBody,
   ReadHoldingRegistersRequestBody,
@@ -6,10 +10,10 @@ import {
   WriteMultipleCoilsRequestBody,
   WriteMultipleRegistersRequestBody,
   WriteSingleCoilRequestBody,
-  WriteSingleRegisterRequestBody,
-  ModbusRequestBody,
-} from "./request";
+  WriteSingleRegisterRequestBody
+} from './request'
 import {
+  ModbusResponseBody,
   ReadCoilsResponseBody,
   ReadDiscreteInputsResponseBody,
   ReadHoldingRegistersResponseBody,
@@ -17,16 +21,12 @@ import {
   WriteMultipleCoilsResponseBody,
   WriteMultipleRegistersResponseBody,
   WriteSingleCoilResponseBody,
-  WriteSingleRegisterResponseBody,
-  ModbusResponseBody,
-} from "./response";
-import ModbusTCPRequest from "./tcp-request";
-import ModbusTCPResponse from "./tcp-response";
-import ModbusRTURequest from "./rtu-request";
-import ModbusRTUResponse from "./rtu-response";
-import ModbusAbstractRequest from "./abstract-request";
-import ModbusAbstractResponse from "./abstract-response";
-
+  WriteSingleRegisterResponseBody
+} from './response'
+import ModbusRTURequest from './rtu-request'
+import ModbusRTUResponse from './rtu-response'
+import ModbusTCPRequest from './tcp-request'
+import ModbusTCPResponse from './tcp-response'
 
 export type BodyRequestToResponse<T> =
   T extends ReadCoilsRequestBody ? ReadCoilsResponseBody :
@@ -37,8 +37,7 @@ export type BodyRequestToResponse<T> =
   T extends WriteMultipleRegistersRequestBody ? WriteMultipleRegistersResponseBody :
   T extends WriteSingleCoilRequestBody ? WriteSingleCoilResponseBody :
   T extends WriteSingleRegisterRequestBody ? WriteSingleRegisterResponseBody :
-  T extends ModbusRequestBody ? ModbusResponseBody : unknown;
-
+  T extends ModbusRequestBody ? ModbusResponseBody : unknown
 
 export type BodyResponseToRequest<T> =
   T extends ReadCoilsResponseBody ? ReadCoilsRequestBody :
@@ -49,23 +48,21 @@ export type BodyResponseToRequest<T> =
   T extends WriteMultipleRegistersResponseBody ? WriteMultipleRegistersRequestBody :
   T extends WriteSingleCoilResponseBody ? WriteSingleCoilRequestBody :
   T extends WriteSingleRegisterResponseBody ? WriteSingleRegisterRequestBody :
-  T extends ModbusResponseBody ? ModbusRequestBody : unknown;
-
+  T extends ModbusResponseBody ? ModbusRequestBody : unknown
 
 export type RequestToResponse<T> =
   T extends ModbusTCPRequest<infer B> ? ModbusTCPResponse<BodyRequestToResponse<B>> :
   T extends ModbusRTURequest<infer B> ? ModbusRTUResponse<BodyRequestToResponse<B>> :
   T extends ModbusAbstractRequest<infer B> ? ModbusAbstractResponse<BodyRequestToResponse<B>> :
-  unknown;
-
+  unknown
 
 export type GetBody<T> =
   T extends ModbusAbstractRequest<infer B> ? B :
   T extends ModbusAbstractResponse<infer B> ? B :
-  unknown;
+  unknown
 
 export type CastRequestBody<T extends ModbusAbstractRequest, B extends ModbusRequestBody> =
   T extends ModbusTCPRequest ? ModbusTCPRequest<B> :
   T extends ModbusRTURequest ? ModbusRTURequest<B> :
   T extends ModbusAbstractRequest ? ModbusAbstractRequest<B> :
-  unknown;
+  unknown

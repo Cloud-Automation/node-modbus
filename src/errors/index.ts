@@ -1,2 +1,2 @@
-export * from './isInternalException';
-export * from './isUserRequestError';
+export * from './isInternalException'
+export * from './isUserRequestError'

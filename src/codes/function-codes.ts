@@ -12,15 +12,15 @@ export enum FC {
   WRITE_SINGLE_COIL = 5,
   WRITE_SINGLE_HOLDING_REGISTER = 6,
   WRITE_MULTIPLE_COILS = 15,
-  WRITE_MULTIPLE_HOLDING_REGISTERS = 16,
+  WRITE_MULTIPLE_HOLDING_REGISTERS = 16
 }
 
-export function isFunctionCode(x: number): x is FunctionCode {
+export function isFunctionCode (x: number): x is FunctionCode {
   if (FC[x] === undefined) {
-    return false;
+    return false
   } else {
-    return true;
+    return true
   }
 }
 
-export type FunctionCode = 1 | 2 | 3 | 4 | 5 | 6 | 15 | 16;
+export type FunctionCode = 1 | 2 | 3 | 4 | 5 | 6 | 15 | 16

@@ -2,5 +2,9 @@
   "extends": [
     "tslint:recommended",
     "tslint-config-standard"
-  ]
+  ],
+  "rules":{
+    "unified-signatures":false,
+    "no-bitwise":false
+  }
 }

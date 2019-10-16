@@ -1,26 +1,41 @@
-import ReadHoldingRegistersRequestBody from "../request/read-holding-registers";
-import { FC } from "../codes";
-import ModbusReadResponseBody from './read-response-body.js';
+import Debug = require('debug'); const debug = Debug('ReadHoldingRegistersResponseBody')
 import BufferUtils from '../buffer-utils.js'
-const debug = require('debug')('ReadHoldingRegistersResponseBody')
+import { FC } from '../codes'
+import ReadHoldingRegistersRequestBody from '../request/read-holding-registers'
+import ModbusReadResponseBody from './read-response-body.js'
 
 /** Read Holding Registers ResponseBody (Function Code 0x03)
  * @extends ModbusResponseBody
  * @class
  */
 export default class ReadHoldingRegistersResponseBody extends ModbusReadResponseBody {
-  private _byteCount: any;
-  private _values: number[] | Buffer;
-  private _bufferLength: any;
-  protected _valuesAsArray: number[] | Uint16Array;
-  protected _valuesAsBuffer: Buffer;
+
+  get byteCount () {
+    return this._bufferLength
+  }
+
+  get values () {
+    return this._values
+  }
+
+  get valuesAsArray () {
+    return this._valuesAsArray
+  }
+
+  get valuesAsBuffer () {
+    return this._valuesAsBuffer
+  }
+
+  get length () {
+    return this._values.length
+  }
 
   /** Create ReadHoldingRegistersResponseBody from Request
    * @param {ReadHoldingRegistersRequestBody} request
    * @param {Buffer} holdingRegisters
    * @returns ReadHoldingRegistersResponseBody
    */
-  static fromRequest(requestBody: ReadHoldingRegistersRequestBody, holdingRegisters: Buffer) {
+  public static fromRequest (requestBody: ReadHoldingRegistersRequestBody, holdingRegisters: Buffer) {
     const startByte = requestBody.start * 2
     const endByte = (requestBody.start * 2) + (requestBody.count * 2)
 
@@ -35,7 +50,7 @@ export default class ReadHoldingRegistersResponseBody extends ModbusReadResponse
    * @param {Buffer} buffer
    * @returns ReadHoldingRegistersResponseBody
    */
-  static fromBuffer(buffer: Buffer) {
+  public static fromBuffer (buffer: Buffer) {
     const fc = buffer.readUInt8(0)
     const byteCount = buffer.readUInt8(1)
     const payload = buffer.slice(2, 2 + byteCount)
@@ -51,8 +66,13 @@ export default class ReadHoldingRegistersResponseBody extends ModbusReadResponse
 
     return new ReadHoldingRegistersResponseBody(byteCount, values, payload)
   }
+  protected _valuesAsArray: number[] | Uint16Array
+  protected _valuesAsBuffer: Buffer
+  private _byteCount: any
+  private _values: number[] | Buffer
+  private _bufferLength: any
 
-  constructor(byteCount: number, values: number[] | Buffer, payload?: Buffer) {
+  constructor (byteCount: number, values: number[] | Buffer, payload?: Buffer) {
     super(FC.READ_HOLDING_REGISTERS)
     this._byteCount = byteCount
     this._values = values
@@ -69,7 +89,7 @@ export default class ReadHoldingRegistersResponseBody extends ModbusReadResponse
       this._valuesAsBuffer = values
       this._bufferLength += values.length
     } else {
-      throw new Error('InvalidType_MustBeBufferOrArray');
+      throw new Error('InvalidType_MustBeBufferOrArray')
     }
 
     if (payload instanceof Buffer) {
@@ -77,27 +97,7 @@ export default class ReadHoldingRegistersResponseBody extends ModbusReadResponse
     }
   }
 
-  get byteCount() {
-    return this._bufferLength
-  }
-
-  get values() {
-    return this._values
-  }
-
-  get valuesAsArray() {
-    return this._valuesAsArray
-  }
-
-  get valuesAsBuffer() {
-    return this._valuesAsBuffer
-  }
-
-  get length() {
-    return this._values.length
-  }
-
-  createPayload() {
+  public createPayload () {
     if (this._values instanceof Buffer) {
       let payload = Buffer.alloc(2)
       payload.writeUInt8(this._fc, 0)
@@ -110,7 +110,7 @@ export default class ReadHoldingRegistersResponseBody extends ModbusReadResponse
       const payload = Buffer.alloc(this._byteCount + 2)
       payload.writeUInt8(this._fc, 0)
       payload.writeUInt8(this._byteCount, 1)
-      this._values.forEach(function (value, i) {
+      this._values.forEach((value, i) => {
         payload.writeUInt16BE(Math.max(0, Math.min(0xFFFF, value)), 2 * i + 2)
       })
 

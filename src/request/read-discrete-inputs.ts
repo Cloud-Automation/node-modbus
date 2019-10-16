@@ -1,14 +1,30 @@
-import { FC } from "../codes";
+import { FC } from '../codes'
 import ModbusRequestBody from './request-body.js'
 
 /** Read Discrete Inputs Request Body
  * @extends ModbusRequestBody
  */
 export default class ReadDiscreteInputsRequestBody extends ModbusRequestBody {
-  private _start: number;
-  private _count: number;
 
-  static fromBuffer(buffer: Buffer) {
+  /** Start Address. */
+  get start () {
+    return this._start
+  }
+
+  /** Coil Quantity. */
+  get count () {
+    return this._count
+  }
+
+  get name () {
+    return 'ReadDiscreteInput' as const
+  }
+
+  get byteCount () {
+    return 5
+  }
+
+  public static fromBuffer (buffer: Buffer) {
     try {
       const fc = buffer.readUInt8(0)
 
@@ -24,6 +40,8 @@ export default class ReadDiscreteInputsRequestBody extends ModbusRequestBody {
       return null
     }
   }
+  private _start: number
+  private _count: number
 
   /** Create a new Read Discrete Inputs Request Body.
    * @param {number} start Start Address.
@@ -31,7 +49,7 @@ export default class ReadDiscreteInputsRequestBody extends ModbusRequestBody {
    * @throws {InvalidStartAddressException} When Start address is larger than 0xFFFF.
    * @throws {InvalidQuantityException} When count is larger than 0x7D0.
    */
-  constructor(start: number, count: number) {
+  constructor (start: number, count: number) {
     super(FC.READ_DISCRETE_INPUT)
 
     if (start > 0xFFFF) {
@@ -46,21 +64,7 @@ export default class ReadDiscreteInputsRequestBody extends ModbusRequestBody {
     this._count = count
   }
 
-  /** Start Address. */
-  get start() {
-    return this._start
-  }
-
-  /** Coil Quantity. */
-  get count() {
-    return this._count
-  }
-
-  get name() {
-    return 'ReadDiscreteInput' as const
-  }
-
-  createPayload() {
+  public createPayload () {
     const payload = Buffer.alloc(5)
 
     payload.writeUInt8(this._fc, 0) // function code
@@ -69,16 +73,12 @@ export default class ReadDiscreteInputsRequestBody extends ModbusRequestBody {
 
     return payload
   }
-
-  get byteCount() {
-    return 5
-  }
 }
 
-export function isReadDiscreteInputsRequestBody(x: any): x is ReadDiscreteInputsRequestBody {
+export function isReadDiscreteInputsRequestBody (x: any): x is ReadDiscreteInputsRequestBody {
   if (x instanceof ReadDiscreteInputsRequestBody) {
-    return true;
+    return true
   } else {
-    return false;
+    return false
   }
 }

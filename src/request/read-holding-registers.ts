@@ -1,14 +1,30 @@
-import { FC } from "../codes";
+import { FC } from '../codes'
 import ModbusRequestBody from './request-body.js'
 
 /** Read Holding Registers Request Body
  * @extends ModbusRequestBody
  */
 export default class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
-  private _start: number;
-  private _count: number;
 
-  static fromBuffer(buffer: Buffer) {
+  /** Start Address. */
+  get start () {
+    return this._start
+  }
+
+  /** Quantity of registers. */
+  get count () {
+    return this._count
+  }
+
+  get byteCount () {
+    return 5
+  }
+
+  get name () {
+    return 'ReadHoldingRegisters' as const
+  }
+
+  public static fromBuffer (buffer: Buffer) {
     try {
       const fc = buffer.readUInt8(0)
       const start = buffer.readUInt16BE(1)
@@ -23,6 +39,8 @@ export default class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
       return null
     }
   }
+  private _start: number
+  private _count: number
 
   /** Create a new Read Holding Registers Request Body.
    * @param {Number} start Start Address.
@@ -30,7 +48,7 @@ export default class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
    * @throws {InvalidStartAddressException} When start address is larger than 0xFFFF.
    * @throws {InvalidQuantityException} When count is larger than 0x7D0.
    */
-  constructor(start: number, count: number) {
+  constructor (start: number, count: number) {
     super(FC.READ_HOLDING_REGISTERS)
     if (start > 0xFFFF) {
       throw new Error('InvalidStartAddress')
@@ -42,25 +60,7 @@ export default class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
     this._count = count
   }
 
-  /** Start Address. */
-  get start() {
-    return this._start
-  }
-
-  /** Quantity of registers. */
-  get count() {
-    return this._count
-  }
-
-  get byteCount() {
-    return 5
-  }
-
-  get name() {
-    return 'ReadHoldingRegisters' as const
-  }
-
-  createPayload() {
+  public createPayload () {
     const payload = Buffer.alloc(5)
     payload.writeUInt8(this._fc, 0) // function code
     payload.writeUInt16BE(this._start, 1) // start address
@@ -69,11 +69,10 @@ export default class ReadHoldingRegistersRequestBody extends ModbusRequestBody {
   }
 }
 
-export function isReadHoldingRegistersRequestBody(x: any): x is ReadHoldingRegistersRequestBody {
+export function isReadHoldingRegistersRequestBody (x: any): x is ReadHoldingRegistersRequestBody {
   if (x instanceof ReadHoldingRegistersRequestBody) {
-    return true;
+    return true
   } else {
-    return false;
+    return false
   }
 }
-

@@ -1,19 +1,34 @@
 
-
-import { isFunctionCode, FunctionCode } from "../codes";
-import ModbusRequestBody from "../request/request-body";
+import { FunctionCode, isFunctionCode } from '../codes'
+import ModbusRequestBody from '../request/request-body'
 
 /** Modbus Response Body
  * @abstract
  */
 export default abstract class ModbusBaseResponseBody {
-  protected _fc: FunctionCode;
+
+  /** Function Code */
+  get fc () {
+    return this._fc
+  }
+
+  /** Number of bytes for the payload.  */
+  abstract get byteCount (): number;
+
+  get isException (): boolean {
+    return false
+  }
+
+  public static fromRequest (requestBody: ModbusRequestBody, buf: Buffer): any {
+    throw new TypeError('Cannot call from request from abstract class')
+  }
+  protected _fc: FunctionCode
 
   /** Create new ModbusResponseBody
    * @param {FunctionCode} fc Function Code
    * @throws {InvalidFunctionCode}
    */
-  constructor(fc: FunctionCode, ignoreInvalidFunctionCode = false) {
+  constructor (fc: FunctionCode, ignoreInvalidFunctionCode = false) {
     if (ignoreInvalidFunctionCode === false) {
       if (!isFunctionCode(fc)) {
         throw Error('InvalidFunctionCode')
@@ -23,25 +38,9 @@ export default abstract class ModbusBaseResponseBody {
     this._fc = fc
   }
 
-  public static fromRequest(requestBody: ModbusRequestBody, buf: Buffer): any {
-    throw new TypeError('Cannot call from request from abstract class')
-  };
-
-  /** Function Code */
-  get fc() {
-    return this._fc
-  }
-
-  /** Number of bytes for the payload.  */
-  abstract get byteCount(): number;
-
   /** Create payload to be send over a socket.
    * @returns {Buffer}
    */
-  abstract createPayload(): Buffer;
-
-  get isException(): boolean {
-    return false;
-  }
+  public abstract createPayload (): Buffer
 
 }

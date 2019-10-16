@@ -1,2 +1,2 @@
-export * from './limits';
-export * from './primatives';
+export * from './limits'
+export * from './primatives'

@@ -1,4 +1,4 @@
-import { FC } from "../codes";
+import { FC } from '../codes'
 
 import ModbusRequestBody from './request-body.js'
 
@@ -6,15 +6,47 @@ import ModbusRequestBody from './request-body.js'
  * @extends ModbusRequestBody
  */
 export default class WriteMultipleRegistersRequestBody extends ModbusRequestBody {
-  private _address: number;
-  private _values: number[] | Buffer;
-  private _byteCount: number;
-  private _numberOfBytes: number;
-  private _quantity: number;
-  private _valuesAsBuffer: Buffer;
-  private _valuesAsArray: number[];
 
-  static fromBuffer(buffer: Buffer) {
+  /** Start Address to begin writing data */
+  get address () {
+    return this._address
+  }
+
+  /** Quantity of registers beein written */
+  get quantity () {
+    return this._quantity
+  }
+
+  get count () {
+    return this.quantity
+  }
+
+  /** Values to be written */
+  get values () {
+    return this._values
+  }
+
+  get valuesAsArray () {
+    return this._valuesAsArray
+  }
+
+  get valuesAsBuffer () {
+    return this._valuesAsBuffer
+  }
+
+  get byteCount () {
+    return this._byteCount
+  }
+
+  get numberOfBytes () {
+    return this._numberOfBytes
+  }
+
+  get name () {
+    return 'WriteMultipleRegisters' as const
+  }
+
+  public static fromBuffer (buffer: Buffer) {
     try {
       const fc = buffer.readUInt8(0)
       const address = buffer.readUInt16BE(1)
@@ -30,6 +62,13 @@ export default class WriteMultipleRegistersRequestBody extends ModbusRequestBody
       return null
     }
   }
+  private _address: number
+  private _values: number[] | Buffer
+  private _byteCount: number
+  private _numberOfBytes: number
+  private _quantity: number
+  private _valuesAsBuffer: Buffer
+  private _valuesAsArray: number[]
 
   /** Create a new Write Multiple Registers Request Body.
    * @param {number} address Write address.
@@ -39,7 +78,7 @@ export default class WriteMultipleRegistersRequestBody extends ModbusRequestBody
    * @throws {InvalidArraySizeException}
    * @throws {InvalidBufferSizeException}
    */
-  constructor(address: number, values: number[] | Buffer) {
+  constructor (address: number, values: number[] | Buffer) {
     super(FC.WRITE_MULTIPLE_HOLDING_REGISTERS)
     if (address > 0xFFFF) {
       throw new Error('InvalidStartAddress')
@@ -72,50 +111,11 @@ export default class WriteMultipleRegistersRequestBody extends ModbusRequestBody
         this._valuesAsBuffer.writeUInt16BE(v, i * 2)
       })
     } else {
-      throw new Error('InvalidType_MustBeBufferOrArray');
+      throw new Error('InvalidType_MustBeBufferOrArray')
     }
   }
 
-  /** Start Address to begin writing data */
-  get address() {
-    return this._address
-  }
-
-  /** Quantity of registers beein written */
-  get quantity() {
-    return this._quantity
-  }
-
-  get count() {
-    return this.quantity
-  }
-
-  /** Values to be written */
-  get values() {
-    return this._values
-  }
-
-  get valuesAsArray() {
-    return this._valuesAsArray
-  }
-
-  get valuesAsBuffer() {
-    return this._valuesAsBuffer
-  }
-
-  get byteCount() {
-    return this._byteCount
-  }
-
-  get numberOfBytes() {
-    return this._numberOfBytes
-  }
-
-  get name() {
-    return 'WriteMultipleRegisters' as const
-  }
-
-  createPayload() {
+  public createPayload () {
     const payload = Buffer.alloc(6 + this._numberOfBytes)
     payload.writeUInt8(this._fc, 0) // function code
     payload.writeUInt16BE(this._address, 1) // start address
@@ -126,10 +126,10 @@ export default class WriteMultipleRegistersRequestBody extends ModbusRequestBody
   }
 }
 
-export function isWriteMultipleRegistersRequestBody(x: any): x is WriteMultipleRegistersRequestBody {
+export function isWriteMultipleRegistersRequestBody (x: any): x is WriteMultipleRegistersRequestBody {
   if (x instanceof WriteMultipleRegistersRequestBody) {
-    return true;
+    return true
   } else {
-    return false;
+    return false
   }
 }

@@ -1,26 +1,27 @@
 
-
-const debug = require('debug')('modbus tcp client socket')
+import Debug = require('debug'); const debug = Debug('modbus tcp client socket')
+import * as Stream from 'stream'
+import { ModbusAbstractRequestFromBuffer } from './abstract-request.js'
+import { ModbusAbstractResponseFromRequest } from './abstract-response.js'
 import ModbusServerRequestHandler from './modbus-server-request-handler.js'
 import ModbusServerResponseHandler from './modbus-server-response-handler.js'
-import ModbusServer from './modbus-server.js';
-import * as Stream from 'stream';
-import { ModbusAbstractResponseFromRequest } from './abstract-response.js';
-import { ModbusAbstractRequestFromBuffer } from './abstract-request.js';
-
-
-
+import ModbusServer from './modbus-server.js'
 
 export default class ModbusServerClient<
   S extends Stream.Duplex,
   ReqFromBufferMethod extends ModbusAbstractRequestFromBuffer,
   ResFromRequestMethod extends ModbusAbstractResponseFromRequest> {
-  public _server: ModbusServer;
-  public _socket: S;
-  public _requestHandler: ModbusServerRequestHandler<ReqFromBufferMethod>;
-  public _responseHandler: ModbusServerResponseHandler<ResFromRequestMethod>;
+  public _server: ModbusServer
+  public _socket: S
+  public _requestHandler: ModbusServerRequestHandler<ReqFromBufferMethod>
+  public _responseHandler: ModbusServerResponseHandler<ResFromRequestMethod>
 
-  constructor(server: ModbusServer, socket: S, fromBufferMethod: ReqFromBufferMethod, fromRequestMethod: ResFromRequestMethod) {
+  constructor (
+    server: ModbusServer,
+    socket: S,
+    fromBufferMethod: ReqFromBufferMethod,
+    fromRequestMethod: ResFromRequestMethod
+  ) {
     this._server = server
     this._socket = socket
 
@@ -30,15 +31,15 @@ export default class ModbusServerClient<
     this._socket.on('data', this._onData.bind(this))
   }
 
-  get socket() {
+  get socket () {
     return this._socket
   }
 
-  get server() {
+  get server () {
     return this._server
   }
 
-  _onData(data: Buffer) {
+  public _onData (data: Buffer) {
     debug('new data coming in')
     this._requestHandler.handle(data)
 
@@ -52,7 +53,7 @@ export default class ModbusServerClient<
       }
 
       this._responseHandler.handle(request, (response) => {
-        this._socket.write(response, function () {
+        this._socket.write(response, () => {
           debug('response flushed', response)
         })
       })

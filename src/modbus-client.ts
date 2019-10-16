@@ -1,44 +1,63 @@
-const debug = require('debug')('modbus-client')
+import Debug = require('debug'); const debug = Debug('modbus-client')
 
-import * as Stream from 'stream';
+import * as Stream from 'stream'
 
 import {
   ReadCoilsRequestBody,
   ReadDiscreteInputsRequestBody,
   ReadHoldingRegistersRequestBody,
   ReadInputRegistersRequestBody,
-  WriteSingleCoilRequestBody,
-  WriteSingleRegisterRequestBody,
   WriteMultipleCoilsRequestBody,
   WriteMultipleRegistersRequestBody,
+  WriteSingleCoilRequestBody,
+  WriteSingleRegisterRequestBody
 } from './request'
 
-import { PromiseUserRequest } from './user-request.js';
-import MBClientResponseHandler from './client-response-handler.js';
-import MBClientRequestHandler from './client-request-handler.js';
-import ModbusAbstractRequest from './abstract-request.js';
-import ModbusAbstractResponse from './abstract-response.js';
-import { WriteMultipleCoilsResponseBody } from './response';
-import { CastRequestBody } from './request-response-map';
-import { UserRequestError } from './errors';
+import ModbusAbstractRequest from './abstract-request.js'
+import ModbusAbstractResponse from './abstract-response.js'
+import MBClientRequestHandler from './client-request-handler.js'
+import MBClientResponseHandler from './client-response-handler.js'
+import { UserRequestError } from './errors'
+import { CastRequestBody } from './request-response-map'
+import { WriteMultipleCoilsResponseBody } from './response'
+import { PromiseUserRequest } from './user-request.js'
 
 /** Common Modbus Client
  * @abstract
  */
-export default abstract class MBClient<S extends Stream.Duplex, Req extends ModbusAbstractRequest>{
-  protected _socket: S;
+export default abstract class MBClient<S extends Stream.Duplex, Req extends ModbusAbstractRequest> {
 
-  protected abstract readonly _requestHandler: MBClientRequestHandler<S, Req>;
-  protected abstract readonly _responseHandler: MBClientResponseHandler;
+  public abstract get slaveId (): number;
+  public abstract get unitId (): number;
 
-  public abstract get slaveId(): number;
-  public abstract get unitId(): number;
+  /**
+   * Connection state of the client. Either online or offline.
+   */
+  public get connectionState () {
+    return this._requestHandler.state
+  }
+
+  public get socket () {
+    return this._socket
+  }
+
+  /**
+   * The current number of requests
+   * in the handler cue
+   */
+  public get requestCount (): number {
+    return this._requestHandler.requestCount
+  }
+  protected _socket: S
+
+  protected abstract readonly _requestHandler: MBClientRequestHandler<S, Req>
+  protected abstract readonly _responseHandler: MBClientResponseHandler
 
   /** Creates a new Modbus client object.
    * @param {Socket} socket A socket object
    * @throws {NoSocketException}
    */
-  constructor(socket: S) {
+  constructor (socket: S) {
     if (new.target === MBClient) {
       throw new TypeError('Cannot instantiate ModbusClient directly.')
     }
@@ -49,28 +68,6 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
     }
 
     this._socket.on('data', this._onData.bind(this))
-  }
-
-  private _onData(data: Buffer) {
-    debug('received data')
-
-    this._responseHandler.handleData(data)
-
-    /* get latest message from message handler */
-
-    do {
-      const response = this._responseHandler.shift()
-
-      /* no message was parsed by now, come back later */
-      if (!response) {
-        return
-      }
-
-      /* process the response in the request handler if unitId is a match */
-      if (this.unitId === response.unitId) {
-        this._requestHandler.handle(response) //TODO: Find a better way than overwriting the type as any
-      }
-    } while (1)
   }
 
   /** Execute ReadCoils Request (Function Code 0x01)
@@ -84,7 +81,7 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
    *   ...
    * })
    */
-  public readCoils(start: number, count: number) {
+  public readCoils (start: number, count: number) {
     debug('issuing new read coils request')
     let request
 
@@ -98,17 +95,6 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
     return this._requestHandler.register(request)
   }
 
-  /**
-   * Connection state of the client. Either online or offline.
-   */
-  public get connectionState() {
-    return this._requestHandler.state;
-  }
-
-  public get socket() {
-    return this._socket;
-  }
-
   /** Execute ReadDiscreteInputs Request (Function Code 0x02)
    * @param {number} start Start Address.
    * @param {number} count Coil Quantity.
@@ -119,7 +105,7 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
    *   ...
    * })
    */
-  public readDiscreteInputs(start: number, count: number) {
+  public readDiscreteInputs (start: number, count: number) {
     debug('issuing new read discrete inputs request')
     let request
     try {
@@ -142,7 +128,7 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
    *   ...
    * })
    */
-  public readHoldingRegisters(start: number, count: number) {
+  public readHoldingRegisters (start: number, count: number) {
     debug('issuing new read holding registers request')
     let request
     try {
@@ -165,7 +151,7 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
    *   ...
    * })
    */
-  public readInputRegisters(start: number, count: number) {
+  public readInputRegisters (start: number, count: number) {
     debug('issuing new read input registers request')
 
     let request
@@ -189,7 +175,7 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
    *   ...
    * })
    */
-  public writeSingleCoil(address: number, value: boolean | 0 | 1) {
+  public writeSingleCoil (address: number, value: boolean | 0 | 1) {
     debug('issuing new write single coil request')
 
     let request
@@ -213,7 +199,7 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
    *   ...
    * })
    */
-  public writeSingleRegister(address: number, value: number) {
+  public writeSingleRegister (address: number, value: number) {
     debug('issuing new write single register request')
     let request
     try {
@@ -237,7 +223,8 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
    *   ...
    * })
    */
-  public writeMultipleCoils(start: number, values: boolean[]): PromiseUserRequest<CastRequestBody<Req, WriteMultipleCoilsRequestBody>>
+  public writeMultipleCoils (start: number, values: boolean[]):
+    PromiseUserRequest<CastRequestBody<Req, WriteMultipleCoilsRequestBody>>
   /** Execute WriteMultipleCoils Request (Function Code 0x0F)
    * @param {Number} address Address.
    * @param { Buffer} values Values either as an Array[Boolean] or a Buffer.
@@ -251,8 +238,9 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
    *   ...
    * })
    */
-  public writeMultipleCoils(start: number, values: Buffer, quantity: number): PromiseUserRequest<CastRequestBody<Req, WriteMultipleCoilsRequestBody>>
-  public writeMultipleCoils(start: number, values: boolean[] | Buffer, quantity: number = 0) {
+  public writeMultipleCoils (start: number, values: Buffer, quantity: number):
+    PromiseUserRequest<CastRequestBody<Req, WriteMultipleCoilsRequestBody>>
+  public writeMultipleCoils (start: number, values: boolean[] | Buffer, quantity: number = 0) {
     debug('issuing new write multiple coils request')
 
     let request
@@ -283,13 +271,14 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
    *   ...
    * })
    * @example
-   * client.writeMultipleRegisters(10, Buffer.from([0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0])).then(function (res) {
+   * const buff = Buffer.from([0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0]);
+   * client.writeMultipleRegisters(10, buff).then(function (res) {
    *   console.log(res.response, res.request)
    * }).catch(function (err) {
    *   ...
    * })
    */
-  public writeMultipleRegisters(start: number, values: number[] | Buffer) {
+  public writeMultipleRegisters (start: number, values: number[] | Buffer) {
     debug('issuing new write multiple registers request')
 
     let request
@@ -304,32 +293,46 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
   }
 
   /**
-   * The current number of requests
-   * in the handler cue
-   */
-  public get requestCount(): number {
-    return this._requestHandler.requestCount;
-  }
-
-  /**
    * Manually Reject a specified number of requests
    */
-  public manuallyClearRequests(numRequests: number): void {
-    return this._requestHandler.manuallyRejectRequests(numRequests);
+  public manuallyClearRequests (numRequests: number): void {
+    return this._requestHandler.manuallyRejectRequests(numRequests)
   }
 
   /**
    * Manually reject the first request in the cue
    */
-  public manuallyRejectCurrentRequest(): void {
-    return this._requestHandler.manuallyRejectCurrentRequest();
+  public manuallyRejectCurrentRequest (): void {
+    return this._requestHandler.manuallyRejectCurrentRequest()
   }
 
   /**
    * Reject current request with a custom error
    */
-  public customErrorRequest(err: UserRequestError<any>) {
-    return this._requestHandler.customErrorRequest(err);
+  public customErrorRequest (err: UserRequestError<any>) {
+    return this._requestHandler.customErrorRequest(err)
+  }
+
+  private _onData (data: Buffer) {
+    debug('received data')
+
+    this._responseHandler.handleData(data)
+
+    /* get latest message from message handler */
+
+    do {
+      const response = this._responseHandler.shift()
+
+      /* no message was parsed by now, come back later */
+      if (!response) {
+        return
+      }
+
+      /* process the response in the request handler if unitId is a match */
+      if (this.unitId === response.unitId) {
+        this._requestHandler.handle(response) // TODO: Find a better way than overwriting the type as any
+      }
+    } while (1)
   }
 
 }

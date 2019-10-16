@@ -1,8 +1,7 @@
 
+import { FunctionCode } from '../codes'
 
-import { FunctionCode } from "../codes";
-
-import Debug from 'debug';
+import Debug from 'debug'
 const debug = Debug('request-body')
 
 export type ModbusRequestTypeName =
@@ -22,13 +21,13 @@ export type ModbusRequestTypeName =
  * @class ModbusRequestBody
  */
 export default abstract class ModbusRequestBody {
-  protected _fc: FunctionCode;
+  protected _fc: FunctionCode
 
   /** Creates a new Common Modbus Request Body. Do not use this,
    * use the actual request body
    * @param {FunctionCode} fc Function Code
    */
-  constructor(fc: FunctionCode) {
+  constructor (fc: FunctionCode) {
     if (new.target === ModbusRequestBody) {
       throw new TypeError('Cannot construct ModbusRequestBody directly.')
     }
@@ -37,26 +36,26 @@ export default abstract class ModbusRequestBody {
   }
 
   /** Function Code */
-  get fc() {
+  get fc () {
     return this._fc
   }
 
   /** Create byte representation.
    * @returns {Buffer}
    */
-  abstract createPayload(): Buffer
+  public abstract createPayload (): Buffer
 
   /** Returns the byte count of the `request` for the byte representation.
    * @returns {Number}
    */
-  abstract get byteCount(): number
+  abstract get byteCount (): number
 
   /**
    * Name of the request body
    *
    * @memberof ModbusRequestBody
    */
-  abstract get name(): ModbusRequestTypeName;
+  abstract get name (): ModbusRequestTypeName;
 
   /**
    * Returns the count of the quantity
@@ -67,21 +66,21 @@ export default abstract class ModbusRequestBody {
    * @type {number}
    * @memberof ModbusRequestBody
    */
-  abstract get count(): number;
+  abstract get count (): number;
 
-  get isException(): boolean {
-    return false;
+  get isException (): boolean {
+    return false
   }
 
-  public get isModbusRequestBody() {
-    return true;
+  public get isModbusRequestBody () {
+    return true
   }
 }
 
-export function isModbusRequestBody(x: any): x is ModbusRequestBody {
+export function isModbusRequestBody (x: any): x is ModbusRequestBody {
   if (x.isModbusRequestBody) {
-    return true;
+    return true
   } else {
-    return false;
+    return false
   }
 }

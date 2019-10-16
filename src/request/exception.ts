@@ -1,4 +1,4 @@
-import { isFunctionCode, ErrorCode, FunctionCode } from "../codes";
+import { ErrorCode, FunctionCode, isFunctionCode } from '../codes'
 
 import ModbusRequestBody from './request-body.js'
 
@@ -6,9 +6,32 @@ import ModbusRequestBody from './request-body.js'
  * @extends ModbusRequestBody
  */
 export default class ExceptionRequestBody extends ModbusRequestBody {
-  protected _code: ErrorCode;
 
-  static fromBuffer(buffer: Buffer) {
+  /** Address to be written */
+  get code () {
+    return this._code
+  }
+
+  get name () {
+    return 'ExceptionRequest' as const
+  }
+
+  get count () {
+    return 0
+  }
+
+  /** Returns the byte count of this request for the byte representation.
+   * @returns {Number}
+   */
+  get byteCount () {
+    return 2
+  }
+
+  get isException () {
+    return true
+  }
+
+  public static fromBuffer (buffer: Buffer) {
     try {
       const fc = buffer.readUInt8(0)
 
@@ -21,15 +44,16 @@ export default class ExceptionRequestBody extends ModbusRequestBody {
       return null
     }
   }
+  protected _code: ErrorCode
 
   /** Create a new Exception Request Body.
    * @param {FunctionCode} related function code.
    * @param {ErrorCode} exception code.
    * @throws {InvalidFunctionCodeError} - when the function code is invalid
    */
-  constructor(fc: FunctionCode, code: ErrorCode)
-  constructor(fc: number, code: ErrorCode)
-  constructor(fc: number, code: ErrorCode) {
+  constructor (fc: FunctionCode, code: ErrorCode)
+  constructor (fc: number, code: ErrorCode)
+  constructor (fc: number, code: ErrorCode) {
     if (!isFunctionCode(fc)) {
       throw Error('InvalidFunctionCode')
     }
@@ -37,12 +61,7 @@ export default class ExceptionRequestBody extends ModbusRequestBody {
     this._code = code
   }
 
-  /** Address to be written */
-  get code() {
-    return this._code
-  }
-
-  createPayload() {
+  public createPayload () {
     const payload = Buffer.alloc(2)
 
     payload.writeUInt8(this._fc, 0) // function code
@@ -50,31 +69,12 @@ export default class ExceptionRequestBody extends ModbusRequestBody {
 
     return payload
   }
-
-  get name() {
-    return 'ExceptionRequest' as const
-  }
-
-  get count() {
-    return 0;
-  }
-
-  /** Returns the byte count of this request for the byte representation.
-   * @returns {Number}
-   */
-  get byteCount() {
-    return 2
-  }
-
-  get isException() {
-    return true;
-  }
 }
 
-export function isExceptionRequestBody(x: any): x is ExceptionRequestBody {
+export function isExceptionRequestBody (x: any): x is ExceptionRequestBody {
   if (x instanceof ExceptionRequestBody) {
-    return true;
+    return true
   } else {
-    return false;
+    return false
   }
 }

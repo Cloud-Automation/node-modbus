@@ -1,4 +1,4 @@
-import { ModbusRequestBody } from "./request";
+import { ModbusRequestBody } from './request'
 
 /**
  *
@@ -8,14 +8,9 @@ import { ModbusRequestBody } from "./request";
  * @class ModbusAbstractRequest
  */
 export default abstract class ModbusAbstractRequest<ReqBody extends ModbusRequestBody = ModbusRequestBody> {
-  protected abstract _body: ReqBody;
 
   /** The actual modbus function code and parameters */
-  public abstract get body(): ReqBody;
-
-  static fromBuffer: ModbusAbstractRequestFromBuffer<any> = (buffer) => {
-    throw new TypeError('Cannot call from buffer from base abstract class')
-  }
+  public abstract get body (): ReqBody;
 
   /**
    * Unit ID
@@ -27,7 +22,7 @@ export default abstract class ModbusAbstractRequest<ReqBody extends ModbusReques
    * @alias address
    * @memberof ModbusAbstractRequest
    */
-  public abstract get unitId(): number;
+  public abstract get unitId (): number;
 
   /**
    * Slave Id
@@ -39,7 +34,7 @@ export default abstract class ModbusAbstractRequest<ReqBody extends ModbusReques
    * @type {number}
    * @memberof ModbusAbstractRequest
    */
-  public abstract get slaveId(): number;
+  public abstract get slaveId (): number;
 
   /**
    * RTU Address
@@ -51,17 +46,7 @@ export default abstract class ModbusAbstractRequest<ReqBody extends ModbusReques
    * @type {number}
    * @memberof ModbusAbstractRequest
    */
-  public abstract get address(): number;
-
-
-  /**
-   * Creates a buffer object representing the modbus request
-   *
-   * @abstract
-   * @returns {Buffer}
-   * @memberof ModbusAbstractRequest
-   */
-  public abstract createPayload(): Buffer;
+  public abstract get address (): number;
 
   /**
    * The calculated byte count of the byte representation
@@ -71,15 +56,30 @@ export default abstract class ModbusAbstractRequest<ReqBody extends ModbusReques
    * @type {number}
    * @memberof ModbusAbstractRequest
    */
-  public abstract get byteCount(): number;
+  public abstract get byteCount (): number;
+
+  public static fromBuffer: ModbusAbstractRequestFromBuffer<any> = (buffer) => {
+    throw new TypeError('Cannot call from buffer from base abstract class')
+  }
+  protected abstract _body: ReqBody
+
+  /**
+   * Creates a buffer object representing the modbus request
+   *
+   * @abstract
+   * @returns {Buffer}
+   * @memberof ModbusAbstractRequest
+   */
+  public abstract createPayload (): Buffer
 }
 
-export type ModbusAbstractRequestFromBuffer<ReqBody extends ModbusRequestBody = any> = (buffer: Buffer) => ReqBody | null;
+export type ModbusAbstractRequestFromBuffer<ReqBody extends ModbusRequestBody = any> =
+  (buffer: Buffer) => ReqBody | null
 
-export function isModbusRequest(x: any): x is ModbusAbstractRequest {
+export function isModbusRequest (x: any): x is ModbusAbstractRequest {
   if (x.body !== undefined) {
-    return true;
+    return true
   } else {
-    return false;
+    return false
   }
 }

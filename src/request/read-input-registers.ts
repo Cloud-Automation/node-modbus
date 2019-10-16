@@ -1,4 +1,4 @@
-import { FC } from "../codes";
+import { FC } from '../codes'
 
 import ModbusRequestBody from './request-body.js'
 
@@ -6,10 +6,26 @@ import ModbusRequestBody from './request-body.js'
  * @extends ModbusRequestBody
  */
 export default class ReadInputRegistersRequestBody extends ModbusRequestBody {
-  private _start: number;
-  private _count: number;
 
-  static fromBuffer(buffer: Buffer) {
+  /** Start Address. */
+  get start () {
+    return this._start
+  }
+
+  /** Quantity of registers */
+  get count () {
+    return this._count
+  }
+
+  get name () {
+    return 'ReadInputRegisters' as const
+  }
+
+  get byteCount () {
+    return 5
+  }
+
+  public static fromBuffer (buffer: Buffer) {
     try {
       const fc = buffer.readUInt8(0)
       const start = buffer.readUInt16BE(1)
@@ -24,6 +40,8 @@ export default class ReadInputRegistersRequestBody extends ModbusRequestBody {
       return null
     }
   }
+  private _start: number
+  private _count: number
 
   /** Create a new Read Input Registers Request Body.
    * @param {number} start Start Address.
@@ -31,7 +49,7 @@ export default class ReadInputRegistersRequestBody extends ModbusRequestBody {
    * @throws {InvalidStartAddressException} When Start address is larger than 0xFFFF.
    * @throws {InvalidQuantityException} When count is larger than 0x7D0.
    */
-  constructor(start: number, count: number) {
+  constructor (start: number, count: number) {
     super(FC.READ_INPUT_REGISTERS)
     if (start > 0xFFFF) {
       throw new Error('InvalidStartAddress')
@@ -43,21 +61,7 @@ export default class ReadInputRegistersRequestBody extends ModbusRequestBody {
     this._count = count
   }
 
-  /** Start Address. */
-  get start() {
-    return this._start
-  }
-
-  /** Quantity of registers */
-  get count() {
-    return this._count
-  }
-
-  get name() {
-    return 'ReadInputRegisters' as const
-  }
-
-  createPayload() {
+  public createPayload () {
     const payload = Buffer.alloc(5)
 
     payload.writeUInt8(this._fc, 0) // function code
@@ -66,16 +70,12 @@ export default class ReadInputRegistersRequestBody extends ModbusRequestBody {
 
     return payload
   }
-
-  get byteCount() {
-    return 5
-  }
 }
 
-export function isReadInputRegistersRequestBody(x: any): x is ReadInputRegistersRequestBody {
+export function isReadInputRegistersRequestBody (x: any): x is ReadInputRegistersRequestBody {
   if (x instanceof ReadInputRegistersRequestBody) {
-    return true;
+    return true
   } else {
-    return false;
+    return false
   }
 }

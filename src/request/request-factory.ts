@@ -1,21 +1,19 @@
 
-
 import {
-  isFunctionCode,
   FC,
-} from "../codes";
+  isFunctionCode
+} from '../codes'
+import ExceptionRequest from './exception.js'
 import ReadCoilsRequest from './read-coils.js'
-import ReadDiscreteInputsRequest from './read-discrete-inputs.js';
-import ReadHoldingRegistersRequest from './read-holding-registers.js';
-import ReadInputRegistersRequest from './read-input-registers.js';
-import WriteSingleCoilRequest from './write-single-coil.js';
-import WriteSingleRegisterRequest from './write-single-register.js';
-import WriteMultipleCoilsResponse from './write-multiple-coils.js';
-import WriteMultipleRegistersResponse from './write-multiple-registers.js';
-import ExceptionRequest from './exception.js';
+import ReadDiscreteInputsRequest from './read-discrete-inputs.js'
+import ReadHoldingRegistersRequest from './read-holding-registers.js'
+import ReadInputRegistersRequest from './read-input-registers.js'
+import WriteMultipleCoilsResponse from './write-multiple-coils.js'
+import WriteMultipleRegistersResponse from './write-multiple-registers.js'
+import WriteSingleCoilRequest from './write-single-coil.js'
+import WriteSingleRegisterRequest from './write-single-register.js'
 
 import Debug from 'debug'; const debug = Debug('request-factory')
-
 
 export default class RequestFactory {
 
@@ -24,7 +22,7 @@ export default class RequestFactory {
    * @param {Buffer} buffer The buffer to be parsed.
    * @returns {ModbusRequestBody} The actual request body or null if there is not enough data in the buffer.
    */
-  static fromBuffer(buffer: Buffer) {
+  public static fromBuffer (buffer: Buffer) {
     /* TODO: detect non modbus requests and return a InvalidProtocolRequest. Requests
      * of this kind should lead to disconnecting the client. This way we can make sure that
      * unintendet messages do not harm the server */
@@ -72,6 +70,5 @@ export default class RequestFactory {
       return null
     }
   }
-
 
 }

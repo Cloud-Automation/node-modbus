@@ -1,22 +1,66 @@
-const debug = require('debug')('tcp-request')
+import Debug = require('debug'); const debug = Debug('tcp-request')
+import ModbusAbstractRequest from './abstract-request.js'
 import ModbusRequestBody from './request/request-body.js'
-import ModbusAbstractRequest from './abstract-request.js';
-import RequestFactory from './request/request-factory.js';
+import RequestFactory from './request/request-factory.js'
 
 /** Class representing a Modbus TCP Request */
-export default class ModbusTCPRequest<ReqBody extends ModbusRequestBody = ModbusRequestBody> extends ModbusAbstractRequest<ReqBody> {
-  protected _id: number;
-  protected _protocol: number;
-  protected _length: number;
-  protected _unitId: number;
-  protected _body: ReqBody;
+export default class ModbusTCPRequest<ReqBody extends ModbusRequestBody = ModbusRequestBody>
+  extends ModbusAbstractRequest<ReqBody> {
+
+  /** The Transaction ID */
+  get id () {
+    return this._id
+  }
+
+  /** The protocol version */
+  get protocol () {
+    return this._protocol
+  }
+
+  /** The body length in bytes including the unit ID */
+  get length () {
+    return this._length
+  }
+
+  /** The unit ID */
+  get unitId () {
+    return this._unitId
+  }
+
+  get address () {
+    return this.unitId
+  }
+
+  get slaveId () {
+    return this.unitId
+  }
+
+  /** get function name */
+  get name () {
+    return this._body.name
+  }
+
+  public get body () {
+    return this._body
+  }
+
+  /** For interface compatibility with ModbusRTURequest where data
+   * integrity checking happens as part of the Modbus protocol
+   */
+  get corrupted () {
+    return false
+  }
+
+  get byteCount () {
+    return this._length + 6
+  }
 
   /** Convert a buffer into a new Modbus TCP Request. Returns null if the buffer
    * does not contain enough data.
    * @param {Buffer} buffer
    * @return  A new Modbus TCP Request or Null.
    */
-  static fromBuffer(buffer: Buffer) {
+  public static fromBuffer (buffer: Buffer) {
     try {
       if (buffer.length < 7) {
         debug('no enough data in the buffer yet')
@@ -43,6 +87,11 @@ export default class ModbusTCPRequest<ReqBody extends ModbusRequestBody = Modbus
       return null
     }
   }
+  protected _id: number
+  protected _protocol: number
+  protected _length: number
+  protected _unitId: number
+  protected _body: ReqBody
 
   /** Creates a new Modbus TCP Request
    * @param {number} Transaction ID
@@ -51,7 +100,7 @@ export default class ModbusTCPRequest<ReqBody extends ModbusRequestBody = Modbus
    * @param {number} Unit ID
    * @param {ReqBody} Actual modbus request containing function code and parameters.
    */
-  constructor(id: number, protocol: number, length: number, unitId: number, body: ReqBody) {
+  constructor (id: number, protocol: number, length: number, unitId: number, body: ReqBody) {
     super()
     this._id = id
     this._protocol = protocol
@@ -60,52 +109,10 @@ export default class ModbusTCPRequest<ReqBody extends ModbusRequestBody = Modbus
     this._body = body
   }
 
-  /** The Transaction ID */
-  get id() {
-    return this._id
-  }
-
-  /** The protocol version */
-  get protocol() {
-    return this._protocol
-  }
-
-  /** The body length in bytes including the unit ID */
-  get length() {
-    return this._length
-  }
-
-  /** The unit ID */
-  get unitId() {
-    return this._unitId
-  }
-
-  get address() {
-    return this.unitId
-  }
-
-  get slaveId() {
-    return this.unitId
-  }
-
-  /** get function name **/
-  get name() {
-    return this._body.name
-  }
-
-  public get body() {
-    return this._body;
-  }
-
-  /** For interface compatibility with ModbusRTURequest where data
-   * integrity checking happens as part of the Modbus protocol **/
-  get corrupted() {
-    return false
-  }
-
   /** Creates a buffer object representing the modbus tcp request.
-   * @returns {Buffer} */
-  createPayload() {
+   * @returns {Buffer}
+   */
+  public createPayload () {
     const body = this._body.createPayload()
     const payload = Buffer.alloc(7 + this._body.byteCount)
 
@@ -117,10 +124,5 @@ export default class ModbusTCPRequest<ReqBody extends ModbusRequestBody = Modbus
     body.copy(payload, 7)
 
     return payload
-  }
-
-
-  get byteCount() {
-    return this._length + 6
   }
 }

@@ -1,6 +1,6 @@
-import { ModbusResponseBody } from "./response";
-import ModbusAbstractRequest from "./abstract-request";
-import { ModbusRequestBody } from "./request";
+import ModbusAbstractRequest from './abstract-request'
+import { ModbusRequestBody } from './request'
+import { ModbusResponseBody } from './response'
 
 /**
  *
@@ -10,21 +10,6 @@ import { ModbusRequestBody } from "./request";
  * @class ModbusAbstractResponse
  */
 export default abstract class ModbusAbstractResponse<ResBody extends ModbusResponseBody = ModbusResponseBody> {
-  protected abstract _body: ResBody
-
-  /**
-   * Creates Modbus TCP or RTU Response from a Modbus TCP or RTU Request including
-   * the modbus function body.
-   *
-   * @static
-   * @param {ModbusAbstractResponse} request
-   * @param {ModbusResponseBody} body
-   * @returns {ModbusAbstractResponse}
-   * @memberof ModbusAbstractResponse
-   */
-  public static fromRequest<ReqBody extends ModbusRequestBody, ResBody extends ModbusResponseBody>(request: ModbusAbstractRequest<ReqBody>, body: ResBody): ModbusAbstractResponse<ResBody> {
-    throw new TypeError('Cannot call fromRequest directly from abstract class')
-  }
 
   /**
    * Unit ID
@@ -36,7 +21,7 @@ export default abstract class ModbusAbstractResponse<ResBody extends ModbusRespo
    * @alias address
    * @memberof ModbusAbstractResponse
    */
-  public abstract get unitId(): number;
+  public abstract get unitId (): number;
 
   /**
    * Slave Id
@@ -48,7 +33,7 @@ export default abstract class ModbusAbstractResponse<ResBody extends ModbusRespo
    * @type {number}
    * @memberof ModbusAbstractResponse
    */
-  public abstract get slaveId(): number;
+  public abstract get slaveId (): number;
 
   /**
    * RTU Address
@@ -60,15 +45,34 @@ export default abstract class ModbusAbstractResponse<ResBody extends ModbusRespo
    * @type {number}
    * @memberof ModbusAbstractResponse
    */
-  public abstract get address(): number;
+  public abstract get address (): number;
 
   /** Modbus response body */
-  public get body() {
+  public get body () {
     return this._body
   }
 
-  public abstract createPayload(): Buffer;
+  /**
+   * Creates Modbus TCP or RTU Response from a Modbus TCP or RTU Request including
+   * the modbus function body.
+   *
+   * @static
+   * @param {ModbusAbstractResponse} request
+   * @param {ModbusResponseBody} body
+   * @returns {ModbusAbstractResponse}
+   * @memberof ModbusAbstractResponse
+   */
+  public static fromRequest<ReqBody extends ModbusRequestBody, ResBody extends ModbusResponseBody> (
+    request: ModbusAbstractRequest<ReqBody>,
+    body: ResBody
+  ): ModbusAbstractResponse<ResBody> {
+    throw new TypeError('Cannot call fromRequest directly from abstract class')
+  }
+  protected abstract _body: ResBody
+
+  public abstract createPayload (): Buffer
 
 }
 
-export type ModbusAbstractResponseFromRequest = (request: ModbusAbstractRequest, body: ModbusResponseBody) => ModbusAbstractResponse;
+export type ModbusAbstractResponseFromRequest =
+  (request: ModbusAbstractRequest, body: ModbusResponseBody) => ModbusAbstractResponse

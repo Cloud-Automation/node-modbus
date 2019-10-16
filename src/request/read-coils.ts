@@ -1,14 +1,33 @@
-import ModbusRequestBody from './request-body.js';
-import { FC } from '../codes/index.js';
+import { FC } from '../codes/index.js'
+import ModbusRequestBody from './request-body.js'
 
 /** Read Coils Request Body
  * @extends ModbusRequestBody
  */
 export default class ReadCoilsRequestBody extends ModbusRequestBody {
-  private _start: number;
-  private _count: number;
 
-  static fromBuffer(buffer: Buffer) {
+  /** Start Address. */
+  get start () {
+    return this._start
+  }
+
+  /** Coil Quantity. */
+  get count () {
+    return this._count
+  }
+
+  get name () {
+    return 'ReadCoils' as const
+  }
+
+  /** Returns the byte count of this request for the byte representation.
+   * @returns {Number}
+   */
+  get byteCount () {
+    return 5
+  }
+
+  public static fromBuffer (buffer: Buffer) {
     try {
       const fc = buffer.readUInt8(0)
 
@@ -24,6 +43,8 @@ export default class ReadCoilsRequestBody extends ModbusRequestBody {
       return null
     }
   }
+  private _start: number
+  private _count: number
 
   /** Create a new Read Coils Request Body.
    * @param {number} start Start Address.
@@ -31,7 +52,7 @@ export default class ReadCoilsRequestBody extends ModbusRequestBody {
    * @throws {InvalidStartAddressException} When Start address is larger than 0xFFFF.
    * @throws {InvalidQuantityException} When count is larger than 0x7D0.
    */
-  constructor(start: number, count: number) {
+  constructor (start: number, count: number) {
     super(FC.READ_COIL)
     this._start = start
     this._count = count
@@ -45,21 +66,7 @@ export default class ReadCoilsRequestBody extends ModbusRequestBody {
     }
   }
 
-  /** Start Address. */
-  get start() {
-    return this._start
-  }
-
-  /** Coil Quantity. */
-  get count() {
-    return this._count
-  }
-
-  get name() {
-    return 'ReadCoils' as const
-  }
-
-  createPayload() {
+  public createPayload () {
     const payload = Buffer.alloc(5)
 
     payload.writeUInt8(this._fc, 0) // function code
@@ -68,19 +75,12 @@ export default class ReadCoilsRequestBody extends ModbusRequestBody {
 
     return payload
   }
-
-  /** Returns the byte count of this request for the byte representation.
-   * @returns {Number}
-   */
-  get byteCount() {
-    return 5
-  }
 }
 
-export function isReadCoilsRequestBody(x: any): x is ReadCoilsRequestBody {
+export function isReadCoilsRequestBody (x: any): x is ReadCoilsRequestBody {
   if (x instanceof ReadCoilsRequestBody) {
-    return true;
+    return true
   } else {
-    return false;
+    return false
   }
 }

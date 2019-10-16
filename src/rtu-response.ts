@@ -1,15 +1,37 @@
-const debug = require('debug')('rtu-response')
+import Debug = require('debug'); const debug = Debug('rtu-response')
 import CRC = require('crc')
+import ModbusAbstractResponse from './abstract-response.js'
+import { ModbusRequestBody } from './request/index.js'
+import ModbusResponseBody from './response/response-body.js'
 import ResponseFactory from './response/response-factory.js'
-import ModbusResponseBody from './response/response-body.js';
-import ModbusRTURequest from './rtu-request.js';
-import ModbusAbstractResponse from './abstract-response.js';
-import { ModbusRequestBody } from './request/index.js';
+import ModbusRTURequest from './rtu-request.js'
 
-export default class ModbusRTUResponse<ResBody extends ModbusResponseBody = ModbusResponseBody> extends ModbusAbstractResponse<ResBody> {
-  protected _body: ResBody;
-  public _address: number;
-  public _crc: number | undefined;
+export default class ModbusRTUResponse<ResBody extends ModbusResponseBody = ModbusResponseBody>
+  extends ModbusAbstractResponse<ResBody> {
+
+  get address () {
+    return this._address
+  }
+
+  get crc () {
+    return this._crc
+  }
+
+  get body () {
+    return this._body
+  }
+
+  get byteCount () {
+    return this._body.byteCount + 3
+  }
+
+  get slaveId () {
+    return this._address
+  }
+
+  get unitId () {
+    return this._address
+  }
 
   /** Create Modbus/RTU Response from a Modbus/RTU Request including
    * the modbus function body.
@@ -17,14 +39,17 @@ export default class ModbusRTUResponse<ResBody extends ModbusResponseBody = Modb
    * @param {ModbusResponseBody} body
    * @returns {ModbusRTUResponse}
    */
-  static fromRequest<ReqBody extends ModbusRequestBody, ResBody extends ModbusResponseBody>(rtuRequest: ModbusRTURequest<ReqBody>, modbusBody: ResBody): ModbusRTUResponse<ResBody> {
+  public static fromRequest<ReqBody extends ModbusRequestBody, ResBody extends ModbusResponseBody> (
+    rtuRequest: ModbusRTURequest<ReqBody>,
+    modbusBody: ResBody
+  ): ModbusRTUResponse<ResBody> {
     return new ModbusRTUResponse(
       rtuRequest.address,
       undefined,  // CRC is calculated when createPayload () is called
       modbusBody)
   }
 
-  static fromBuffer(buffer: Buffer) {
+  public static fromBuffer (buffer: Buffer) {
     if (buffer.length < 1) {
       return null
     }
@@ -49,39 +74,18 @@ export default class ModbusRTUResponse<ResBody extends ModbusResponseBody = Modb
 
     return new ModbusRTUResponse(address, crc, body)
   }
+  public _address: number
+  public _crc: number | undefined
+  protected _body: ResBody
 
-  constructor(address: number, crc: number | undefined, body: ResBody) {
-    super();
+  constructor (address: number, crc: number | undefined, body: ResBody) {
+    super()
     this._address = address
     this._crc = crc
     this._body = body
   }
 
-  get address() {
-    return this._address
-  }
-
-  get crc() {
-    return this._crc
-  }
-
-  get body() {
-    return this._body
-  }
-
-  get byteCount() {
-    return this._body.byteCount + 3
-  }
-
-  get slaveId() {
-    return this._address;
-  }
-
-  get unitId() {
-    return this._address;
-  }
-
-  createPayload() {
+  public createPayload () {
     /* Payload is a buffer with:
      * Address/Unit ID = 1 Byte
      * Body = N Bytes

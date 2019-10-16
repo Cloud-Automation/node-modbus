@@ -34,11 +34,11 @@
     "typescript": "^3.5.2"
   },
   "scripts": {
-    "test": "npm run build && mocha test/*.test.js",
+    "test": "npm run lint && npm run build && mocha test/*.test.js",
     "build": "tsc",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "lint:fix": "tslint -c tslint.json 'src/**/*.ts' --fix",
-    "watch": "npm run build && mocha --watch test/*.test.js",
+    "watch": "npm run lint && npm run build && mocha --watch test/*.test.js",
     "prepublishOnly": "npm run test",
     "prepare": "npm run build",
     "cov": "nyc mocha test/*.test.js"

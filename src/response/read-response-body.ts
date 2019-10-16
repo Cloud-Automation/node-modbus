@@ -1,34 +1,34 @@
-import { FunctionCode } from "../codes";
-import ModbusBaseResponseBody from "./response-body";
-import { BooleanArray } from "../constants";
+import { FunctionCode } from '../codes'
+import { BooleanArray } from '../constants'
+import ModbusBaseResponseBody from './response-body'
 
 /** Modbus Response Body
  * @abstract
  */
 export default abstract class ModbusReadResponseBody extends ModbusBaseResponseBody {
-  protected abstract _valuesAsArray?: number[] | BooleanArray | Uint16Array;
-  protected abstract _valuesAsBuffer?: Buffer;
+  protected abstract _valuesAsArray?: number[] | BooleanArray | Uint16Array
+  protected abstract _valuesAsBuffer?: Buffer
 
   /** Create new ModbusResponseBody
    * @param {FunctionCode} fc Function Code
    * @throws {InvalidFunctionCode}
    */
-  constructor(fc: FunctionCode) {
-    super(fc);
+  constructor (fc: FunctionCode) {
+    super(fc)
   }
 
   /** Function Code */
-  get fc() {
+  get fc () {
     return this._fc
   }
 
   /** Number of bytes for the payload.  */
-  abstract get byteCount(): number;
+  abstract get byteCount (): number;
 
   /** Create payload to be send over a socket.
    * @returns {Buffer}
    */
-  abstract createPayload(): Buffer;
+  public abstract createPayload (): Buffer
 
   // /**
   //  * Start Address / Coil
@@ -48,7 +48,7 @@ export default abstract class ModbusReadResponseBody extends ModbusBaseResponseB
   //  */
   // public abstract readonly count: number;
 
-  public abstract get valuesAsArray(): number[] | BooleanArray | Uint16Array
-  public abstract get valuesAsBuffer(): Buffer
+  public abstract get valuesAsArray (): number[] | BooleanArray | Uint16Array
+  public abstract get valuesAsBuffer (): Buffer
 
 }

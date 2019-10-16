@@ -1,24 +1,24 @@
-import ModbusRTURequest from "./rtu-request";
-import ModbusAbstractRequest, { ModbusAbstractRequestFromBuffer } from "./abstract-request";
+import ModbusAbstractRequest, { ModbusAbstractRequestFromBuffer } from './abstract-request'
+import ModbusRTURequest from './rtu-request'
 
-const debug = require('debug')('modbus-server-request-handler')
+import Debug = require('debug'); const debug = Debug('modbus-server-request-handler')
 
 export default class ModbusServerRequestHandler<FB extends ModbusAbstractRequestFromBuffer<any>> {
-  public _fromBuffer: FB;
-  public _requests: ModbusAbstractRequest[];
-  public _buffer: Buffer;
+  public _fromBuffer: FB
+  public _requests: ModbusAbstractRequest[]
+  public _buffer: Buffer
 
-  constructor(fromBufferMethod: FB) {
+  constructor (fromBufferMethod: FB) {
     this._fromBuffer = fromBufferMethod
     this._requests = []
     this._buffer = Buffer.alloc(0)
   }
 
-  shift() {
+  public shift () {
     return this._requests.shift()
   }
 
-  handle(data: Buffer) {
+  public handle (data: Buffer) {
     this._buffer = Buffer.concat([this._buffer, data])
     debug('this._buffer', this._buffer)
 
@@ -36,8 +36,6 @@ export default class ModbusServerRequestHandler<FB extends ModbusAbstractRequest
       } else {
         this._requests.unshift(request)
       }
-
-
 
       this._buffer = this._buffer.slice(request.byteCount)
     } while (1)

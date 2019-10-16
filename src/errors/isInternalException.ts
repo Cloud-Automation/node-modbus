@@ -7,8 +7,7 @@ export type InternalErrorMessages =
   | 'InvalidType_MustBeBufferOrArray'
   | 'InvalidValue'
 
-
-export interface InternalException extends Error {
+export interface IInternalException extends Error {
   readonly message: InternalErrorMessages
 }
 
@@ -19,17 +18,17 @@ const InternalErrorMessagesArray: ReadonlyArray<InternalErrorMessages> = [
   'InvalidBufferSize',
   'InvalidCoilsInput',
   'InvalidType_MustBeBufferOrArray',
-  'InvalidValue',
+  'InvalidValue'
 ]
 
-export function isInternalException(x: any): x is InternalException {
+export function isInternalException (x: any): x is IInternalException {
   if (typeof x !== 'object') {
-    return false;
+    return false
   }
 
   if (InternalErrorMessagesArray.includes(x.message)) {
-    return true;
+    return true
   }
 
-  return false;
+  return false
 }

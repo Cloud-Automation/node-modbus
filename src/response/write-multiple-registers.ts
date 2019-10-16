@@ -1,29 +1,43 @@
-import { FC } from "../codes";
-import WriteMultipleRegistersRequestBody from "../request/write-multiple-registers";
+import { FC } from '../codes'
+import WriteMultipleRegistersRequestBody from '../request/write-multiple-registers'
 
-import ModbusWriteResponseBody from "./write-response.body";
+import ModbusWriteResponseBody from './write-response.body'
 
 /** WriteMultipleRegisters Respone Body (Function code 0x10)
  * @extends ModbusResponseBody
  * @class
  */
 export default class WriteMultipleRegistersResponseBody extends ModbusWriteResponseBody {
-  protected _start: number;
-  protected _quantity: number;
+
+  get start () {
+    return this._start
+  }
+
+  get quantity () {
+    return this._quantity
+  }
+
+  get count () {
+    return this.quantity
+  }
+
+  get byteCount () {
+    return 5
+  }
 
   /** Create WriteMultipleRegisterResponseBody from Request
-  * @param {WriteMultipleRegistersRequestBody} request
-  * @param {Buffer} coil
-  * @returns WriteMultipleRegisterResponseBody
-  */
-  static fromRequest(requestBody: WriteMultipleRegistersRequestBody) {
+   * @param {WriteMultipleRegistersRequestBody} request
+   * @param {Buffer} coil
+   * @returns WriteMultipleRegisterResponseBody
+   */
+  public static fromRequest (requestBody: WriteMultipleRegistersRequestBody) {
     const start = requestBody.address
     const quantity = requestBody.quantity
 
     return new WriteMultipleRegistersResponseBody(start, quantity)
   }
 
-  static fromBuffer(buffer: Buffer) {
+  public static fromBuffer (buffer: Buffer) {
     const fc = buffer.readUInt8(0)
     const start = buffer.readUInt16BE(1)
     const quantity = buffer.readUInt16BE(3)
@@ -34,30 +48,16 @@ export default class WriteMultipleRegistersResponseBody extends ModbusWriteRespo
 
     return new WriteMultipleRegistersResponseBody(start, quantity)
   }
+  protected _start: number
+  protected _quantity: number
 
-  constructor(start: number, quantity: number) {
+  constructor (start: number, quantity: number) {
     super(FC.WRITE_MULTIPLE_HOLDING_REGISTERS)
     this._start = start
     this._quantity = quantity
   }
 
-  get start() {
-    return this._start
-  }
-
-  get quantity() {
-    return this._quantity
-  }
-
-  get count() {
-    return this.quantity
-  }
-
-  get byteCount() {
-    return 5
-  }
-
-  createPayload() {
+  public createPayload () {
     const payload = Buffer.alloc(this.byteCount)
 
     payload.writeUInt8(this._fc, 0)

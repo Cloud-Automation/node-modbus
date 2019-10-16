@@ -1,5 +1,4 @@
 
-
 /** jsModbus is a node.js module that enables the developer to interact with modbus/tcp and modbus/rtu server (slaves)
  * or to create a modbus/tcp server (master).
  * @module jsmodbus
@@ -19,7 +18,7 @@
  *
  *  socket.connect(options)
  */
-import ModbusTCPClient from './modbus-tcp-client.js';
+import ModbusTCPClient from './modbus-tcp-client.js'
 
 /** module:jsmodbus.client.RTU
  * @example <caption>Create new Modbus/RTU Client.</caption>
@@ -29,39 +28,37 @@ import ModbusTCPClient from './modbus-tcp-client.js';
  * const client = new Modbus.client.TCP(socket, address)
  */
 
-import ModbusRTUClient from './modbus-rtu-client.js';
+import ModbusRTUClient from './modbus-rtu-client.js'
 
 /** module:jsmodbus.server.TCP */
-import ModbusTCPServer from './modbus-tcp-server.js';
+import ModbusTCPServer from './modbus-tcp-server.js'
 
 /** module:jsmodbus.server.RTU */
-import ModbusRTUServer from './modbus-rtu-server.js';
+import ModbusRTUServer from './modbus-rtu-server.js'
 
-import * as Requests from './request';
-import * as Responses from './response';
-import * as Codes from './codes';
-import UserRequest from './user-request.js';
-import * as Errors from './errors';
+import * as Codes from './codes'
+import * as Errors from './errors'
+import * as Requests from './request'
+import * as Responses from './response'
+import UserRequest from './user-request.js'
 
 export const client = {
-  TCP: ModbusTCPClient,
-  RTU: ModbusRTUClient
+  RTU: ModbusRTUClient,
+  TCP: ModbusTCPClient
 }
 
 export const server = {
-  TCP: ModbusTCPServer,
-  RTU: ModbusRTUServer
+  RTU: ModbusRTUServer,
+  TCP: ModbusTCPServer
 }
-
-
 
 export const requests = {
   ...Requests,
-  UserRequest,
-};
+  UserRequest
+}
 
-export const responses = Responses;
-export const codes = Codes;
+export const responses = Responses
+export const codes = Codes
 export const errors = Errors
 
 export { default as ModbusAbstractRequest } from './abstract-request'
@@ -76,18 +73,16 @@ export { UserRequestError } from './user-request-error'
 export {
   default as UserRequest,
   ModbusRequest,
-  UserRequestMetrics,
-  UserRequestResolve,
-  PromiseUserRequest,
+  IUserRequestResolve as UserRequestResolve,
+  PromiseUserRequest
 } from './user-request'
-
-
-
-
+export {
+  UserRequestMetrics
+} from './user-request-metrics'
 
 export {
   ModbusTCPClient,
   ModbusRTUClient,
   ModbusTCPServer,
-  ModbusRTUServer,
+  ModbusRTUServer
 }

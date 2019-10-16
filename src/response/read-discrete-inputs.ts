@@ -1,31 +1,49 @@
 import BufferUtils from '../buffer-utils.js'
-import UserRequest from '../user-request.js';
-import { BooleanArray } from '../constants/index.js';
-import { FC } from '../codes/index.js';
-import ReadDiscreteInputsRequestBody from '../request/read-discrete-inputs.js';
-import ModbusReadResponseBody from './read-response-body.js';
+import { FC } from '../codes/index.js'
+import { BooleanArray } from '../constants/index.js'
+import ReadDiscreteInputsRequestBody from '../request/read-discrete-inputs.js'
+import UserRequest from '../user-request.js'
+import ModbusReadResponseBody from './read-response-body.js'
 
 const {
   bufferToArrayStatus,
   arrayStatusToBuffer
-} = BufferUtils;
+} = BufferUtils
 
 /** Read Discrete Inputs Response Body (Function Code 0x02)
  * @extends ModbusResponseBody
  * @class
  */
 export default class ReadDiscreteInputsResponseBody extends ModbusReadResponseBody {
-  private _discrete: BooleanArray | Buffer;
-  private _numberOfBytes: number;
-  protected _valuesAsArray: BooleanArray;
-  protected _valuesAsBuffer: Buffer;
+
+  /** Coils */
+  get discrete () {
+    return this._discrete
+  }
+
+  get valuesAsArray () {
+    return this._valuesAsArray
+  }
+
+  get valuesAsBuffer () {
+    return this._valuesAsBuffer
+  }
+
+  /** Length */
+  get numberOfBytes () {
+    return this._numberOfBytes
+  }
+
+  get byteCount () {
+    return this._numberOfBytes + 2
+  }
 
   /** Create ReadDiscreteInputsResponseBody from Request
    * @param {ReadDiscreteInputsRequestBody} request
    * @param {Buffer} discreteInputs
    * @returns ReadDiscreteInputsResponseBody
    */
-  static fromRequest(requestBody: ReadDiscreteInputsRequestBody, discreteInputs: Buffer) {
+  public static fromRequest (requestBody: ReadDiscreteInputsRequestBody, discreteInputs: Buffer) {
     const discreteStatus = bufferToArrayStatus(discreteInputs)
 
     const start = requestBody.start
@@ -41,7 +59,7 @@ export default class ReadDiscreteInputsResponseBody extends ModbusReadResponseBo
    * @param {Buffer} buffer
    * @returns ReadDiscreteInputsResponseBody
    */
-  static fromBuffer(buffer: Buffer) {
+  public static fromBuffer (buffer: Buffer) {
     try {
       const fc = buffer.readUInt8(0)
       const byteCount = buffer.readUInt8(1)
@@ -60,12 +78,16 @@ export default class ReadDiscreteInputsResponseBody extends ModbusReadResponseBo
       return null
     }
   }
+  protected _valuesAsArray: BooleanArray
+  protected _valuesAsBuffer: Buffer
+  private _discrete: BooleanArray | Buffer
+  private _numberOfBytes: number
 
   /** Creates a ReadDiscreteInputsResponseBody
    * @param {Array} discrete Array with Boolean values
    * @param {Number} length Quantity of Coils
    */
-  constructor(discrete: BooleanArray | Buffer, numberOfBytes: number) {
+  constructor (discrete: BooleanArray | Buffer, numberOfBytes: number) {
     super(FC.READ_DISCRETE_INPUT)
     this._discrete = discrete
     this._numberOfBytes = numberOfBytes
@@ -77,33 +99,11 @@ export default class ReadDiscreteInputsResponseBody extends ModbusReadResponseBo
       this._valuesAsBuffer = discrete
       this._valuesAsArray = bufferToArrayStatus(discrete)
     } else {
-      throw new Error('InvalidType_MustBeBufferOrArray');
+      throw new Error('InvalidType_MustBeBufferOrArray')
     }
   }
 
-  /** Coils */
-  get discrete() {
-    return this._discrete
-  }
-
-  get valuesAsArray() {
-    return this._valuesAsArray
-  }
-
-  get valuesAsBuffer() {
-    return this._valuesAsBuffer
-  }
-
-  /** Length */
-  get numberOfBytes() {
-    return this._numberOfBytes
-  }
-
-  get byteCount() {
-    return this._numberOfBytes + 2
-  }
-
-  createPayload() {
+  public createPayload () {
     const payload = Buffer.alloc(this.byteCount)
 
     payload.writeUInt8(this._fc, 0)

@@ -1,4 +1,4 @@
-export type ErrorCode = 1 | 2 | 3 | 4 | 5 | 6 | 8 | 10 | 11;
+export type ErrorCode = 1 | 2 | 3 | 4 | 5 | 6 | 8 | 10 | 11
 
 export const ErrorMessages = {
   0x01: 'ILLEGAL FUNCTION',
@@ -10,23 +10,23 @@ export const ErrorMessages = {
   0x08: 'MEMORY PARITY ERROR',
   0x0A: 'GATEWAY PATH UNAVAILABLE',
   0x0B: 'GATEWAY TARGET DEVICE FAILED TO RESPOND'
-} as const;
+} as const
 
-type IErrorMessage = typeof ErrorMessages;
+type IErrorMessage = typeof ErrorMessages
 
-type ErrorMessage = IErrorMessage[ErrorCode];
+type ErrorMessage = IErrorMessage[ErrorCode]
 
-export function errorCodeToMessage(x: number): ErrorMessage;
-export function errorCodeToMessage(x: ErrorCode): ErrorMessage;
-export function errorCodeToMessage(x: any) {
+export function errorCodeToMessage (x: number): ErrorMessage
+export function errorCodeToMessage (x: ErrorCode): ErrorMessage
+export function errorCodeToMessage (x: any) {
   if (isErrorCode(x)) {
-    return ErrorMessages[x];
+    return ErrorMessages[x]
   } else {
     throw new Error('')
   }
 }
 
-export function isErrorCode(x: any): x is ErrorCode {
+export function isErrorCode (x: any): x is ErrorCode {
   switch (x) {
     case 0x01:
     case 0x02:
@@ -37,8 +37,8 @@ export function isErrorCode(x: any): x is ErrorCode {
     case 0x08:
     case 0x0A:
     case 0x0B:
-      return true;
+      return true
     default:
-      return false;
+      return false
   }
 }

@@ -1,22 +1,22 @@
-const debug = require('debug')('tcp-response-handler')
-import ModbusTCPResponse from './tcp-response.js';
-import ModbusClientResponseHandler from './client-response-handler.js';
+import Debug = require('debug'); const debug = Debug('tcp-response-handler')
+import ModbusClientResponseHandler from './client-response-handler.js'
+import ModbusTCPResponse from './tcp-response.js'
 
 /** Modbus/TCP Client Response Handler.
  * @extends ModbusClientResponseHandler
  * @class
  */
 export default class ModbusTCPClientResponseHandler extends ModbusClientResponseHandler<ModbusTCPResponse> {
-  protected _messages: ModbusTCPResponse[];
+  protected _messages: ModbusTCPResponse[]
 
   /** Create new Modbus/TCP Client Response Handler */
-  constructor() {
+  constructor () {
     super()
     this._buffer = Buffer.alloc(0)
     this._messages = []
   }
 
-  handleData(data: Buffer) {
+  public handleData (data: Buffer) {
     debug('receiving new data', data)
     this._buffer = Buffer.concat([this._buffer, data])
 
@@ -30,7 +30,12 @@ export default class ModbusTCPClientResponseHandler extends ModbusClientResponse
         return
       }
 
-      debug('response id', response.id, 'protocol', response.protocol, 'length', response.bodyLength, 'unit', response.unitId)
+      debug(
+        'response id', response.id,
+        'protocol', response.protocol,
+        'length', response.bodyLength,
+        'unit', response.unitId
+      )
 
       debug('reset buffer from', this._buffer.length, 'to', (this._buffer.length - response.byteCount))
 
