@@ -4,10 +4,26 @@
 
 const assert = require('assert')
 const ReadHoldingRegistersRequest = require('../dist/request/read-holding-registers.js').default
+const ReadHoldingRegistersResponse = require('../dist/response/read-holding-registers.js').default
 
 describe('ReadHoldingRegisters Tests.', function () {
   describe('ReadHoldingRegisters Response', function () {
+    it('should create a response from a buffer', function () {
+      const request = new ReadHoldingRegistersRequest(0, 1)
+      const holdingRegisters = Buffer.from([0x01, 0x00, 0x02, 0x00, 0xFF, 0xFF])
+      const response = ReadHoldingRegistersResponse.fromRequest(request, holdingRegisters)
+      const respPayload = response.createPayload()
+      const expected = Buffer.from([0x03, 0x02, 0x01, 0x00])
 
+      assert.deepEqual(respPayload, expected)
+    })
+    it('should create a response with constructor from array', function () {
+      const response = new ReadHoldingRegistersResponse(6, [0x01, 0x02, 0xFFFE])
+      const respPayload = response.createPayload()
+      const expected = Buffer.from([0x03, 0x06, 0x00, 0x01, 0x00, 0x02, 0xFF, 0xFE])
+
+      assert.deepEqual(respPayload, expected)
+    })
   })
   describe('ReadHoldingRegisters Request', function () {
     it('should create a buffer from a read holding registers message', function () {
