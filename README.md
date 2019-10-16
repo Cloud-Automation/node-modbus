@@ -7,10 +7,20 @@ Modbus [![Build Status](https://travis-ci.org/Cloud-Automation/node-modbus.png)]
 
 Modbus is a simple Modbus TCP/RTU Client/Server with a simple API. It supports modbus function codes 1 - 6 and 15 and 16.
 
+Status
+------
+
+Version 4.0.0 is a early beta release. Please use and test it and help make it better. We keep you posted on the status of this module.
+
 Installation
 ------------
 
-Just type `npm install jsmodbus` and you are ready to go.
+Just type `npm install jsmodbus` and you are ready to go. You can also install this module globally and use the Command Line Interface. Simply type `npm install -g jsmodbus`.
+
+CLI
+---
+
+Version 4 offers a Command Line Interface. Just install the module globally and type `jsmodbus --help` to get some more Information.
 
 Testing
 -------
@@ -20,13 +30,6 @@ The test files are implemented using [mocha](https://github.com/visionmedia/moch
 Simply `npm install -g mocha` and `npm install -g sinon`. To run the tests type from the projects root folder `mocha test/*`.
 
 Please feel free to fork and add your own tests.
-
-New in Version 3.0.0
---------------------
-
-We got rid of all the dependencies like stampit and serialport and make extensive use of es6 features like promisses. This way we, the developer do not have any restrictions on how to use this module. Unfortunatly this way the module probably won't work for nodejs versions lower than 6.0.
-
-For modbus rtu we recommend the serialport npm module, for tcp the net.Socket interface is needed. When you need to keep a connection alive with some reconnect logic, use the node-net-reconnect module from our github page https://github.com/cloud-automation/node-net-reconnect.
 
 Debugging
 ---------
@@ -103,13 +106,6 @@ server.listen(502)
 
 ````
 
-## Long Running Test Results
-
-We've got a munin server running some scripts. You can find detailed results on [jsmodbus.cloud-automation.de](jsmodbus.cloud-automation.de).
-
-![CPU usage per day](http://jsmodbus.cloud-automation.de/localdomain/localhost.localdomain/cpu_by_node_process-day.png)
-
-![Memory usage per day](http://jsmodbus.cloud-automation.de/localdomain/localhost.localdomain/memory_by_node_process-day.png)
 
 ## License (MIT)
 
