@@ -42,6 +42,8 @@ import * as Requests from './request'
 import * as Responses from './response'
 import UserRequest from './user-request.js'
 
+import { LIMITS } from './constants'
+
 export const client = {
   RTU: ModbusRTUClient,
   TCP: ModbusTCPClient
@@ -60,6 +62,7 @@ export const requests = {
 export const responses = Responses
 export const codes = Codes
 export const errors = Errors
+export const limits = LIMITS
 
 export { default as ModbusAbstractRequest } from './abstract-request'
 export { default as ModbusAbstractResponse } from './abstract-response'
