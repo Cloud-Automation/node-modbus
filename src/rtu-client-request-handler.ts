@@ -18,9 +18,6 @@ export default class ModbusRTUClientRequestHandler extends MBClientRequestHandle
   protected _requests: Array<UserRequest<ModbusRTURequest>>
   protected _currentRequest: UserRequest<ModbusRTURequest> | null | undefined
   protected readonly _address: number
-  protected _socket: any
-  protected _onConnect: any
-  protected _clearAllRequests: any
 
   /**
    * Creates an instance of ModbusRTUClientRequestHandler.
@@ -36,6 +33,11 @@ export default class ModbusRTUClientRequestHandler extends MBClientRequestHandle
     this._currentRequest = null
 
     this._socket.on('open', this._onConnect.bind(this))
+
+    // Check if the passed in socket connection is already connected
+    if (this._socket.isOpen) {
+      this._onConnect()
+    }
   }
 
   // TODO: Find a better way then putting in the any overide
