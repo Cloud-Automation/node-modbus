@@ -9,6 +9,8 @@ const {
 } = require('../dist/modbus')
 const SerialPort = require('serialport')
 
+let randomCount = 10;
+
 describe('ModbusRTUClientManager Tests.', () => {
   /**
    * @type {ModbusRTUClientManager}
@@ -31,7 +33,8 @@ describe('ModbusRTUClientManager Tests.', () => {
   })
 
   function generateRandomPath() {
-    return defaultSerialPortPath + Math.floor(Math.random() * Math.pow(10, 10))
+    randomCount++
+    return defaultSerialPortPath + randomCount
   }
 
   function addClient(path = defaultSerialPortPath, slaveId = 1, options = defaultSerialPortOptions) {
