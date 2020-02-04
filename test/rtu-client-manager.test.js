@@ -26,7 +26,7 @@ describe('ModbusRTUClientManager Tests.', () => {
     defaultSerialPortOptions = {
       baudRate: 9600,
       dataBits: 8,
-      autoOpen: false
+      autoOpen: false,
     }
   })
 
@@ -66,6 +66,7 @@ describe('ModbusRTUClientManager Tests.', () => {
     manager.createClient({
       path,
       slaveId,
+      ...defaultSerialPortOptions
     })
 
     assert.equal(manager.clientCount, 1, 'Number of clients should be one')
@@ -80,6 +81,7 @@ describe('ModbusRTUClientManager Tests.', () => {
     const client = manager.createClient({
       path,
       slaveId,
+      ...defaultSerialPortOptions
     })
 
     const foundClient = manager.findClient({
@@ -133,12 +135,14 @@ describe('ModbusRTUClientManager Tests.', () => {
 
     const client_1 = manager.findOrCreateClient({
       path: testPath,
-      slaveId: testSlaveId
+      slaveId: testSlaveId,
+      ...defaultSerialPortOptions
     })
 
     const client_2 = manager.findOrCreateClient({
       path: testPath,
-      slaveId: testSlaveId
+      slaveId: testSlaveId,
+      ...defaultSerialPortOptions
     })
 
     assert.equal(client_1 instanceof ModbusRTUClient, true, 'Client 1 should be an instance of ModbusRTUClient')
@@ -165,7 +169,8 @@ describe('ModbusRTUClientManager Tests.', () => {
     const testPath = generateRandomPath()
 
     const socket = manager.findOrCreateSocket({
-      path: testPath
+      path: testPath,
+      ...defaultSerialPortOptions
     })
 
     assert.equal(socket instanceof SerialPort, true, 'Socket should be an instance of SerialPort')
@@ -246,7 +251,8 @@ describe('ModbusRTUClientManager Tests.', () => {
     addMultipleSlavesById(generateRandomPath(), 2)
     
     manager.createSocket({
-      path: testPath
+      path: testPath,
+      ...defaultSerialPortOptions
     })
 
     let clients = manager.filterClientsBySocket({
@@ -296,7 +302,11 @@ describe('ModbusRTUClientManager Tests.', () => {
     const testPath = generateRandomPath()
     const slaveId = 1;
 
-    manager.createClient({ path: testPath, slaveId })
+    manager.createClient({
+      path: testPath,
+      slaveId,
+      ...defaultSerialPortOptions
+    })
 
     assert.throws(() => manager.createClient({ host, port, slaveId }))
 
