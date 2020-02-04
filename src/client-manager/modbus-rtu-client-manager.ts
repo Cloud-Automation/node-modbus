@@ -97,6 +97,10 @@ export default class ModbusRTUClientManager {
     } = rtuInfo
     const socket = new SerialPort(path, options)
 
+    // set maximum listeners to the maximum number of clients for
+    // a single rtu master
+    socket.setMaxListeners(255)
+
     const socketId = this.marshalSocketId(rtuInfo)
     this.sockets.set(socketId, socket)
 
