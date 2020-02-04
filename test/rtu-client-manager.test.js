@@ -36,11 +36,11 @@ describe('ModbusRTUClientManager Tests.', () => {
 
   function addClient(path = defaultSerialPortPath, slaveId = 1, options = defaultSerialPortOptions) {
 
-    const client = manager.findOrCreateClient({
+    const fullOptions = Object.assign({
       path,
       slaveId,
-      ...options
-    })
+    },options)
+    const client = manager.findOrCreateClient(fullOptions)
 
     assert.equal(client instanceof ModbusRTUClient, true)
     return client
@@ -63,11 +63,11 @@ describe('ModbusRTUClientManager Tests.', () => {
 
     const path = defaultSerialPortPath, slaveId = 1
 
-    manager.createClient({
+    
+    manager.createClient(Object.assign({
       path,
       slaveId,
-      ...defaultSerialPortOptions
-    })
+    },defaultSerialPortOptions))
 
     assert.equal(manager.clientCount, 1, 'Number of clients should be one')
     assert.equal(manager.socketCount, 1, 'Number of sockets should be one')
@@ -78,11 +78,10 @@ describe('ModbusRTUClientManager Tests.', () => {
 
     const path = defaultSerialPortPath, slaveId = 1
 
-    const client = manager.createClient({
+    const client = manager.createClient(Object.assign({
       path,
       slaveId,
-      ...defaultSerialPortOptions
-    })
+    },defaultSerialPortOptions))
 
     const foundClient = manager.findClient({
       path,
@@ -133,17 +132,14 @@ describe('ModbusRTUClientManager Tests.', () => {
     const testPath = generateRandomPath()
     const testSlaveId = 6
 
-    const client_1 = manager.findOrCreateClient({
+    const options = Object.assign({
       path: testPath,
       slaveId: testSlaveId,
-      ...defaultSerialPortOptions
-    })
+    },defaultSerialPortOptions);
 
-    const client_2 = manager.findOrCreateClient({
-      path: testPath,
-      slaveId: testSlaveId,
-      ...defaultSerialPortOptions
-    })
+    const client_1 = manager.findOrCreateClient(options)
+
+    const client_2 = manager.findOrCreateClient(options)
 
     assert.equal(client_1 instanceof ModbusRTUClient, true, 'Client 1 should be an instance of ModbusRTUClient')
     assert.equal(client_2 instanceof ModbusRTUClient, true, 'Client 2 should be an instance of ModbusRTUClient')
@@ -168,10 +164,9 @@ describe('ModbusRTUClientManager Tests.', () => {
   it('should findOrCreateSocket', () => { 
     const testPath = generateRandomPath()
 
-    const socket = manager.findOrCreateSocket({
-      path: testPath,
-      ...defaultSerialPortOptions
-    })
+    const socket = manager.findOrCreateSocket(Object.assign({
+      path: testPath
+    }, defaultSerialPortOptions))
 
     assert.equal(socket instanceof SerialPort, true, 'Socket should be an instance of SerialPort')
   })
@@ -250,10 +245,9 @@ describe('ModbusRTUClientManager Tests.', () => {
     addMultipleSlavesById(generateRandomPath(), 5)
     addMultipleSlavesById(generateRandomPath(), 2)
     
-    manager.createSocket({
-      path: testPath,
-      ...defaultSerialPortOptions
-    })
+    manager.createSocket(Object.assign({
+      path: testPath
+    }, defaultSerialPortOptions))
 
     let clients = manager.filterClientsBySocket({
       path: testPath
@@ -302,11 +296,10 @@ describe('ModbusRTUClientManager Tests.', () => {
     const testPath = generateRandomPath()
     const slaveId = 1;
 
-    manager.createClient({
+    manager.createClient(Object.assign({
       path: testPath,
-      slaveId,
-      ...defaultSerialPortOptions
-    })
+      slaveId
+    },defaultSerialPortOptions))
 
     assert.throws(() => manager.createClient({ host, port, slaveId }))
 
