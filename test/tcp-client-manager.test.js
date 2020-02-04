@@ -239,7 +239,11 @@ describe('ModbusTCPClientManager Tests.', () => {
     addMultipleSlavesById('localhost', 5052, 10)
     addMultipleSlavesById('localhost', 5053, 5)
     addMultipleSlavesById('localhost', 5054, 2)
-    addMultipleSlavesById(testHost, testPort, 0)
+    
+    manager.createSocket({
+      host: testHost,
+      port: testPort
+    })
 
     let clients = manager.filterClientsBySocket({host: testHost, port: testPort})
 
@@ -253,10 +257,6 @@ describe('ModbusTCPClientManager Tests.', () => {
     })
 
     assert.equal(socket, undefined, 'Socket not be found')
-  })
-
-  it('should findSocketsWithoutClients', () => { 
-    // TODO
   })
 
   it('should create a client where the socket only has a maximum of 255 listeners', () => {
