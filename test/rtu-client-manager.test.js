@@ -31,7 +31,7 @@ describe('ModbusRTUClientManager Tests.', () => {
   })
 
   function generateRandomPath() {
-    return defaultSerialPortPath + Math.floor(Math.random() * 100)
+    return defaultSerialPortPath + Math.floor(Math.random() * Math.pow(10, 10))
   }
 
   function addClient(path = defaultSerialPortPath, slaveId = 1, options = defaultSerialPortOptions) {
