@@ -1,7 +1,10 @@
 import { EventEmitter } from 'events'
 import { Socket } from 'net'
+import ModbusAbstractRequest from './abstract-request'
 import { BooleanArray } from './constants'
 import ModbusServerClient from './modbus-server-client'
+
+type AbstractRequest = ModbusAbstractRequest
 
 export interface IModbusServerOptions {
   coils: Buffer
@@ -17,7 +20,7 @@ const DEFAULT_MODBUS_SERVER_OPTIONS: IModbusServerOptions = {
   input: Buffer.alloc(1024)
 }
 
-export type BufferCallback = (buffer: Buffer) => void
+export type BufferCB = (buffer: Buffer) => void
 
 export default class ModbusServer extends EventEmitter {
   private _options: IModbusServerOptions
@@ -59,40 +62,69 @@ export default class ModbusServer extends EventEmitter {
     return this._input
   }
 
+  public on (event: 'connection', listener: (client: ModbusServerClient<any, any, any>) => void): this
+  public on (event: 'readCoils', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'preReadCoils', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'postReadCoils', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'readDiscreteInputs', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'preReadDiscreteInputs', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'postReadDiscreteInputs', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'readHoldingRegisters', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'preReadHoldingRegisters', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'postReadHoldingRegisters', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'readInputRegisters', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'preReadInputRegisters', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'postReadInputRegisters', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'writeSingleCoil', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'preWriteSingleCoil', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'postWriteSingleCoil', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'writeSingleRegister', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'preWriteSingleRegister', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'postWriteSingleRegister', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'writeMultipleCoils', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'preWriteMultipleCoils', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'writeMultipleCoils', listener: (coils: Buffer, oldStatus: BooleanArray) => void): this
+  public on (event: 'postWriteMultipleCoils', listener: (coils: Buffer, newStatus: BooleanArray) => void): this
+  public on (event: 'postWriteMultipleCoils', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'writeMultipleRegisters', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'preWriteMultipleRegisters', listener: (request: AbstractRequest, cb: BufferCB) => void): this
+  public on (event: 'writeMultipleRegisters', listener: (holdingRegisters: Buffer) => void): this
+  public on (event: 'postWriteMultipleRegisters', listener: (holdingRegisters: Buffer) => void): this
+  public on (event: 'postWriteMultipleRegisters', listener: (request: AbstractRequest, cb: BufferCB) => void): this
   public on (event: 'connection', listener: (socket: Socket) => void): this
   public on (event: string | symbol, listener: (...args: any[]) => void): this {
     return super.on(event, listener)
   }
 
   public emit (event: 'connection', client: ModbusServerClient<any, any, any>): boolean
-  public emit (event: 'readCoils', request: any, cb: BufferCallback): boolean
-  public emit (event: 'preReadCoils', request: any, cb: BufferCallback): boolean
-  public emit (event: 'postReadCoils', request: any, cb: BufferCallback): boolean
-  public emit (event: 'readDiscreteInputs', request: any, cb: BufferCallback): boolean
-  public emit (event: 'preReadDiscreteInputs', request: any, cb: BufferCallback): boolean
-  public emit (event: 'postReadDiscreteInputs', request: any, cb: BufferCallback): boolean
-  public emit (event: 'readHoldingRegisters', request: any, cb: BufferCallback): boolean
-  public emit (event: 'preReadHoldingRegisters', request: any, cb: BufferCallback): boolean
-  public emit (event: 'postReadHoldingRegisters', request: any, cb: BufferCallback): boolean
-  public emit (event: 'readInputRegisters', request: any, cb: BufferCallback): boolean
-  public emit (event: 'preReadInputRegisters', request: any, cb: BufferCallback): boolean
-  public emit (event: 'postReadInputRegisters', request: any, cb: BufferCallback): boolean
-  public emit (event: 'writeSingleCoil', request: any, cb: BufferCallback): boolean
-  public emit (event: 'preWriteSingleCoil', request: any, cb: BufferCallback): boolean
-  public emit (event: 'postWriteSingleCoil', request: any, cb: BufferCallback): boolean
-  public emit (event: 'writeSingleRegister', request: any, cb: BufferCallback): boolean
-  public emit (event: 'preWriteSingleRegister', request: any, cb: BufferCallback): boolean
-  public emit (event: 'postWriteSingleRegister', request: any, cb: BufferCallback): boolean
-  public emit (event: 'writeMultipleCoils', request: any, cb: BufferCallback): boolean
-  public emit (event: 'preWriteMultipleCoils', request: any, cb: BufferCallback): boolean
+  public emit (event: 'readCoils', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'preReadCoils', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'postReadCoils', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'readDiscreteInputs', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'preReadDiscreteInputs', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'postReadDiscreteInputs', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'readHoldingRegisters', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'preReadHoldingRegisters', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'postReadHoldingRegisters', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'readInputRegisters', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'preReadInputRegisters', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'postReadInputRegisters', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'writeSingleCoil', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'preWriteSingleCoil', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'postWriteSingleCoil', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'writeSingleRegister', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'preWriteSingleRegister', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'postWriteSingleRegister', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'writeMultipleCoils', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'preWriteMultipleCoils', request: AbstractRequest, cb: BufferCB): boolean
   public emit (event: 'writeMultipleCoils', coils: Buffer, oldStatus: BooleanArray): boolean
   public emit (event: 'postWriteMultipleCoils', coils: Buffer, newStatus: BooleanArray): boolean
-  public emit (event: 'postWriteMultipleCoils', request: any, cb: BufferCallback): boolean
-  public emit (event: 'writeMultipleRegisters', request: any, cb: BufferCallback): boolean
-  public emit (event: 'preWriteMultipleRegisters', request: any, cb: BufferCallback): boolean
+  public emit (event: 'postWriteMultipleCoils', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'writeMultipleRegisters', request: AbstractRequest, cb: BufferCB): boolean
+  public emit (event: 'preWriteMultipleRegisters', request: AbstractRequest, cb: BufferCB): boolean
   public emit (event: 'writeMultipleRegisters', holdingRegisters: Buffer): boolean
   public emit (event: 'postWriteMultipleRegisters', holdingRegisters: Buffer): boolean
-  public emit (event: 'postWriteMultipleRegisters', request: any, cb: BufferCallback): boolean
+  public emit (event: 'postWriteMultipleRegisters', request: AbstractRequest, cb: BufferCB): boolean
   public emit (event: string | symbol, ...args: any[]): boolean {
     return super.emit(event, ...args)
   }
