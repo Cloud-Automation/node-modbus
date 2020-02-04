@@ -9,8 +9,4 @@ export class MapUtils {
   public static Filter<K, V> (map: Map<K, V>, cb: FilterCallback<[K, V]>): Map<K, V> {
     return new Map(this.ToArray(map).filter(cb))
   }
-
-  public static Map<K, V, U> (map: Map<K, V>, cb: MapCallback<[K, V], U>) {
-    return new Map(this.ToArray(map).filter(cb))
-  }
 }
