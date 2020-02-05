@@ -20,7 +20,7 @@ interface ITCPSlaveInfo extends ITCPInfo {
 
 enum ErrorCode {
   DUPLICATE_SOCKET = 'DUPLICATE_SOCKET',
-  DUPLICATE_CLIENT = 'DUPLICATE_SOCKET'
+  DUPLICATE_CLIENT = 'DUPLICATE_CLIENT'
 }
 
 export default class ModbusTCPClientManager {
