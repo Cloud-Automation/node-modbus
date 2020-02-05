@@ -174,17 +174,15 @@ export default class ModbusTCPClientManager {
    * Finds sockets that do not have any clients using it
    */
   private findSocketsWithoutClients () {
-    const unusedSocketMap = new Map<SocketId, Socket>()
-
-    for (const [socketId, socket] of this.sockets) {
-      const { host, port } = this.unmarshalSocketId(socketId)
-      const clients = this.filterClientsBySocket({ host, port })
-      if (clients.size === 0) {
-        unusedSocketMap.set(socketId, socket)
-      }
-    }
-
-    return unusedSocketMap
+    return MapUtils.Filter(this.sockets,
+      (
+        ([socketId]) => {
+          const rtuInfo = this.unmarshalSocketId(socketId)
+          const clients = this.filterClientsBySocket(rtuInfo)
+          return clients.size === 0
+        }
+      )
+    )
   }
 
   private marshalSocketId ({ host, port }: ITCPInfo): SocketId {
