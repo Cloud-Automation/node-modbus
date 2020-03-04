@@ -248,7 +248,6 @@ class ModbusServerResponseHandler {
         return response
       } else {
         this._server.emit('writeMultipleRegisters', this._server.holding)
-        console.log(request.body)
         this._server.holding.fill(request.body.values,
           request.body.address * 2,
           request.body.address * 2 + request.body.values.length)
