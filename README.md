@@ -99,10 +99,10 @@ Server example
 
 const modbus = require('jsmodbus')
 const net = require('net')
-const server = new net.Server()
-const server = new modbus.server.TCP(server)
+const netServer = new net.Server()
+const server = new modbus.server.TCP(netServer)
 
-server.listen(502)
+netServer.listen(502)
 
 ````
 
