@@ -4,6 +4,7 @@
   "description": "Implementation for the Serial/TCP Modbus protocol.",
   "author": "Stefan Poeter <stefan.poeter@cloud-automation.de>",
   "main": "./dist/modbus.js",
+  "types": "./dist/modbus.d.ts",
   "bin": {
     "jsmodbus": "./bin/jsmodbus.js"
   },
