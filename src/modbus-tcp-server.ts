@@ -8,7 +8,7 @@ import ModbusTCPResponse from './tcp-response.js'
 export default class ModbusTCPServer extends ModbusServer {
   public _server: Server | ModbusServer
 
-  constructor (server: Server | ModbusServer, options?: Partial<IModbusServerOptions>) {
+  constructor (server: Server, options?: Partial<IModbusServerOptions>) {
     super(options)
     this._server = server
 
