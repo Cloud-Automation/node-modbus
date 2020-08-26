@@ -1,6 +1,6 @@
 {
   "name": "jsmodbus",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "description": "Implementation for the Serial/TCP Modbus protocol.",
   "author": "Stefan Poeter <stefan.poeter@cloud-automation.de>",
   "main": "./dist/modbus.js",
