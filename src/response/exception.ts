@@ -64,7 +64,9 @@ export default class ExceptionResponseBody extends ModbusResponseBody {
 
   public createPayload () {
     const payload = Buffer.alloc(2)
-    payload.writeUInt8(this._fc, 0)
+    // This is a exception Response
+    // Add 0x80 for compatibility (crc check)
+    payload.writeUInt8(this._fc + 0x80, 0)
     payload.writeUInt8(this._code, 1)
     return payload
   }
