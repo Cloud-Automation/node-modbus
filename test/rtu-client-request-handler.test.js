@@ -68,8 +68,8 @@ describe('Modbus/RTU Client Request Tests', function () {
     it('should register an rtu request and handle a exception response', function (done) {
       const handler = new ModbusRTUClientRequestHandler(socket, 4)
       const request = new ReadCoilsRequest(0x0000, 0x0008)
-      const response = new ExceptionResponse(0x81, 0x01)
-      const rtuResponse = new ModbusRTUResponse(4, 8352, response)
+      const response = new ExceptionResponse(0x01, 0x01)
+      const rtuResponse = new ModbusRTUResponse(4, 37265, response)
 
       socket.emit('open')
 
@@ -80,14 +80,48 @@ describe('Modbus/RTU Client Request Tests', function () {
           assert.ok(false)
 
           done()
-        }).catch(function () {
-          assert.ok(true)
+        }).catch(function (err) {
+          // Exception type should be ModbusException not crcMismatch or any other 
+          assert.equal(err.err, 'ModbusException')
           socketMock.verify()
 
           done()
         })
 
       handler.handle(rtuResponse)
+    })
+
+    it('should calculate exception response crc correctly', function (done) {
+      const handler = new ModbusRTUClientRequestHandler(socket, 1)
+      const request = new ReadHoldingRegistersRequestBody(0x4000, 0x0002)
+      const responseBuffer = Buffer.from([
+        0x01,       // address
+        0x83,       // fc
+        0x02,       // error code
+        0xc0, 0xf1  // crc              
+      ])
+      const rtuResponse = ModbusRTUResponse.fromBuffer(responseBuffer)
+
+      socket.emit('open')
+
+      socketMock.expects('write').once()
+
+      handler.register(request)
+        .then(function (resp) {          
+          assert.ok(false)
+
+          done()
+        }).catch(function (err) {     
+          // Exception type should be ModbusException not crcMismatch or any other 
+          assert.equal(err.err, 'ModbusException')
+          socketMock.verify()
+
+          done()
+        })
+
+      handler.handle(rtuResponse)
+      // rtuResponse.crc
+      
     })
   })
 })
