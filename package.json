@@ -51,7 +51,8 @@
     "serial",
     "port",
     "modbus",
-    "tcp"
+    "tcp",
+    "typescript"
   ],
   "readmeFilename": "README.md",
   "directories": {
