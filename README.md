@@ -12,6 +12,8 @@ Status
 
 Version 4.0.0 is a early beta release. Please use and test it and help make it better. We keep you posted on the status of this module.
 
+Version 2.0.1 is the last release that will run on unsupported Node versions less than 12.
+
 Installation
 ------------
 
