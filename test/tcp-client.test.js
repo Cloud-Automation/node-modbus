@@ -122,6 +122,22 @@ describe('TCP Client Tests.', function () {
           done()
         })
     })
+    it('should handle a valid request with read ECONNRESET', function (done) {
+      socket.write  = function() {
+        // Socket receives a read ECONNRESET, the socket is closed and no further data is received
+        socket.emit('close');
+      }
+      const client = new Modbus.client.TCP(socket, 2, 100) // unit id = 2, timeout = 100ms
+      socket.emit('connect')
+      
+      client.readCoils(10, 11)
+        .then(function (resp) {
+          assert.ok(false)
+        }).catch(function (e) {
+          assert.equal('Offline', e.err)
+          done()
+        })
+    })
     it('should handle a valid request while offline', function (done) {
       const client = new Modbus.client.TCP(socket)
 

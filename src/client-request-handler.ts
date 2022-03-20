@@ -186,6 +186,10 @@ export default abstract class MBClientRequestHandler<S extends Stream.Duplex, Re
 
   protected _onClose () {
     this._state = 'offline'
+    this._currentRequest && this._currentRequest.reject(new UserRequestError({
+      err: OFFLINE,
+      message: 'connection to modbus server closed'
+    }))
     this._clearAllRequests()
   }
 
