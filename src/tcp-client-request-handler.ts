@@ -39,11 +39,7 @@ export default class ModbusTCPClientRequestHandler extends MBClientRequestHandle
 
     this._socket.on('connect', this._onConnect.bind(this))
     this._socket.on('close', this._onClose.bind(this))
-    
-    // Check if the passed in socket connection is already connected
-    if(this._socket.readyState === 'open'){
-      this._onConnect()
-    }
+
   }
 
   // TODO: Find a better way then putting in the any overide
