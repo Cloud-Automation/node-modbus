@@ -44,7 +44,7 @@ const net = require('net')
 const socket = new net.Socket()
 const client = new Modbus.client.TCP(socket, unitId)
 const options = {
-'host' : host
+'host' : host,
 'port' : port
 }
 
