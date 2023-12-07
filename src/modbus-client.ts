@@ -309,7 +309,7 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
   /**
    * Reject current request with a custom error
    */
-  public customErrorRequest (err: UserRequestError<any>) {
+  public customErrorRequest (err: UserRequestError<any, any>) {
     return this._requestHandler.customErrorRequest(err)
   }
 

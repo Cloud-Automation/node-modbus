@@ -91,7 +91,8 @@ export default abstract class MBClientRequestHandler<S extends Stream.Duplex, Re
       /* clear all request, client must be reset */
       userRequest.reject(new UserRequestError({
         err: OUT_OF_SYNC,
-        message: 'request fc and response fc does not match.'
+        message: 'request fc and response fc does not match.',
+        request
       }))
       this._clearAllRequests()
       return
@@ -103,7 +104,8 @@ export default abstract class MBClientRequestHandler<S extends Stream.Duplex, Re
       userRequest.reject(new UserRequestError({
         err: MODBUS_EXCEPTION,
         message: `A Modbus Exception Occurred - See Response Body`,
-        response
+        response,
+        request
       }))
       this._clearCurrentRequest()
       this._flush()
@@ -152,7 +154,7 @@ export default abstract class MBClientRequestHandler<S extends Stream.Duplex, Re
   /**
    * Reject current request with a custom error
    */
-  public customErrorRequest (err: UserRequestError<any>) {
+  public customErrorRequest (err: UserRequestError<any, any>) {
     if (this._currentRequest) {
       this._currentRequest.reject(err)
     }
