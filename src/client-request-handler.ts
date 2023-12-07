@@ -129,7 +129,8 @@ export default abstract class MBClientRequestHandler<S extends Stream.Duplex, Re
     if (this._currentRequest) {
       this._currentRequest.reject(new UserRequestError({
         err: MANUALLY_CLEARED,
-        message: 'the request was manually cleared'
+        message: 'the request was manually cleared',
+        request: this._currentRequest.request
       }))
       this._flush()
     }
@@ -176,7 +177,8 @@ export default abstract class MBClientRequestHandler<S extends Stream.Duplex, Re
       if (req) {
         req.reject(new UserRequestError({
           err: OUT_OF_SYNC,
-          message: 'rejecting because of earlier OutOfSync error'
+          message: 'rejecting because of earlier OutOfSync error',
+          request: req.request
         }))
       }
     }
@@ -190,7 +192,8 @@ export default abstract class MBClientRequestHandler<S extends Stream.Duplex, Re
     this._state = 'offline'
     this._currentRequest && this._currentRequest.reject(new UserRequestError({
       err: OFFLINE,
-      message: 'connection to modbus server closed'
+      message: 'connection to modbus server closed',
+      request: this._currentRequest.request
     }))
     this._clearAllRequests()
   }
@@ -214,7 +217,8 @@ export default abstract class MBClientRequestHandler<S extends Stream.Duplex, Re
       debug('rejecting request immediatly, client offline')
       this._currentRequest && this._currentRequest.reject(new UserRequestError({
         err: OFFLINE,
-        message: 'no connection to modbus server'
+        message: 'no connection to modbus server',
+        request: this._currentRequest.request
       }))
       this._clearCurrentRequest()
       /* start next request */
