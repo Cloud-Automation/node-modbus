@@ -10,6 +10,7 @@ const ReadHoldingRegistersRequestBody = require('../dist/request/read-holding-re
 const ModbusRTUResponse = require('../dist/rtu-response.js').default
 const ExceptionResponse = require('../dist/response/exception.js').default
 const ModbusRTUClientRequestHandler = require('../dist/rtu-client-request-handler.js').default
+const Modbus = require('../dist/modbus.js')
 
 
 describe('Modbus/RTU Client Request Tests', function () {
@@ -83,6 +84,7 @@ describe('Modbus/RTU Client Request Tests', function () {
         }).catch(function (err) {
           // Exception type should be ModbusException not crcMismatch or any other 
           assert.equal(err.err, 'ModbusException')
+          assert.equal(err.request instanceof Modbus.ModbusRTURequest, true)
           socketMock.verify()
 
           done()
@@ -114,6 +116,7 @@ describe('Modbus/RTU Client Request Tests', function () {
         }).catch(function (err) {     
           // Exception type should be ModbusException not crcMismatch or any other 
           assert.equal(err.err, 'ModbusException')
+          assert.equal(err.request instanceof Modbus.ModbusRTURequest, true)
           socketMock.verify()
 
           done()

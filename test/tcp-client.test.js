@@ -296,6 +296,7 @@ describe('TCP Client Tests.', function () {
           assert.equal(Modbus.errors.isInternalException(e), false)
           assert.equal(Modbus.errors.isUserRequestError(e), true)
           assert.equal('OutOfSync', e.err)
+          assert.equal(e.request instanceof Modbus.ModbusTCPRequest, true)
           socketMock.verify()
           done()
         })
@@ -324,6 +325,7 @@ describe('TCP Client Tests.', function () {
           done()
         }).catch(function (e) {
           assert.equal('Protocol', e.err)
+          assert.equal(e.request instanceof Modbus.ModbusTCPRequest, true)
           socketMock.verify()
           done()
         })
