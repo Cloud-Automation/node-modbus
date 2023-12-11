@@ -129,7 +129,7 @@ describe('TCP Client Tests.', function () {
       }
       const client = new Modbus.client.TCP(socket, 2, 100) // unit id = 2, timeout = 100ms
       socket.emit('connect')
-      
+
       client.readCoils(10, 11)
         .then(function (resp) {
           assert.ok(false)
