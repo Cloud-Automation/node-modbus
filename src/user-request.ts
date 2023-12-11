@@ -64,7 +64,8 @@ export default class UserRequest<Req extends ModbusAbstractRequest = any> {
     this._timer = setTimeout(() => {
       this._reject(new UserRequestError({
         err: 'Timeout',
-        message: 'Req timed out'
+        message: 'Req timed out',
+        request: this._request
       }))
       cb()
     }, this._timeout)
