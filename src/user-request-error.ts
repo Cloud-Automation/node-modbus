@@ -1,5 +1,5 @@
+import ModbusAbstractRequest from './abstract-request'
 import ModbusAbstractResponse from './abstract-response'
-import ModbusAbstractRequest from "./abstract-request";
 
 export type UserRequestErrorCodes = 'OutOfSync' | 'Protocol' | 'Timeout' | 'ManuallyCleared' | 'ModbusException' | 'Offline' | 'crcMismatch'
 
@@ -10,16 +10,17 @@ export interface IUserRequestError<Res extends ModbusAbstractResponse, Req exten
   request?: Req
 }
 
-export class UserRequestError<Res extends ModbusAbstractResponse, Req extends ModbusAbstractRequest> implements IUserRequestError<Res, Req> {
+export class UserRequestError<Res extends ModbusAbstractResponse, Req extends ModbusAbstractRequest>
+    implements IUserRequestError<Res, Req> {
   public err: UserRequestErrorCodes
   public message: string
-  public response?: Res
   public request?: Req
-  constructor ({ err, message, response, request }: IUserRequestError<Res, Req>) {
+  public response?: Res
+  constructor ({ err, message, request, response }: IUserRequestError<Res, Req>) {
     this.err = err
     this.message = message
-    this.response = response
     this.request = request
+    this.response = response
   }
 }
 

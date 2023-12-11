@@ -104,8 +104,8 @@ export default abstract class MBClientRequestHandler<S extends Stream.Duplex, Re
       userRequest.reject(new UserRequestError({
         err: MODBUS_EXCEPTION,
         message: `A Modbus Exception Occurred - See Response Body`,
-        response,
-        request
+        request,
+        response
       }))
       this._clearCurrentRequest()
       this._flush()
