@@ -16,7 +16,7 @@ export class UserRequestError<Res extends ModbusAbstractResponse, Req extends Mo
   public message: string
   public request?: Req
   public response?: Res
-  constructor ({ err, message, request, response }: IUserRequestError<Res, Req>) {
+  constructor ({ err, message, response, request }: IUserRequestError<Res, Req>) {
     this.err = err
     this.message = message
     this.request = request
