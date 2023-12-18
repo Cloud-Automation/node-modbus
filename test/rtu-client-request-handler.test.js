@@ -85,6 +85,7 @@ describe('Modbus/RTU Client Request Tests', function () {
           // Exception type should be ModbusException not crcMismatch or any other
           assert.equal(err.err, 'ModbusException')
           assert.equal(err.request instanceof Modbus.ModbusRTURequest, true)
+          assert.equal(err.request.body, request)
           socketMock.verify()
 
           done()
@@ -117,6 +118,7 @@ describe('Modbus/RTU Client Request Tests', function () {
           // Exception type should be ModbusException not crcMismatch or any other
           assert.equal(err.err, 'ModbusException')
           assert.equal(err.request instanceof Modbus.ModbusRTURequest, true)
+          assert.equal(err.request.body, request)
           socketMock.verify()
 
           done()
