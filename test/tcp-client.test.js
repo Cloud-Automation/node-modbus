@@ -7,6 +7,10 @@ const Modbus = require('../')
 const sinon = require('sinon')
 const EventEmitter = require('events')
 
+const ReadCoilsRequest = require('../dist/request/read-holding-registers.js').default
+const ExceptionResponse = require('../dist/response/exception.js').default
+const ModbusTCPClientRequestHandler = require('../dist/tcp-client-request-handler.js').default
+
 describe('TCP Client Tests.', function () {
   let socket
   let socketMock
@@ -331,6 +335,56 @@ describe('TCP Client Tests.', function () {
         })
 
       socket.emit('data', response)
+    })
+    it('should provide request in UserRequestError when ModbusException', function (done) {
+      const handler = new ModbusTCPClientRequestHandler(socket, 2)
+      const request = new ReadCoilsRequest(0x0000, 0x0008)
+      const response = new ExceptionResponse(0x01, 0x01)
+      const tcpResponse = new Modbus.ModbusTCPResponse(1, 0, response.byteCount, 4, response)
+
+      socket.emit('connect')
+
+      socketMock.expects('write').once()
+
+      handler.register(request)
+        .then(function (resp) {
+          assert.ok(false)
+
+          done()
+        }).catch(function (err) {
+          // Exception type should be ModbusException not crcMismatch or any other
+          assert.equal(err.err, 'ModbusException')
+          assert.equal(err.request instanceof Modbus.ModbusTCPRequest, true)
+          assert.equal(err.request.body, request)
+          socketMock.verify()
+
+          done()
+        })
+
+      handler.handle(tcpResponse)
+    })
+    it('should provide request in UserRequestError when timed out', function (done) {
+      const handler = new ModbusTCPClientRequestHandler(socket, 2, 200)
+      const request = new ReadCoilsRequest(0x0000, 0x0008)
+      const response = new ExceptionResponse(0x01, 0x01)
+
+      socket.emit('connect')
+
+      socketMock.expects('write').once()
+
+      handler.register(request)
+        .then(function (resp) {
+          assert.ok(false)
+
+          done()
+        }).catch(function (err) {
+          assert.equal(err.err, 'Timeout')
+          assert.equal(err.request instanceof Modbus.ModbusTCPRequest, true)
+          assert.equal(err.request.body, request)
+          socketMock.verify()
+
+          done()
+        })
     })
   })
   describe('Read Discrete Inputs Tests.', function () {
