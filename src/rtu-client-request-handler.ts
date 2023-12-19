@@ -71,7 +71,9 @@ export default class ModbusRTUClientRequestHandler extends MBClientRequestHandle
       debug('CRC does not match', response.crc, '!==', crc)
       userRequest.reject(new UserRequestError({
         err: 'crcMismatch',
-        message: 'the response payload does not match the crc'
+        message: 'the response payload does not match the crc',
+        request: userRequest.request,
+        response
       }))
       this._clearAllRequests()
       return

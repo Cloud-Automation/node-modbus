@@ -10,6 +10,7 @@ const ReadHoldingRegistersRequestBody = require('../dist/request/read-holding-re
 const ModbusRTUResponse = require('../dist/rtu-response.js').default
 const ExceptionResponse = require('../dist/response/exception.js').default
 const ModbusRTUClientRequestHandler = require('../dist/rtu-client-request-handler.js').default
+const Modbus = require('../dist/modbus.js')
 
 
 describe('Modbus/RTU Client Request Tests', function () {
@@ -81,8 +82,10 @@ describe('Modbus/RTU Client Request Tests', function () {
 
           done()
         }).catch(function (err) {
-          // Exception type should be ModbusException not crcMismatch or any other 
+          // Exception type should be ModbusException not crcMismatch or any other
           assert.equal(err.err, 'ModbusException')
+          assert.equal(err.request instanceof Modbus.ModbusRTURequest, true)
+          assert.equal(err.request.body, request)
           socketMock.verify()
 
           done()
@@ -98,7 +101,7 @@ describe('Modbus/RTU Client Request Tests', function () {
         0x01,       // address
         0x83,       // fc
         0x02,       // error code
-        0xc0, 0xf1  // crc              
+        0xc0, 0xf1  // crc
       ])
       const rtuResponse = ModbusRTUResponse.fromBuffer(responseBuffer)
 
@@ -107,13 +110,15 @@ describe('Modbus/RTU Client Request Tests', function () {
       socketMock.expects('write').once()
 
       handler.register(request)
-        .then(function (resp) {          
+        .then(function (resp) {
           assert.ok(false)
 
           done()
-        }).catch(function (err) {     
-          // Exception type should be ModbusException not crcMismatch or any other 
+        }).catch(function (err) {
+          // Exception type should be ModbusException not crcMismatch or any other
           assert.equal(err.err, 'ModbusException')
+          assert.equal(err.request instanceof Modbus.ModbusRTURequest, true)
+          assert.equal(err.request.body, request)
           socketMock.verify()
 
           done()
@@ -121,7 +126,7 @@ describe('Modbus/RTU Client Request Tests', function () {
 
       handler.handle(rtuResponse)
       // rtuResponse.crc
-      
+
     })
   })
 })

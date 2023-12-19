@@ -1,25 +1,30 @@
+import ModbusAbstractRequest from './abstract-request'
 import ModbusAbstractResponse from './abstract-response'
 
 export type UserRequestErrorCodes = 'OutOfSync' | 'Protocol' | 'Timeout' | 'ManuallyCleared' | 'ModbusException' | 'Offline' | 'crcMismatch'
 
-export interface IUserRequestError<Res extends ModbusAbstractResponse> {
+export interface IUserRequestError<Res extends ModbusAbstractResponse, Req extends ModbusAbstractRequest> {
   err: UserRequestErrorCodes
   message: string
-  response?: Res
+  response?: Res,
+  request?: Req
 }
 
-export class UserRequestError<Res extends ModbusAbstractResponse> implements IUserRequestError<Res> {
+export class UserRequestError<Res extends ModbusAbstractResponse, Req extends ModbusAbstractRequest>
+    implements IUserRequestError<Res, Req> {
   public err: UserRequestErrorCodes
   public message: string
+  public request?: Req
   public response?: Res
-  constructor ({ err, message, response }: IUserRequestError<Res>) {
+  constructor ({ err, message, response, request }: IUserRequestError<Res, Req>) {
     this.err = err
     this.message = message
+    this.request = request
     this.response = response
   }
 }
 
-export function isUserRequestError (x: any): x is UserRequestError<any> {
+export function isUserRequestError (x: any): x is UserRequestError<any, any> {
   if (x instanceof isUserRequestError) {
     return true
   }

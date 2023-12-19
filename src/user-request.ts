@@ -30,7 +30,7 @@ export default class UserRequest<Req extends ModbusAbstractRequest = any> {
   protected readonly _timeout: number
   protected readonly _promise: PromiseUserRequest<Req>
   protected _resolve!: (value: IUserRequestResolve<Req>) => void
-  protected _reject!: (err: UserRequestError<RequestToResponse<Req>>) => void
+  protected _reject!: (err: UserRequestError<RequestToResponse<Req>, Req>) => void
   protected _timer!: NodeJS.Timeout
 
   protected _metrics: UserRequestMetrics
@@ -64,7 +64,8 @@ export default class UserRequest<Req extends ModbusAbstractRequest = any> {
     this._timer = setTimeout(() => {
       this._reject(new UserRequestError({
         err: 'Timeout',
-        message: 'Req timed out'
+        message: 'Req timed out',
+        request: this._request
       }))
       cb()
     }, this._timeout)

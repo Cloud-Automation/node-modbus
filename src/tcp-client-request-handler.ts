@@ -81,7 +81,8 @@ export default class ModbusTCPClientRequestHandler extends MBClientRequestHandle
       /* clear all request, client must be reset */
       userRequest.reject(new UserRequestError({
         err: OUT_OF_SYNC,
-        message: 'request fc and response fc does not match.'
+        message: 'request fc and response fc does not match.',
+        request
       }))
       this._clearAllRequests()
       return
@@ -92,7 +93,8 @@ export default class ModbusTCPClientRequestHandler extends MBClientRequestHandle
       debug('server responds with wrong protocol version')
       userRequest.reject(new UserRequestError({
         err: PROTOCOL,
-        message: 'Unknown protocol version ' + response.protocol
+        message: 'Unknown protocol version ' + response.protocol,
+        request
       }))
       this._clearAllRequests()
       return
