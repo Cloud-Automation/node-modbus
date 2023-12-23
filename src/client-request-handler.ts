@@ -148,7 +148,7 @@ export default abstract class MBClientRequestHandler<S extends Stream.Duplex, Re
   /**
    * Manually reject all requests in the cue
    */
-  public manuallylRejectAllRequests () {
+  public manuallyRejectAllRequests () {
     this.manuallyRejectRequests(this.requestCount)
   }
 

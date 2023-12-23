@@ -70,6 +70,20 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
     this._socket.on('data', this._onData.bind(this))
   }
 
+  /**
+   * Manually reject all requests in the cue
+   */
+  public manuallyRejectAllRequests () {
+    return this._requestHandler.manuallyRejectAllRequests()
+  }
+
+  /**
+   * Manually Reject a specified number of requests
+   */
+  public manuallyRejectRequests (numRequests: number) {
+    return this._requestHandler.manuallyRejectRequests(numRequests)
+  }
+
   /** Execute ReadCoils Request (Function Code 0x01)
    * @param {number} start Start Address.
    * @param {number} count Coil Quantity.
