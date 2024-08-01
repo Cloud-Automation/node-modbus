@@ -53,8 +53,12 @@ export default class WriteSingleCoilResponseBody extends ModbusWriteResponseBody
   constructor (address: number, value: 0 | 0xff00 | boolean) {
     super(FC.WRITE_SINGLE_COIL)
     this._address = address
-
-    this._value = value === 0xFF00 ? 0xFF00 : 0x0000
+    
+    if (value === true || value === 0xFF00) {
+        this._value = 0xFF00
+    } else {
+        this._value = 0x0000
+    }
   }
 
   public createPayload () {
