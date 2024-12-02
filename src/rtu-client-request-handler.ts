@@ -14,8 +14,8 @@ import UserRequest from './user-request.js'
  * @extends MBClientRequestHandler
  * @class
  */
-  protected _requests: Array<UserRequest<ModbusRTURequest>>
 export default class ModbusRTUClientRequestHandler extends MBClientRequestHandler<SerialPort, ModbusRTURequest> {
+  protected _requests: UserRequest<ModbusRTURequest>[]
   protected _currentRequest: UserRequest<ModbusRTURequest> | null | undefined
   protected readonly _address: number
 

@@ -14,12 +14,10 @@ import {
 } from './request'
 
 import ModbusAbstractRequest from './abstract-request.js'
-import ModbusAbstractResponse from './abstract-response.js'
 import MBClientRequestHandler from './client-request-handler.js'
 import MBClientResponseHandler from './client-response-handler.js'
 import { UserRequestError } from './errors'
 import { CastRequestBody } from './request-response-map'
-import { WriteMultipleCoilsResponseBody } from './response'
 import { PromiseUserRequest } from './user-request.js'
 
 /** Common Modbus Client
@@ -249,7 +247,7 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
       if (values instanceof Buffer) {
         request = new WriteMultipleCoilsRequestBody(start, values, quantity)
       } else {
-        request = new WriteMultipleCoilsRequestBody(start, values)
+        request = new WriteMultipleCoilsRequestBody(start, values as boolean[])
       }
 
     } catch (e) {
