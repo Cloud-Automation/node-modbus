@@ -18,7 +18,7 @@ const PROTOCOL = 'Protocol'
  * @class
  */
 export default class ModbusTCPClientRequestHandler extends MBClientRequestHandler<Socket, ModbusTCPRequest> {
-  protected _requests: Array<UserRequest<ModbusTCPRequest>>
+  protected _requests: UserRequest<ModbusTCPRequest>[]
   protected _currentRequest: UserRequest<ModbusTCPRequest> | null | undefined
   private _requestId: number
   private _unitId: number
