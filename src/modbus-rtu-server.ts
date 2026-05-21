@@ -16,7 +16,8 @@ export default class ModbusRTUServer extends ModbusServer {
 
     const fromBuffer = ModbusRTURequest.fromBuffer
     const fromRequest = ModbusRTUResponse.fromRequest as any
-    const client = new ModbusServerClient(this, socket, fromBuffer, fromRequest)
+    const slaveId = options && typeof options.slaveId !== 'undefined' ? options.slaveId : -1
+    const client = new ModbusServerClient(this, socket, fromBuffer, fromRequest, slaveId)
     this.emit('connection', client)
   }
 }

@@ -11,13 +11,15 @@ export interface IModbusServerOptions {
   discrete: Buffer
   holding: Buffer
   input: Buffer
+  slaveId: number
 }
 
 const DEFAULT_MODBUS_SERVER_OPTIONS: IModbusServerOptions = {
   coils: Buffer.alloc(1024),
   discrete: Buffer.alloc(1024),
   holding: Buffer.alloc(1024),
-  input: Buffer.alloc(1024)
+  input: Buffer.alloc(1024),
+  slaveId: -1
 }
 
 export type BufferCB = (buffer: Buffer) => void

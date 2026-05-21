@@ -20,12 +20,13 @@ export default class ModbusServerClient<
     server: ModbusServer,
     socket: S,
     fromBufferMethod: ReqFromBufferMethod,
-    fromRequestMethod: ResFromRequestMethod
+    fromRequestMethod: ResFromRequestMethod,
+    slaveId: number = -1
   ) {
     this._server = server
     this._socket = socket
 
-    this._requestHandler = new ModbusServerRequestHandler(fromBufferMethod)
+    this._requestHandler = new ModbusServerRequestHandler(fromBufferMethod, slaveId)
     this._responseHandler = new ModbusServerResponseHandler(this._server, fromRequestMethod)
 
     this._socket.on('data', this._onData.bind(this))
