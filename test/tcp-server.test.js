@@ -14,7 +14,9 @@ describe('TCP Server Tests.', function () {
 
     server = new Modbus.server.TCP(socket, {
       holding: Buffer.alloc(12, 0x00),
-      coils: Buffer.from([0x55, 0x55, 0x55])
+      input: Buffer.alloc(12, 0x00),
+      coils: Buffer.from([0x55, 0x55, 0x55]),
+      discrete: Buffer.from([0xAA, 0xAA, 0xAA])
     })
   })
 
@@ -313,6 +315,252 @@ describe('TCP Server Tests.', function () {
       socket.write = (response) => {
         assert.deepEqual(expectedResponse, response)
         assert.deepEqual(expectedHolding, server.holding)
+        done()
+      }
+
+      socket.emit('connection', socket)
+      socket.emit('data', request)
+    })
+  })
+
+  describe('Read Request Quantity Validation Tests.', function () {
+    it('should return exception 0x03 for FC01 read coils with quantity of 0', function (done) {
+      const request = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x06, // byte count
+        0x02,       // unit id
+        0x01,       // function code
+        0x00, 0x00, // starting address
+        0x00, 0x00  // quantity 0 (below minimum of 1)
+      ])
+      const expectedResponse = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x03, // byte count
+        0x02,       // unit id
+        0x81,       // exception for FC01
+        0x03        // ILLEGAL DATA VALUE
+      ])
+
+      socket.write = (response) => {
+        assert.deepEqual(expectedResponse, response)
+        done()
+      }
+
+      socket.emit('connection', socket)
+      socket.emit('data', request)
+    })
+
+    it('should return exception 0x03 for FC02 read discrete inputs with quantity of 0', function (done) {
+      const request = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x06, // byte count
+        0x02,       // unit id
+        0x02,       // function code
+        0x00, 0x00, // starting address
+        0x00, 0x00  // quantity 0 (below minimum of 1)
+      ])
+      const expectedResponse = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x03, // byte count
+        0x02,       // unit id
+        0x82,       // exception for FC02
+        0x03        // ILLEGAL DATA VALUE
+      ])
+
+      socket.write = (response) => {
+        assert.deepEqual(expectedResponse, response)
+        done()
+      }
+
+      socket.emit('connection', socket)
+      socket.emit('data', request)
+    })
+
+    it('should return exception 0x03 for FC03 read holding registers with quantity > 125', function (done) {
+      const request = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x06, // byte count
+        0x02,       // unit id
+        0x03,       // function code
+        0x00, 0x00, // starting address
+        0x00, 0x7E  // quantity 126 (exceeds 125 limit)
+      ])
+      const expectedResponse = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x03, // byte count
+        0x02,       // unit id
+        0x83,       // exception for FC03
+        0x03        // ILLEGAL DATA VALUE
+      ])
+
+      socket.write = (response) => {
+        assert.deepEqual(expectedResponse, response)
+        done()
+      }
+
+      socket.emit('connection', socket)
+      socket.emit('data', request)
+    })
+
+    it('should return exception 0x03 for FC04 read input registers with quantity > 125', function (done) {
+      const request = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x06, // byte count
+        0x02,       // unit id
+        0x04,       // function code
+        0x00, 0x00, // starting address
+        0x00, 0x7E  // quantity 126 (exceeds 125 limit)
+      ])
+      const expectedResponse = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x03, // byte count
+        0x02,       // unit id
+        0x84,       // exception for FC04
+        0x03        // ILLEGAL DATA VALUE
+      ])
+
+      socket.write = (response) => {
+        assert.deepEqual(expectedResponse, response)
+        done()
+      }
+
+      socket.emit('connection', socket)
+      socket.emit('data', request)
+    })
+
+    it('should return exception 0x03 for FC03 with quantity of 0', function (done) {
+      const request = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x06, // byte count
+        0x02,       // unit id
+        0x03,       // function code
+        0x00, 0x00, // starting address
+        0x00, 0x00  // quantity 0 (below minimum of 1)
+      ])
+      const expectedResponse = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x03, // byte count
+        0x02,       // unit id
+        0x83,       // exception for FC03
+        0x03        // ILLEGAL DATA VALUE
+      ])
+
+      socket.write = (response) => {
+        assert.deepEqual(expectedResponse, response)
+        done()
+      }
+
+      socket.emit('connection', socket)
+      socket.emit('data', request)
+    })
+
+    it('should return exception 0x02 for FC03 when start + count exceeds holding buffer', function (done) {
+      const request = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x06, // byte count
+        0x02,       // unit id
+        0x03,       // function code
+        0x00, 0x04, // starting address 4
+        0x00, 0x04  // quantity 4 (address 4 + 4 = 8 registers = 16 bytes > 12 byte buffer)
+      ])
+      const expectedResponse = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x03, // byte count
+        0x02,       // unit id
+        0x83,       // exception for FC03
+        0x02        // ILLEGAL DATA ADDRESS
+      ])
+
+      socket.write = (response) => {
+        assert.deepEqual(expectedResponse, response)
+        done()
+      }
+
+      socket.emit('connection', socket)
+      socket.emit('data', request)
+    })
+
+    it('should return exception 0x02 for FC04 when start + count exceeds input buffer', function (done) {
+      const request = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x06, // byte count
+        0x02,       // unit id
+        0x04,       // function code
+        0x00, 0x04, // starting address 4
+        0x00, 0x04  // quantity 4 (address 4 + 4 = 8 registers = 16 bytes > 12 byte buffer)
+      ])
+      const expectedResponse = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x03, // byte count
+        0x02,       // unit id
+        0x84,       // exception for FC04
+        0x02        // ILLEGAL DATA ADDRESS
+      ])
+
+      socket.write = (response) => {
+        assert.deepEqual(expectedResponse, response)
+        done()
+      }
+
+      socket.emit('connection', socket)
+      socket.emit('data', request)
+    })
+
+    it('should not crash when FC03 quantity would overflow byte count (DoS regression)', function (done) {
+      const request = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x06, // byte count
+        0x02,       // unit id
+        0x03,       // function code
+        0x05, 0x39, // starting address 1337
+        0x02, 0x69  // quantity 617 (byte count 1234 overflows UInt8)
+      ])
+      const expectedResponse = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x03, // byte count
+        0x02,       // unit id
+        0x83,       // exception for FC03
+        0x03        // ILLEGAL DATA VALUE
+      ])
+
+      socket.write = (response) => {
+        assert.deepEqual(expectedResponse, response)
+        done()
+      }
+
+      socket.emit('connection', socket)
+      socket.emit('data', request)
+    })
+
+    it('should accept FC03 read holding registers at max valid quantity for buffer', function (done) {
+      const request = Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x06, // byte count
+        0x02,       // unit id
+        0x03,       // function code
+        0x00, 0x00, // starting address 0
+        0x00, 0x06  // quantity 6 (exactly fills 12-byte holding buffer)
+      ])
+
+      socket.write = (response) => {
+        assert.equal(response.readUInt8(7), 0x03)
         done()
       }
 

@@ -109,6 +109,15 @@ export default class ModbusServerResponseHandler<FR extends ModbusAbstractRespon
       return
     }
 
+    /* Modbus spec: FC01 quantity must be 1-2000 (0x0001 to 0x07D0) */
+    if (request.body.count < 1 || request.body.count > 0x7D0) {
+      debug('illegal data value, quantity out of range: %d', request.body.count)
+      const exceptionBody = new ExceptionResponseBody(request.body.fc, 0x03)
+      const exceptionResponse = this._fromRequest(request, exceptionBody)
+      cb(exceptionResponse.createPayload())
+      return exceptionResponse
+    }
+
     this._server.emit('preReadCoils', request, cb)
 
     const responseBody = ReadCoilsResponseBody.fromRequest(request.body, this._server.coils)
@@ -131,6 +140,15 @@ export default class ModbusServerResponseHandler<FR extends ModbusAbstractRespon
       debug('no discrete input buffer on server, trying readDiscreteInputs handler')
       this._server.emit('readDiscreteInputs', request, cb)
       return
+    }
+
+    /* Modbus spec: FC02 quantity must be 1-2000 (0x0001 to 0x07D0) */
+    if (request.body.count < 1 || request.body.count > 0x7D0) {
+      debug('illegal data value, quantity out of range: %d', request.body.count)
+      const exceptionBody = new ExceptionResponseBody(request.body.fc, 0x03)
+      const exceptionResponse = this._fromRequest(request, exceptionBody)
+      cb(exceptionResponse.createPayload())
+      return exceptionResponse
     }
 
     this._server.emit('preReadDiscreteInputs', request, cb)
@@ -192,6 +210,24 @@ export default class ModbusServerResponseHandler<FR extends ModbusAbstractRespon
       return
     }
 
+    /* Modbus spec: FC03 quantity must be 1-125 (0x0001 to 0x007D) */
+    if (request.body.count < 1 || request.body.count > 0x7D) {
+      debug('illegal data value, quantity out of range: %d', request.body.count)
+      const exceptionBody = new ExceptionResponseBody(request.body.fc, 0x03)
+      const exceptionResponse = this._fromRequest(request, exceptionBody)
+      cb(exceptionResponse.createPayload())
+      return exceptionResponse
+    }
+
+    /* Validate start address + count does not exceed holding register buffer */
+    if ((request.body.start + request.body.count) * 2 > this._server.holding.length) {
+      debug('illegal data address')
+      const exceptionBody = new ExceptionResponseBody(request.body.fc, 0x02)
+      const exceptionResponse = this._fromRequest(request, exceptionBody)
+      cb(exceptionResponse.createPayload())
+      return exceptionResponse
+    }
+
     this._server.emit('preReadHoldingRegisters', request, cb)
 
     const responseBody = ReadHoldingRegistersResponseBody.fromRequest(request.body, this._server.holding)
@@ -214,6 +250,24 @@ export default class ModbusServerResponseHandler<FR extends ModbusAbstractRespon
       debug('no input register buffer on server, trying readInputRegisters handler')
       this._server.emit('readInputRegisters', request, cb)
       return
+    }
+
+    /* Modbus spec: FC04 quantity must be 1-125 (0x0001 to 0x007D) */
+    if (request.body.count < 1 || request.body.count > 0x7D) {
+      debug('illegal data value, quantity out of range: %d', request.body.count)
+      const exceptionBody = new ExceptionResponseBody(request.body.fc, 0x03)
+      const exceptionResponse = this._fromRequest(request, exceptionBody)
+      cb(exceptionResponse.createPayload())
+      return exceptionResponse
+    }
+
+    /* Validate start address + count does not exceed input register buffer */
+    if ((request.body.start + request.body.count) * 2 > this._server.input.length) {
+      debug('illegal data address')
+      const exceptionBody = new ExceptionResponseBody(request.body.fc, 0x02)
+      const exceptionResponse = this._fromRequest(request, exceptionBody)
+      cb(exceptionResponse.createPayload())
+      return exceptionResponse
     }
 
     this._server.emit('preReadInputRegisters', request, cb)
