@@ -275,7 +275,7 @@ export default abstract class MBClient<S extends Stream.Duplex, Req extends Modb
     let request
     try {
 
-      if (values instanceof Buffer) {
+      if (Buffer.isBuffer(values)) {
         request = new WriteMultipleCoilsRequestBody(start, values, quantity)
       } else {
         request = new WriteMultipleCoilsRequestBody(start, values)

@@ -1,14 +1,13 @@
 import Modbus from '../../../';
-import SerialPort, { OpenOptions } from 'serialport';
+import { SerialPort } from 'serialport';
 
-const options: OpenOptions = {
+const socket = new SerialPort({
+  path: '/dev/ttyUSB1',
   baudRate: 115200,
   parity: 'even',
   stopBits: 1,
   dataBits: 8
-}
-
-const socket = new SerialPort('/dev/ttyUSB1', options);
+});
 
 const address = 0x01;
 const client = new Modbus.client.RTU(socket, address);

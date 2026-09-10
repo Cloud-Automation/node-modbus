@@ -1,12 +1,9 @@
-import SerialPort from 'serialport'
+import { SerialPort } from 'serialport'
 
-SerialPort.list(function (err, ports) {
-  if (err) {
-    console.error(err)
-    return
-  }
-
-  ports.forEach(function (port) {
-    console.log(port.comName)
+SerialPort.list()
+  .then(ports => {
+    ports.forEach(port => {
+      console.log(port.path)
+    })
   })
-})
+  .catch(console.error)

@@ -1,8 +1,9 @@
 'use strict'
 
 const modbus = require('../../')
-const SerialPort = require('serialport')
-const socket = new SerialPort('/dev/ttyUSB1', {
+const { SerialPort } = require('serialport')
+const socket = new SerialPort({
+  path: '/dev/ttyUSB1',
   baudRate: 115200,
   parity: 'even',
   stopBits: 1,

@@ -1,10 +1,11 @@
 'use strict'
 
 const modbus = require('../..')
-const Serialport = require('serialport')
-const socket = new Serialport('COM6', {
+const { SerialPort } = require('serialport')
+const socket = new SerialPort({
+  path: 'COM6',
   baudRate: 19200,
-  Parity: 'none',
+  parity: 'none',
   stopBits: 1,
   dataBits: 8
 })
