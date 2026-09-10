@@ -2,7 +2,7 @@ A simple an easy to use Modbus TCP client/server implementation.
 
 [![JavaScript Style Guide](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
-Modbus [![Build Status](https://travis-ci.org/Cloud-Automation/node-modbus.png)](https://travis-ci.org/Cloud-Automation/node-modbus)
+Modbus [![CI](https://github.com/Cloud-Automation/node-modbus/actions/workflows/ci.yml/badge.svg)](https://github.com/Cloud-Automation/node-modbus/actions/workflows/ci.yml)
 ========
 
 Modbus is a simple Modbus TCP/RTU Client/Server with a simple API. It supports modbus function codes 1 - 6, 15, 16 and 43/14.
@@ -10,10 +10,12 @@ Modbus is a simple Modbus TCP/RTU Client/Server with a simple API. It supports m
 Status
 ------
 
-Version 4.0.0 is a early beta release. Please use and test it and help make it better. We keep you posted on the status of this module.
+Version 5.0.0 is an early beta release. Please use and test it and help make it better. We keep you posted on the status of this module.
 
 Installation
 ------------
+
+This module requires Node.js 20 or newer.
 
 Just type `npm install jsmodbus` and you are ready to go. You can also install this module globally and use the Command Line Interface. Simply type `npm install -g jsmodbus`.
 
@@ -27,7 +29,7 @@ Testing
 
 The test files are implemented using [mocha](https://github.com/visionmedia/mocha) and sinon.
 
-Simply `npm install -g mocha` and `npm install -g sinon`. To run the tests type from the projects root folder `mocha test/*`.
+Both come in as devDependencies, so there is no need to install anything globally. From the project's root folder run `npm ci` once, then `npm test` to run the linter, the TypeScript build and the test suite.
 
 Please feel free to fork and add your own tests.
 
@@ -54,13 +56,13 @@ RTU Client Example
 ---------------------
 ```javascript
 
-// create a tcp modbus client
+// create a serial modbus client
 const Modbus = require('jsmodbus')
-const SerialPort = require('serialport')
-const options = {
-baudRate: 57600
-}
-const socket = new SerialPort("/dev/tty-usbserial1", options)
+const { SerialPort } = require('serialport')
+const socket = new SerialPort({
+  path: '/dev/tty-usbserial1',
+  baudRate: 57600
+})
 const client = new Modbus.client.RTU(socket, address)
 ```
 
