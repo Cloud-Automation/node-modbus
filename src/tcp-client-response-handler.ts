@@ -1,5 +1,6 @@
 import Debug = require('debug'); const debug = Debug('tcp-response-handler')
 import ModbusClientResponseHandler from './client-response-handler.js'
+import { LIMITS } from './constants'
 import ModbusTCPResponse from './tcp-response.js'
 
 /** Modbus/TCP Client Response Handler.
@@ -9,10 +10,12 @@ import ModbusTCPResponse from './tcp-response.js'
 export default class ModbusTCPClientResponseHandler extends ModbusClientResponseHandler<ModbusTCPResponse> {
   protected _messages: ModbusTCPResponse[]
 
-  /** Create new Modbus/TCP Client Response Handler */
-  constructor () {
-    super()
-    this._buffer = Buffer.alloc(0)
+  /** Create new Modbus/TCP Client Response Handler
+   * @param {number} [maxBufferSize=LIMITS.TCP_ADU_MAX] The number of bytes the receive buffer may
+   *   hold without a single complete response being parsable from it.
+   */
+  constructor (maxBufferSize: number = LIMITS.TCP_ADU_MAX) {
+    super(maxBufferSize)
     this._messages = []
   }
 
@@ -27,6 +30,10 @@ export default class ModbusTCPClientResponseHandler extends ModbusClientResponse
 
       if (!response) {
         debug('not enough data available to parse')
+        /* the remaining bytes are at most one incomplete frame by now, so anything beyond
+         * the largest possible ADU cannot be waiting for more data to arrive
+         */
+        this._discardOversizedBuffer()
         return
       }
 

@@ -1,10 +1,10 @@
 
 import { Socket } from 'net'
+import { LIMITS } from './constants'
 import MBClient from './modbus-client.js'
 import MBTCPClientRequestHandler from './tcp-client-request-handler.js'
 import ModbusTCPClientResponseHandler from './tcp-client-response-handler.js'
 import ModbusTCPRequest from './tcp-request.js'
-import ModbusTCPResponse from './tcp-response.js'
 
 /** This client must be initiated with a net.Socket object. The module does not handle reconnections
  * or anything related to keep the connection up in case of an unplugged cable or a closed server. See
@@ -36,13 +36,19 @@ export default class ModbusTCPClient extends MBClient<Socket, ModbusTCPRequest> 
    * @param {Socket} socket The TCP Socket.
    * @param {number} [unitId=1] Unit ID
    * @param {number} [timeout=5000] Timeout for requests in ms.
+   * @param {number} [maxBufferSize=LIMITS.TCP_ADU_MAX] The number of bytes the receive buffer may hold
    * @memberof ModbusTCPClient
    */
-  constructor (socket: Socket, unitId: number = 1, timeout: number = 5000) {
+  constructor (
+    socket: Socket,
+    unitId: number = 1,
+    timeout: number = 5000,
+    maxBufferSize: number = LIMITS.TCP_ADU_MAX
+  ) {
     super(socket)
 
     this._requestHandler = new MBTCPClientRequestHandler(socket, unitId, timeout)
-    this._responseHandler = new ModbusTCPClientResponseHandler()
+    this._responseHandler = new ModbusTCPClientResponseHandler(maxBufferSize)
 
     this._unitId = unitId
     this._timeout = timeout

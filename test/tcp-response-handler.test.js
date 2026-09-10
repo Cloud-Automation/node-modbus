@@ -184,4 +184,86 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
     assert.equal(1, response.body.fc)
     assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
   })
+
+  /* A device that answers with fewer bytes than its MBAP header announces leaves a prefix in
+   * the receive buffer. The buffer only ever advances when a complete response parses and
+   * every frame is read from offset 0, so that prefix desyncs every following response until
+   * the socket is reconnected.
+   */
+  describe('resynchronizing an unparsable buffer', function () {
+    /* the beginning of a response the device never completed */
+    const truncatedFrame = Buffer.from([0x00, 0x2a, 0x00, 0x00])
+
+    const readCoilsResponse = function () {
+      return Buffer.from([
+        0x00, 0x01, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x05, // length
+        0x03,       // unit id
+        0x01,       // function code
+        0x02,       // byte count
+        0xdd,       // coils
+        0x00
+      ])
+    }
+
+    it('should default to the largest possible Modbus/TCP ADU', function () {
+      assert.equal(260, new TCPResponseHandler().maxBufferSize)
+      assert.equal(64, new TCPResponseHandler(64).maxBufferSize)
+    })
+
+    it('should discard the buffer when no response parses from more than maxBufferSize bytes', function () {
+      handler = new TCPResponseHandler(20)
+
+      handler.handleData(truncatedFrame)
+      assert.equal(undefined, handler.shift(), 'a truncated frame must not parse')
+
+      /* 15 bytes, below the limit, the stale prefix keeps this response from parsing */
+      handler.handleData(readCoilsResponse())
+      assert.equal(undefined, handler.shift(), 'the stale prefix must desync this response')
+
+      /* 26 bytes, beyond the limit, the prefix provably is not the start of a frame */
+      handler.handleData(readCoilsResponse())
+      assert.equal(undefined, handler.shift())
+
+      /* the buffer was dropped, so this response is aligned again */
+      handler.handleData(readCoilsResponse())
+
+      const response = handler.shift()
+
+      assert.ok(response !== undefined, 'the handler did not resynchronize')
+      assert.equal(1, response.id)
+      assert.equal(1, response.body.fc)
+      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
+    })
+
+    it('should keep a response that is still being received', function () {
+      /* room for exactly one ADU, so the incomplete frame sits right at the limit */
+      handler = new TCPResponseHandler(11)
+      const responseBuffer = readCoilsResponse()
+
+      handler.handleData(responseBuffer.slice(0, 6))
+      assert.equal(undefined, handler.shift())
+
+      handler.handleData(responseBuffer.slice(6))
+
+      const response = handler.shift()
+
+      assert.ok(response !== undefined, 'a frame at the limit must not be discarded')
+      assert.equal(1, response.body.fc)
+    })
+
+    it('should resynchronize with the default limit as well', function () {
+      handler.handleData(truncatedFrame)
+
+      let response
+      for (let i = 0; i < 30 && response === undefined; i += 1) {
+        handler.handleData(readCoilsResponse())
+        response = handler.shift()
+      }
+
+      assert.ok(response !== undefined, 'the handler never resynchronized')
+      assert.equal(1, response.body.fc)
+    })
+  })
 })
