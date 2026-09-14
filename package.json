@@ -13,7 +13,7 @@
     "url": "https://github.com/Cloud-Automation/node-modbus"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "dependencies": {
     "commander": "^11.1.0",
