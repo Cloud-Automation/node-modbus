@@ -7,7 +7,7 @@ export default abstract class ModbusClientResponseHandler<ResType extends MBAbst
   protected _buffer: Buffer
   protected abstract _messages: ResType[]
 
-  /** Create new Modbus Client Response Hanlder */
+  /** Create new Modbus Client Response Handler */
   constructor () {
     this._buffer = Buffer.alloc(0)
   }

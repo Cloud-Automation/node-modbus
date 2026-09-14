@@ -1,5 +1,5 @@
 import Debug = require('debug'); const debug = Debug('rtu-response')
-import CRC = require('crc')
+import * as CRC from 'crc'
 import ModbusAbstractResponse from './abstract-response.js'
 import { ModbusRequestBody } from './request/index.js'
 import ModbusResponseBody from './response/response-body.js'

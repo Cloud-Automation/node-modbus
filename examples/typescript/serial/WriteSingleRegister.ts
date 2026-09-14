@@ -1,14 +1,13 @@
 import Modbus from '../../../dist/modbus';
-import SerialPort, { OpenOptions } from 'serialport';
+import { SerialPort } from 'serialport';
 
-const options: OpenOptions = {
+const socket = new SerialPort({
+  path: 'COM6',
   baudRate: 19200,
   parity: 'none',
   stopBits: 1,
   dataBits: 8
-}
-
-const socket = new SerialPort('COM6', options)
+});
 
 const address = 0x01;
 const client = new Modbus.client.RTU(socket, address)

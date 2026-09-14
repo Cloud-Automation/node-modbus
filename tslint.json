@@ -3,8 +3,14 @@
     "tslint:recommended",
     "tslint-config-standard"
   ],
+  "linterOptions": {
+    "exclude": [
+      "examples/**/*.ts"
+    ]
+  },
   "rules":{
     "unified-signatures":false,
-    "no-bitwise":false
+    "no-bitwise":false,
+    "array-type": [true, "array-simple"]
   }
 }

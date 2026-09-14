@@ -3,9 +3,8 @@ import MBClient from './modbus-client.js'
 import ModbusRTUClientRequestHandler from './rtu-client-request-handler.js'
 import ModbusRTUClientResponseHandler from './rtu-client-response-handler.js'
 
-import * as SerialPort from 'serialport'
+import { SerialPort } from 'serialport'
 import ModbusRTURequest from './rtu-request.js'
-import ModbusRTUResponse from './rtu-response.js'
 
 /** This Client musst be initiated with a socket object that implements the event emitter
  * interface and fires a 'data' event with a buffer as a parameter. It also needs to
