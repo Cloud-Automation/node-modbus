@@ -124,8 +124,10 @@ describe('Modbus/RTU Client Response Tests', function () {
     })
 
     /* Without the CRC check a single stray byte turns this read holding registers answer into a
-     * read coils answer with invented values, and the handler hands it to the caller as a
-     * genuine reading - a wrong measurement is far worse than a timeout.
+     * read coils answer with invented values. The client rejects that further up, so no wrong
+     * reading ever reaches the application, but only after these bytes were consumed - the
+     * request is lost instead of recovered. Verifying the crc here lets the handler step over
+     * the stray byte and return the answer the device actually sent.
      */
     it('should not deliver a misaligned frame as a valid response', function () {
       handler.handleData(Buffer.concat([
@@ -219,6 +221,51 @@ describe('Modbus/RTU Client Response Tests', function () {
 
       assert.ok(response !== undefined, 'the handler never resynchronized')
       assert.equal(1, response.body.fc)
+    })
+
+    /* The cases above pin individual scenarios, but the property that actually matters is a
+     * global one: wherever the stream is cut and whatever lands between frames, a response that
+     * reaches the caller must be the one the device sent. The seed is fixed so a failure is
+     * reproducible.
+     */
+    it('should never deliver a corrupted response under random noise', function () {
+      let seed = 0x2f6e2b1
+      const rnd = function (n) { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed % n }
+
+      handler = new ModbusRTUClientResponseHandler()
+
+      let delivered = 0
+
+      for (let round = 0; round < 2000; round += 1) {
+        if (rnd(3) === 0) {
+          const noise = Buffer.alloc(1 + rnd(12))
+          for (let i = 0; i < noise.length; i += 1) { noise[i] = rnd(256) }
+          handler.handleData(noise)
+        }
+
+        const frame = readCoilsResponse()
+
+        if (rnd(2) === 0) {
+          const at = 1 + rnd(frame.length - 1)
+          handler.handleData(frame.slice(0, at))
+          handler.handleData(frame.slice(at))
+        } else {
+          handler.handleData(frame)
+        }
+
+        let response
+        while ((response = handler.shift()) !== undefined) {
+          delivered += 1
+          assert.equal(1, response.body.fc, 'a response built from noise reached the caller')
+          assert.deepEqual(
+            [1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+            response.body.valuesAsArray,
+            'a response built from noise reached the caller'
+          )
+        }
+      }
+
+      assert.ok(delivered > 1500, `expected the handler to keep recovering, got ${delivered}`)
     })
   })
 })

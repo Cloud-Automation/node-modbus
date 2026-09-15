@@ -269,6 +269,33 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
       assert.equal(undefined, handler.shift(), 'an incomplete frame must never reach the caller')
     })
 
+    /* The frame has fully arrived, but the body stops short of the length the header announced,
+     * which is how noise that happens to look like an MBAP header presents itself.
+     */
+    it('should not parse a frame whose body does not fill the announced length', function () {
+      handler.handleData(Buffer.concat([
+        Buffer.from([
+          0x00, 0x01, // transaction id
+          0x00, 0x00, // protocol
+          0x00, 0x08, // length: claims a 7 byte pdu
+          0x03,       // unit id
+          0x01,       // function code
+          0x02,       // byte count
+          0xdd,       // coils
+          0x00,
+          0x00, 0x00, 0x00 // padding the body never accounts for
+        ]),
+        readCoilsResponse()
+      ]))
+
+      const response = handler.shift()
+
+      assert.ok(response !== undefined, 'the frame behind the bad one must still be found')
+      assert.equal(1, response.id, 'the short body must not be delivered')
+      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
+      assert.equal(undefined, handler.shift(), 'only one response may be delivered')
+    })
+
     it('should keep a response that is still being received', function () {
       /* room for exactly one ADU, so the incomplete frame sits right at the limit */
       handler = new TCPResponseHandler(11)
@@ -312,6 +339,51 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
       assert.ok(response !== undefined, 'the handler did not resynchronize')
       assert.equal(1, response.id)
       assert.equal(1, response.body.fc)
+    })
+
+    /* The cases above pin individual scenarios, but the property that actually matters is a
+     * global one: wherever the stream is cut and whatever lands between frames, a response that
+     * reaches the caller must be the one the device sent. The seed is fixed so a failure is
+     * reproducible.
+     */
+    it('should never deliver a corrupted response under random noise', function () {
+      let seed = 0x2f6e2b1
+      const rnd = function (n) { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed % n }
+
+      handler = new TCPResponseHandler()
+
+      let delivered = 0
+
+      for (let round = 0; round < 2000; round += 1) {
+        if (rnd(3) === 0) {
+          const noise = Buffer.alloc(1 + rnd(12))
+          for (let i = 0; i < noise.length; i += 1) { noise[i] = rnd(256) }
+          handler.handleData(noise)
+        }
+
+        const frame = readCoilsResponse()
+
+        if (rnd(2) === 0) {
+          const at = 1 + rnd(frame.length - 1)
+          handler.handleData(frame.slice(0, at))
+          handler.handleData(frame.slice(at))
+        } else {
+          handler.handleData(frame)
+        }
+
+        let response
+        while ((response = handler.shift()) !== undefined) {
+          delivered += 1
+          assert.equal(1, response.body.fc, 'a response built from noise reached the caller')
+          assert.deepEqual(
+            [1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+            response.body.valuesAsArray,
+            'a response built from noise reached the caller'
+          )
+        }
+      }
+
+      assert.ok(delivered > 1500, `expected the handler to keep recovering, got ${delivered}`)
     })
   })
 })

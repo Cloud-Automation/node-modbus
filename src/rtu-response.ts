@@ -83,9 +83,15 @@ export default class ModbusRTUResponse<ResBody extends ModbusResponseBody = Modb
     }
 
     /* Modbus/RTU carries no framing in the payload, so the CRC is the only evidence that the
-     * bytes really start a response here. Without it a buffer that lost its alignment parses
-     * into a structurally valid but entirely fabricated response - a stray leading byte turns
-     * a read holding registers answer into a read coils answer with invented values.
+     * bytes really start a response here: a buffer that lost its alignment otherwise parses
+     * into a structurally valid but fabricated response - a stray leading byte turns a read
+     * holding registers answer into a read coils answer with invented values.
+     *
+     * ModbusRTUClientRequestHandler verifies the crc again and rejects such a response, so it
+     * never reaches the application, but by then these bytes have already been consumed and the
+     * stream stays out of step - the request is lost rather than recovered. Reporting the
+     * mismatch here instead lets the response handler step over the stray byte and go on to
+     * find the real frame.
      */
     const expectedCrc = CRC.crc16modbus(buffer.slice(0, payloadLength))
     const corrupted = (expectedCrc !== actualCrc)

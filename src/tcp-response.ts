@@ -99,6 +99,16 @@ export default class ModbusTCPResponse<ResBody extends ModbusResponseBody = Modb
         return null
       }
 
+      /* The length field counts the unit identifier plus the PDU, so the body has to consume
+       * the announced payload exactly. A body that stops short means these bytes are not the
+       * frame the header described - most often noise that happened to look like an MBAP
+       * header, which would otherwise be handed on as a short but structurally valid response.
+       */
+      if (body.byteCount !== length - 1) {
+        debug('body of', body.byteCount, 'bytes does not fill the announced', length - 1)
+        return null
+      }
+
       debug('buffer contains a valid response body')
 
       return new ModbusTCPResponse(id, protocol, length, unitId, body)
