@@ -17,6 +17,14 @@ export default class ModbusRTUResponse<ResBody extends ModbusResponseBody = Modb
     return this._crc
   }
 
+  /** True when the frame's CRC does not match its payload, which means these bytes are not a
+   * trustworthy response - either the buffer lost its frame alignment or the line corrupted
+   * the message. Mirrors ModbusRTURequest#corrupted.
+   */
+  get corrupted () {
+    return this._corrupted
+  }
+
   get body () {
     return this._body
   }
@@ -50,7 +58,7 @@ export default class ModbusRTUResponse<ResBody extends ModbusResponseBody = Modb
   }
 
   public static fromBuffer (buffer: Buffer) {
-    if (buffer.length < 1) {
+    if (buffer.length < 1 /* address */ + 2 /* CRC */) {
       return null
     }
 
@@ -64,25 +72,53 @@ export default class ModbusRTUResponse<ResBody extends ModbusResponseBody = Modb
       return null
     }
 
-    let crc
+    const payloadLength = 1 /* address */ + body.byteCount
+
+    let actualCrc
     try {
-      crc = buffer.readUInt16LE(1 + body.byteCount)
+      actualCrc = buffer.readUInt16LE(payloadLength)
     } catch (e) {
       debug('If NoSuchIndexException, it is probably serial and not all data has arrived')
       return null
     }
 
-    return new ModbusRTUResponse(address, crc, body)
+    /* Modbus/RTU carries no framing in the payload, so the CRC is the only evidence that the
+     * bytes really start a response here: a buffer that lost its alignment otherwise parses
+     * into a structurally valid but fabricated response - a stray leading byte turns a read
+     * holding registers answer into a read coils answer with invented values.
+     *
+     * ModbusRTUClientRequestHandler verifies the crc again and rejects such a response, so it
+     * never reaches the application, but by then these bytes have already been consumed and the
+     * stream stays out of step - the request is lost rather than recovered. Reporting the
+     * mismatch here instead lets the response handler step over the stray byte and go on to
+     * find the real frame.
+     */
+    const expectedCrc = CRC.crc16modbus(buffer.slice(0, payloadLength))
+    const corrupted = (expectedCrc !== actualCrc)
+
+    if (corrupted) {
+      debug('crc mismatch, expected', expectedCrc, 'got', actualCrc)
+    }
+
+    return new ModbusRTUResponse(address, actualCrc, body, corrupted)
   }
   public _address: number
   public _crc: number | undefined
   protected _body: ResBody
+  protected _corrupted: boolean
 
-  constructor (address: number, crc: number | undefined, body: ResBody) {
+  /** Create new Modbus/RTU Response Object.
+   * @param {number} address Address/Unit ID
+   * @param {number} [crc] CRC of the frame, undefined until createPayload () calculates it
+   * @param {ModbusResponseBody} body Modbus response body object
+   * @param {boolean} [corrupted=false] Whether the frame's CRC failed to verify
+   */
+  constructor (address: number, crc: number | undefined, body: ResBody, corrupted: boolean = false) {
     super()
     this._address = address
     this._crc = crc
     this._body = body
+    this._corrupted = corrupted
   }
 
   public createPayload () {
