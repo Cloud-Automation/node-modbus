@@ -20,10 +20,21 @@ const RTU_ADU_MAX = 256
 /* MBAP header (7) + PDU (253) */
 const TCP_ADU_MAX = 260
 
+/* Transaction id (2) + protocol id (2) + length (2). The length field that follows counts the
+ * unit identifier and the PDU, so a complete Modbus/TCP ADU is MBAP_PREFIX_LENGTH + length and
+ * the length field itself can never leave 2 .. PDU_MAX + 1.
+ */
+const MBAP_PREFIX_LENGTH = 6
+
+/* The protocol identifier reserved for Modbus in the MBAP header */
+const MBAP_PROTOCOL_ID = 0x0000
+
 export const LIMITS = {
   COIL_MAX,
   COIL_MIN,
   ERROR_CODE_THRESHOLD,
+  MBAP_PREFIX_LENGTH,
+  MBAP_PROTOCOL_ID,
   PDU_MAX,
   REGISTER_MAX,
   REGISTER_MIN,

@@ -185,10 +185,12 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
     assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
   })
 
-  /* A device that answers with fewer bytes than its MBAP header announces leaves a prefix in
-   * the receive buffer. The buffer only ever advances when a complete response parses and
-   * every frame is read from offset 0, so that prefix desyncs every following response until
-   * the socket is reconnected.
+  /* A device that answers with fewer bytes than its MBAP header announces, or with a frame this
+   * library has no parser for, leaves a prefix in the receive buffer. The buffer only ever
+   * advances when a complete response parses and every frame is read from offset 0, so that
+   * prefix desyncs every following response until the handler realigns itself. Unlike a serial
+   * stream, Modbus/TCP states the frame length in its header, so realigning rarely costs more
+   * than the damaged frame itself.
    */
   describe('resynchronizing an unparsable buffer', function () {
     /* the beginning of a response the device never completed */
@@ -207,26 +209,44 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
       ])
     }
 
+    /* A complete, well formed frame carrying function code 0x11 (Report Server ID), which this
+     * library has no response parser for. Its header still says exactly where it ends.
+     */
+    const unsupportedFunctionResponse = function () {
+      return Buffer.from([
+        0x00, 0x07, // transaction id
+        0x00, 0x00, // protocol
+        0x00, 0x04, // length
+        0x03,       // unit id
+        0x11,       // function code
+        0x02,       // byte count
+        0xaa
+      ])
+    }
+
     it('should default to the largest possible Modbus/TCP ADU', function () {
       assert.equal(260, new TCPResponseHandler().maxBufferSize)
       assert.equal(64, new TCPResponseHandler(64).maxBufferSize)
     })
 
-    it('should discard the buffer when no response parses from more than maxBufferSize bytes', function () {
-      handler = new TCPResponseHandler(20)
+    it('should skip a complete but unparsable frame in a single step', function () {
+      handler.handleData(Buffer.concat([
+        unsupportedFunctionResponse(),
+        readCoilsResponse()
+      ]))
 
+      const response = handler.shift()
+
+      assert.ok(response !== undefined, 'the frame behind the unparsable one must be found')
+      assert.equal(1, response.id)
+      assert.equal(1, response.body.fc)
+      assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
+    })
+
+    it('should resynchronize as soon as the next response arrives', function () {
       handler.handleData(truncatedFrame)
       assert.equal(undefined, handler.shift(), 'a truncated frame must not parse')
 
-      /* 15 bytes, below the limit, the stale prefix keeps this response from parsing */
-      handler.handleData(readCoilsResponse())
-      assert.equal(undefined, handler.shift(), 'the stale prefix must desync this response')
-
-      /* 26 bytes, beyond the limit, the prefix provably is not the start of a frame */
-      handler.handleData(readCoilsResponse())
-      assert.equal(undefined, handler.shift())
-
-      /* the buffer was dropped, so this response is aligned again */
       handler.handleData(readCoilsResponse())
 
       const response = handler.shift()
@@ -235,6 +255,18 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
       assert.equal(1, response.id)
       assert.equal(1, response.body.fc)
       assert.deepEqual([1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], response.body.valuesAsArray)
+    })
+
+    /* Buffer#slice clamps silently, so without the length guard this parses into a response
+     * built from bytes that never arrived.
+     */
+    it('should not parse a frame that announced more bytes than it sent', function () {
+      const lying = readCoilsResponse()
+      lying.writeUInt16BE(0x20, 4) // claim 32 bytes follow, then send 5
+
+      handler.handleData(lying)
+
+      assert.equal(undefined, handler.shift(), 'an incomplete frame must never reach the caller')
     })
 
     it('should keep a response that is still being received', function () {
@@ -253,16 +285,32 @@ describe('Modbus/TCP Client Response Handler Tests', function () {
       assert.equal(1, response.body.fc)
     })
 
-    it('should resynchronize with the default limit as well', function () {
-      handler.handleData(truncatedFrame)
+    /* A header that is plausible and announces a frame still on its way cannot be skipped - the
+     * rest may genuinely be in flight - so the buffer limit remains the backstop for a device
+     * that stops halfway through a frame it announced.
+     */
+    it('should discard the buffer when no response parses from more than maxBufferSize bytes', function () {
+      handler = new TCPResponseHandler(20)
 
-      let response
-      for (let i = 0; i < 30 && response === undefined; i += 1) {
-        handler.handleData(readCoilsResponse())
-        response = handler.shift()
-      }
+      /* announces 100 bytes and then stops */
+      handler.handleData(Buffer.from([0x00, 0x2a, 0x00, 0x00, 0x00, 0x64, 0x03]))
+      assert.equal(undefined, handler.shift(), 'a stalled frame must not parse')
 
-      assert.ok(response !== undefined, 'the handler never resynchronized')
+      /* 18 bytes, below the limit, the stalled frame keeps this response from parsing */
+      handler.handleData(readCoilsResponse())
+      assert.equal(undefined, handler.shift(), 'the stalled frame must desync this response')
+
+      /* 29 bytes, beyond the limit, so the buffer is dropped */
+      handler.handleData(readCoilsResponse())
+      assert.equal(undefined, handler.shift())
+
+      /* the buffer was dropped, so this response is aligned again */
+      handler.handleData(readCoilsResponse())
+
+      const response = handler.shift()
+
+      assert.ok(response !== undefined, 'the handler did not resynchronize')
+      assert.equal(1, response.id)
       assert.equal(1, response.body.fc)
     })
   })

@@ -1,5 +1,6 @@
 import Debug = require('debug'); const debug = Debug('tcp-response')
 import ModbusAbstractResponse from './abstract-response.js'
+import { LIMITS } from './constants'
 import { ModbusRequestBody } from './request'
 import ModbusResponseBody from './response/response-body.js'
 import ResponseFactory from './response/response-factory.js'
@@ -75,6 +76,17 @@ export default class ModbusTCPResponse<ResBody extends ModbusResponseBody = Modb
       const id = buffer.readUInt16BE(0)
       const protocol = buffer.readUInt16BE(2)
       const length = buffer.readUInt16BE(4)
+
+      /* The length field states exactly how many bytes follow it, and Buffer#slice silently
+       * clamps to the end of the buffer. Without this guard a device that answers with fewer
+       * bytes than it announced yields a response parsed from data that never arrived, whose
+       * byteCount then advances the receive buffer past its own end.
+       */
+      if (buffer.length < LIMITS.MBAP_PREFIX_LENGTH + length) {
+        debug('the announced frame has not arrived completely yet')
+        return null
+      }
+
       const unitId = buffer.readUInt8(6)
 
       debug('tcp header complete, id', id, 'protocol', protocol, 'length', length, 'unitId', unitId)
